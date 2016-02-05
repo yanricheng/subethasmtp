@@ -30,11 +30,22 @@ During the development of SubEtha's testing harness, we tried out the [Dumbster]
 
 We hate reinventing wheels.  This should be the LAST FREAKING JAVA SMTP IMPLEMENTATION.
 
+## A New Fork ##
+This new fork by Engine821.com intends to tidy up some of the structure, while keeping the original (and excellent!) design and code. We are using this as a base for a production product, so intend on keeping the code fresh and well maintained.
+
+We too did a survey of existing Java SMTP implementations and were unsatisfied... until we found SubEthaSMTP! The code is clean and very well thought out. So far the changes we've made are minor, including...
+
+* Eliminating the embedded `/lib` directory. Maven correctly handles pulling in all the dependencies and best practices discourage keeping binary artifacts inside version control.
+* Updating to the latest versions of some of the libraries used. 
+* Removing some of the IDE metadata files. Your IDE can rercreate whichever ones you need based on your preferences and the Maven POM.
+* Making the message handing exceptions be `checked`. This is possibly controversial, but we thought about it a lot and prefer to have these exceptions show up in the `throws` clause rather than have them potentially pop-up unexpectedly at run-time. 
+
+
 ## Project Authors ##
 Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.
 
 ## Support ##
-If you have any bug reports, questions or comments about SubEtha SMTP, it's best that you bring these issues up on the Mailing Lists.  Please do not email the authors directly.
+If you have any bug reports, questions or comments about this SubEtha SMTP fork, it's best that you use the GitHub issue tracker to get in touch. Please do not email the authors directly.
 
 ## Spec Compliance ##
 For now, we have just focused on implementing just the minimal  required aspects of http://rfc.net/rfc2821.html#s4.5.1. We also return SMTP status responses that mimic what Postfix returns.
