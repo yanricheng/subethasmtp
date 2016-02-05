@@ -10,7 +10,7 @@ package org.subethamail.smtp;
  * @author Jeff Schnitzer
  */
 @SuppressWarnings("serial")
-public class RejectException extends RuntimeException
+public class RejectException extends Exception
 {
 	int code;
 
