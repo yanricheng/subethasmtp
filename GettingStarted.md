@@ -1,9 +1,10 @@
 # Run a demo SubethaSMTP Server #
 
 1. Download the most recent `subethasmtp.jar` file from the releases section on Github
-2. Run the command `java -cp subetha.jar org.sebethamail.examples.BasicSMTPServer`
+2. Run the command `java -cp subethasmtp-j3.1.8-jar-with-dependencies org.subethamail.examples.BasicSMTPServer` <sup>1</sup>
 3. Use `TELNET` or an SMTP client to connect to the now-running server on TCP port 25000.
 
+<sup>1</sup> replace the name of the jar if the file you downloaded has a different name
 
 # Enable logging #
 
