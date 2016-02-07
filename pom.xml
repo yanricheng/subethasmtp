@@ -8,56 +8,35 @@
 
   <artifactId>subethasmtp</artifactId>
 
-  <version>3.1.7</version>
+  <version>j3.1.8</version>
     <packaging>jar</packaging>
 
   <name>SubEtha SMTP</name>
 
-  <description>
+  <description>A fork of SubEtha, an easy-to-use server-side SMTP library for Java.</description>
 
-    SubEtha SMTP is an easy-to-use server-side SMTP library for Java.
-
-  </description>
-
-  <url>http://subethasmtp.googlecode.com</url>
+  <url>https://github.com/bigjosh/subethasmtp</url>
 
   <inceptionYear>2006</inceptionYear>
 
   <scm>
 
-    <connection>http://subethasmtp.googlecode.com/svn</connection>
+    <connection>https://github.com/bigjosh/subethasmtp</connection>
 
-    <developerConnection>https://subethasmtp.googlecode.com/svn</developerConnection>
+    <developerConnection>https://github.com/bigjosh/subethasmtp</developerConnection>
 
-    <url>http://subethasmtp.googlecode.com/svn</url>
+    <url>https://github.com/bigjosh/subethasmtp</url>
 
   </scm>
 
   <issueManagement>
 
-    <system>Google</system>
+    <system>GitHub</system>
 
-    <url>http://code.google.com/p/subethasmtp/issues/list</url>
+    <url>https://github.com/bigjosh/subethasmtp/issues</url>
 
   </issueManagement>
 
-  <mailingLists>
-
-    <mailingList>
-
-      <name>User and Developer List</name>
-
-      <subscribe>http://www.subethamail.org/se/list/smtp</subscribe>
-
-      <unsubscribe>http://www.subethamail.org/se/list/smtp</unsubscribe>
-
-      <post>smtp@subethamail.org</post>
-
-      <archive>http://www.subethamail.org/se/archive.jsp?listId=13</archive>
-
-    </mailingList>
-
-  </mailingLists>
 
   <licenses>
 
@@ -73,83 +52,6 @@
 
   </licenses>
 
-  <developers>
-
-    <developer>
-
-      <id>latchkey</id>
-
-      <name>Jon Stevens</name>
-
-      <roles>
-
-        <role>Project Owner</role>
-
-      </roles>
-
-    </developer>
-
-    <developer>
-
-      <id>lhoriman</id>
-
-      <name>Jeff Schnitzer</name>
-
-      <roles>
-
-        <role>Project Owner</role>
-
-      </roles>
-
-    </developer>
-
-    <developer>
-
-      <id>scotthernandez</id>
-
-      <name>Scott Hernandez</name>
-
-      <roles>
-
-        <role>Project Owner</role>
-
-      </roles>
-
-    </developer>
-
-    <developer>
-
-      <id>jeffjjensen</id>
-
-      <name>Jeff Jensen</name>
-
-      <timezone>-6</timezone>
-
-      <roles>
-
-        <role>Committer</role>
-
-      </roles>
-
-    </developer>
-
-    <developer>
-
-      <id>hontvari.jozsef.levente</id>
-
-      <name>Hontvári József Levente</name>
-
-      <timezone>+1</timezone>
-
-      <roles>
-
-        <role>Committer</role>
-
-      </roles>
-
-    </developer>
-
-  </developers>
 
   <build>
 
@@ -321,7 +223,6 @@
 
       <artifactId>slf4j-api</artifactId>
 
-      <version>1.7.13</version>
 
     </dependency>
 
@@ -373,5 +274,14 @@
 
   </properties>
 
+  <dependencyManagement>
+  	<dependencies>
+  		<dependency>
+  			<groupId>org.slf4j</groupId>
+  			<artifactId>slf4j-api</artifactId>
+  			<version>1.7.13</version>
+  		</dependency>
+  	</dependencies>
+  </dependencyManagement>
 </project>
 
