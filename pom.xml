@@ -1,287 +1,245 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.subethamail</groupId>
+    <groupId>org.subethamail</groupId>
 
-  <artifactId>subethasmtp</artifactId>
+    <artifactId>subethasmtp</artifactId>
 
-  <version>j3.1.8</version>
+    <version>j3.1.8</version>
     <packaging>jar</packaging>
 
-  <name>SubEtha SMTP</name>
+    <name>SubEtha SMTP</name>
 
-  <description>A fork of SubEtha, an easy-to-use server-side SMTP library for Java.</description>
-
-  <url>https://github.com/bigjosh/subethasmtp</url>
-
-  <inceptionYear>2006</inceptionYear>
-
-  <scm>
-
-    <connection>https://github.com/bigjosh/subethasmtp</connection>
-
-    <developerConnection>https://github.com/bigjosh/subethasmtp</developerConnection>
+    <description>A fork of SubEtha, an easy-to-use server-side SMTP library for Java.</description>
 
     <url>https://github.com/bigjosh/subethasmtp</url>
 
-  </scm>
+    <inceptionYear>2006</inceptionYear>
 
-  <issueManagement>
+    <scm>
 
-    <system>GitHub</system>
+        <connection>https://github.com/bigjosh/subethasmtp</connection>
 
-    <url>https://github.com/bigjosh/subethasmtp/issues</url>
+        <developerConnection>https://github.com/bigjosh/subethasmtp</developerConnection>
 
-  </issueManagement>
+        <url>https://github.com/bigjosh/subethasmtp</url>
 
+    </scm>
 
-  <licenses>
+    <issueManagement>
 
-    <license>
+        <system>GitHub</system>
 
-      <name>Apache 2.0</name>
+        <url>https://github.com/bigjosh/subethasmtp/issues</url>
 
-      <url>http://code.google.com/p/subethasmtp/source/browse/trunk/LICENSE.txt</url>
+    </issueManagement>
 
-      <distribution>repo</distribution>
 
-    </license>
+    <licenses>
 
-  </licenses>
+        <license>
 
+            <name>Apache 2.0</name>
 
-  <build>
+            <url>http://code.google.com/p/subethasmtp/source/browse/trunk/LICENSE.txt</url>
 
-    <plugins>
+            <distribution>repo</distribution>
 
-      <plugin>
+        </license>
 
-        <groupId>org.apache.maven.plugins</groupId>
+    </licenses>
 
-        <artifactId>maven-compiler-plugin</artifactId>
 
-        <version>2.3.2</version>
+    <build>
 
-        <configuration>
+        <plugins>
 
-          <source>1.6</source>
+            <plugin>
 
-          <target>1.6</target>
+                <groupId>org.apache.maven.plugins</groupId>
 
-        </configuration>
+                <artifactId>maven-compiler-plugin</artifactId>
 
-      </plugin>
+                <version>2.3.2</version>
 
-      <plugin>
+                <configuration>
 
-        <groupId>org.apache.maven.plugins</groupId>
+                    <source>1.6</source>
 
-        <artifactId>maven-dependency-plugin</artifactId>
+                    <target>1.6</target>
 
-        <version>2.1</version>
+                </configuration>
 
-      </plugin>
+            </plugin>
 
-      <plugin>
+            <plugin>
 
-        <groupId>org.apache.maven.plugins</groupId>
+                <groupId>org.apache.maven.plugins</groupId>
 
-        <artifactId>maven-jar-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
 
-        <version>2.3.1</version>
+                <version>2.1</version>
 
-        <configuration>
+            </plugin>
 
-          <archive>
+            <plugin>
 
-            <manifest>
+                <groupId>org.apache.maven.plugins</groupId>
 
-              <mainClass>org.subethamail.smtp.Version</mainClass>
+                <artifactId>maven-jar-plugin</artifactId>
 
-              <packageName>org.subethamail.smtp</packageName>
+                <version>2.3.1</version>
 
-            </manifest>
+                <configuration>
 
-            <manifestEntries>
+                    <archive>
 
-              <Specification-Version>${project.version}</Specification-Version>
+                        <manifest>
 
-              <Implementation-Version>${maven.build.timestamp}</Implementation-Version>
+                            <mainClass>org.subethamail.smtp.Version</mainClass>
 
-              <url>${project.url}</url>
+                            <packageName>org.subethamail.smtp</packageName>
 
-            </manifestEntries>
+                        </manifest>
 
-          </archive>
+                        <manifestEntries>
 
-        </configuration>
+                            <Specification-Version>${project.version}</Specification-Version>
 
-      </plugin>
+                            <Implementation-Version>${maven.build.timestamp}</Implementation-Version>
 
-      <!-- always sign -->
+                            <url>${project.url}</url>
 
-      <plugin>
+                        </manifestEntries>
 
-        <groupId>org.apache.maven.plugins</groupId>
+                    </archive>
 
-        <artifactId>maven-gpg-plugin</artifactId>
+                </configuration>
 
-        <version>1.0</version>
+            </plugin>
 
-        <executions>
+            <!-- always sign -->
 
-          <execution>
+            <plugin>
 
-            <id>sign-artifacts</id>
+                <groupId>org.apache.maven.plugins</groupId>
 
-            <phase>verify</phase>
+                <artifactId>maven-gpg-plugin</artifactId>
 
-            <goals>
+                <version>1.0</version>
 
-              <goal>sign</goal>
+                <executions>
 
-            </goals>
+                    <execution>
 
-          </execution>
+                        <id>sign-artifacts</id>
 
-        </executions>
+                        <phase>verify</phase>
 
-      </plugin>
+                        <goals>
 
-      <plugin>
+                            <goal>sign</goal>
 
-        <groupId>org.apache.maven.plugins</groupId>
+                        </goals>
 
-        <artifactId>maven-javadoc-plugin</artifactId>
+                    </execution>
 
-        <version>2.8</version>
+                </executions>
 
-      </plugin>
+            </plugin>
 
-    </plugins>
+            <plugin>
 
-  </build>
+                <groupId>org.apache.maven.plugins</groupId>
 
-  <dependencies>
+                <artifactId>maven-javadoc-plugin</artifactId>
 
-    <dependency>
+                <version>2.8</version>
 
-      <groupId>com.googlecode.jmockit</groupId>
+            </plugin>
 
-      <artifactId>jmockit</artifactId>
+        </plugins>
 
-      <version>0.999.11</version>
+    </build>
 
-      <scope>test</scope>
+    <dependencies>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.7.22</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>1.3.9</version>
+        </dependency>
+    </dependencies>
 
-    </dependency>
+    <distributionManagement>
 
-    <dependency>
+        <snapshotRepository>
 
-      <groupId>junit</groupId>
+            <id>sonatype-nexus-snapshots</id>
 
-      <artifactId>junit</artifactId>
+            <name>Sonatype Nexus Snapshots</name>
 
-      <version>4.5</version>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
 
-      <type>jar</type>
+        </snapshotRepository>
 
-      <scope>test</scope>
+        <repository>
 
-    </dependency>
+            <id>sonatype-nexus-staging</id>
 
-    <dependency>
+            <name>Nexus Release Repository</name>
 
-      <groupId>javax.mail</groupId>
+            <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 
-      <artifactId>mail</artifactId>
+        </repository>
 
-      <version>1.4.4</version>
+    </distributionManagement>
 
-      <type>jar</type>
+    <properties>
 
-    </dependency>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <dependency>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-      <groupId>javax.activation</groupId>
+        <maven.build.timestamp.format>MMMM dd yyyy</maven.build.timestamp.format>
 
-      <artifactId>activation</artifactId>
+    </properties>
 
-      <version>1.1.1</version>
-
-      <type>jar</type>
-
-    </dependency>
-
-    <dependency>
-
-      <groupId>org.slf4j</groupId>
-
-      <artifactId>slf4j-api</artifactId>
-
-
-    </dependency>
-
-    <dependency>
-
-      <groupId>com.google.code.findbugs</groupId>
-
-      <artifactId>jsr305</artifactId>
-
-      <version>1.3.9</version>
-
-      <type>jar</type>
-
-    </dependency>
-
-  </dependencies>
-
-  <distributionManagement>
-
-    <snapshotRepository>
-
-      <id>sonatype-nexus-snapshots</id>
-
-      <name>Sonatype Nexus Snapshots</name>
-
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-
-    </snapshotRepository>
-
-    <repository>
-
-      <id>sonatype-nexus-staging</id>
-
-      <name>Nexus Release Repository</name>
-
-      <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-
-    </repository>
-
-  </distributionManagement>
-
-  <properties>
-
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-    <maven.build.timestamp.format>MMMM dd yyyy</maven.build.timestamp.format>
-
-  </properties>
-
-  <dependencyManagement>
-  	<dependencies>
-  		<dependency>
-  			<groupId>org.slf4j</groupId>
-  			<artifactId>slf4j-api</artifactId>
-  			<version>1.7.13</version>
-  		</dependency>
-  	</dependencies>
-  </dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.13</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
 
