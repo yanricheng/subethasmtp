@@ -7,16 +7,15 @@
         <version>0.1</version>
     </parent>
     <artifactId>subethasmtp</artifactId>
-    <version>j3.1.9-SNAPSHOT</version>
+    <version>3.1.9-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>SubEtha SMTP</name>
-    <description>A fork of SubEtha, an easy-to-use server-side SMTP library for Java.</description>
+    <description>A fork of a fork (!) of SubEtha, an easy-to-use server-side SMTP library for Java.</description>
     <url>https://github.com/davidmoten/subethasmtp</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.build.timestamp.format>MMMM dd yyyy</maven.build.timestamp.format>
         <slf4j.version>1.7.13</slf4j.version>
     </properties>
 
@@ -59,7 +58,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.5</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,7 +93,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <artifactId>log4j</artifactId>
             <groupId>log4j</groupId>
