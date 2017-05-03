@@ -48,7 +48,7 @@ We too did a survey of existing Java SMTP implementations and were unsatisfied..
 ### Fork of a Fork!
 Dave Moten came across this and 
 * fixed tests
-* migrated mocking to use Mockito
+* migrated mocking to use Mockito (with apologies but was the most time-efficient way for me to restore the broken tests!)
 * set up pom.xml for release under the `com.github.davidmoten:subethasmtp` artifact 
 * released to Maven Central
 * submitted the changes back to the Engine821.com fork (apart from the groupId change and release changes)
