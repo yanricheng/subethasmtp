@@ -52,6 +52,8 @@ Dave Moten came across this and
 * set up pom.xml for release under the `com.github.davidmoten:subethasmtp` artifact 
 * released to Maven Central
 * submitted the changes back to the Engine821.com fork (apart from the groupId change and release changes)
+* added multi-JDK continuous integration using Travis
+* added code coverage using coverage.io
 
 ## Project Authors ##
 Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.

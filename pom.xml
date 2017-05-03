@@ -56,7 +56,7 @@
                     <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
             </plugin>
-            <!--  used for coverage by cov.io -->
+            <!-- used for coverage by cov.io -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
