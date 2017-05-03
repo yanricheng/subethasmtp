@@ -26,7 +26,7 @@ Use this maven dependency:
 <dependency>
     <groupId>com.github.davidmoten</groupId>
     <artifactId>subethasmtp</artifactId>
-    <version>3.9.1-RC1</version>
+    <version>3.1.9-RC1</version>
 </dependency>
 ```
 
