@@ -19,6 +19,17 @@ This component can be used in almost any kind of email  processing application. 
 
 SubEthaSMTP's simple, low-level API is suitable for writing almost any kind of mail-receiving application.  Read more in [UsingSubEthaSMTP](UsingSubEthaSMTP.md) or join our MailingList.
 
+## Getting started
+Use this maven dependency:
+
+```xml
+<dependency>
+    <groupId>com.github.davidmoten</groupId>
+    <artifactId>subethasmtp</artifactId>
+    <version>3.9.1-RC1</version>
+</dependency>
+```
+
 ## A Little History ##
 SubEthaSMTP was split out of the SubEthaMail mailing list manager because it is a useful standalone component.  When we wrote SubEtha, the last thing we wanted to do was write our own SMTP server.  In our search for a modular Java SMTP component, we examined:
 
