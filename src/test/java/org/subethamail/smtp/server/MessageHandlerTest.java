@@ -1,13 +1,19 @@
 package org.subethamail.smtp.server;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import javax.mail.MessagingException;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.MessageHandlerFactory;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.client.SMTPException;
 import org.subethamail.smtp.client.SmartClient;
 import org.subethamail.smtp.util.TextUtils;
 
@@ -86,26 +92,6 @@ public class MessageHandlerTest {
     @Test
     public void testTwoMailsInOneSession() throws Exception {
 
-        // new Expectations() {
-        // {
-        // messageHandlerFactory.create((MessageContext) any);
-        // result = messageHandler;
-        //
-        // onInstance(messageHandler).from(anyString);
-        // onInstance(messageHandler).recipient(anyString);
-        // onInstance(messageHandler).data((InputStream) any);
-        // onInstance(messageHandler).done();
-        //
-        // messageHandlerFactory.create((MessageContext) any);
-        // result = messageHandler2;
-        //
-        // onInstance(messageHandler2).from(anyString);
-        // onInstance(messageHandler2).recipient(anyString);
-        // onInstance(messageHandler2).data((InputStream) any);
-        // onInstance(messageHandler2).done();
-        // }
-        // };
-
         MessageHandlerFactory f = Mockito.mock(MessageHandlerFactory.class);
         MessageHandler h = Mockito.mock(MessageHandler.class);
         Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
@@ -151,43 +137,37 @@ public class MessageHandlerTest {
      *      href=http://code.google.com/p/subethasmtp/issues/detail?id=56>Issue
      *      56</a>
      */
-    // @Test
-    // public void testMailFromRejectedFirst() throws IOException,
-    // MessagingException, RejectException
-    // {
-    // new Expectations() {
-    // {
-    // messageHandlerFactory.create((MessageContext) any);
-    // result = messageHandler;
-    //
-    // onInstance(messageHandler).from(anyString);
-    // result = new RejectException("Test MAIL FROM rejection");
-    // onInstance(messageHandler).done();
-    //
-    // messageHandlerFactory.create((MessageContext) any);
-    // result = messageHandler2;
-    //
-    // onInstance(messageHandler2).from(anyString);
-    // onInstance(messageHandler2).done();
-    // }
-    // };
-    //
-    // SmartClient client = new SmartClient("localhost", smtpServer.getPort(),
-    // "localhost");
-    //
-    // boolean expectedRejectReceived = false;
-    // try {
-    // client.from("john1@example.com");
-    // } catch (SMTPException e) {
-    // expectedRejectReceived = true;
-    // }
-    // Assert.assertTrue(expectedRejectReceived);
-    //
-    // client.from("john2@example.com");
-    // client.quit();
-    //
-    // smtpServer.stop(); // wait for the server to catch up
-    //
-    // }
+    @Test
+    public void testMailFromRejectedFirst() throws IOException, MessagingException, RejectException {
+
+        MessageHandlerFactory f = Mockito.mock(MessageHandlerFactory.class);
+        MessageHandler h = Mockito.mock(MessageHandler.class);
+        Mockito.doThrow(new RejectException("Test MAIL FROM rejection")).when(h).from("john1@example.com");
+        Mockito.doNothing().when(h).from("john2@example.com");
+        Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
+        SMTPServer server = create(f);
+        try {
+            SmartClient client = new SmartClient("localhost", server.getPort(), "localhost");
+            try {
+                client.from("john1@example.com");
+                Assert.fail();
+            } catch (SMTPException e) {
+                //expected
+            }
+            client.from("john2@example.com");
+            client.quit();
+        } finally {
+            server.stop(); // wait for the server to catch up
+        }
+        InOrder o = Mockito.inOrder(f, h);
+        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(h).from("john1@example.com");
+        o.verify(h).done();
+        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(h).from("john2@example.com");
+        o.verify(h).done();
+        Mockito.verifyNoMoreInteractions(f, h);
+
+    }
 
 }
