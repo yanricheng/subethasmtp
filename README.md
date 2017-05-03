@@ -40,6 +40,13 @@ We too did a survey of existing Java SMTP implementations and were unsatisfied..
 * Removing some of the IDE metadata files. Your IDE can rercreate whichever ones you need based on your preferences and the Maven POM.
 * Making the message handing exceptions be `checked`. This is possibly controversial, but we thought about it a lot and prefer to have these exceptions show up in the `throws` clause rather than have them potentially pop-up unexpectedly at run-time. 
 
+### Fork of a Fork!
+Dave Moten came across this and 
+* fixed tests
+* migrated mocking to use Mockito
+* set up pom.xml for release under the `com.github.davidmoten:subethasmtp` artifact 
+* released to Maven Central
+* submitted the changes back to the Engine821.com fork (apart from the groupId change and release changes)
 
 ## Project Authors ##
 Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.
