@@ -152,7 +152,7 @@ public class MessageHandlerTest {
                 client.from("john1@example.com");
                 Assert.fail();
             } catch (SMTPException e) {
-                //expected
+                // expected
             }
             client.from("john2@example.com");
             client.quit();
