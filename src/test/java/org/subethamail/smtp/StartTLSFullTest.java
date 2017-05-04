@@ -11,22 +11,37 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.server.SMTPServer;
 
 public class StartTLSFullTest {
 
-    private void start() throws KeyManagementException, NoSuchAlgorithmException {
+    @Test
+    public void testStart()
+            throws KeyManagementException, NoSuchAlgorithmException, InterruptedException {
 
         InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
         final SSLContext sslContext = ExtendedTrustManager
-                .createTlsContextWithExtendedTrustManager(trustStore, "changeIt", false);
+                .createTlsContextWithExtendedTrustManager(trustStore, "password", false);
 
         // Your message handler factory.
         MessageHandlerFactory mhf = createMessageHandlerFactory();
 
-        SMTPServer smtpServer = new SMTPServer(mhf) {
+        SMTPServer server = createTlsSmtpServer(sslContext, mhf);
+
+        server.setHostName("me.com");
+        server.setPort(25000);
+        // smtpServer.setBindAddress(bindAddress);
+        server.setRequireTLS(true);
+        server.start();
+        Thread.sleep(1000);
+        server.stop();
+    }
+
+    private SMTPServer createTlsSmtpServer(final SSLContext sslContext, MessageHandlerFactory mhf) {
+        return new SMTPServer(mhf) {
             @Override
             public SSLSocket createSSLSocket(Socket socket) throws IOException {
                 InetSocketAddress remoteAddress = (InetSocketAddress) socket
@@ -39,7 +54,7 @@ public class StartTLSFullTest {
                 // we are a server
                 s.setUseClientMode(false);
 
-                // select strong protocols and cipher suites
+                // select protocols and cipher suites
                 s.setEnabledProtocols(s.getSupportedProtocols());
                 s.setEnabledCipherSuites(s.getSupportedCipherSuites());
 
@@ -49,12 +64,6 @@ public class StartTLSFullTest {
                 return s;
             }
         };
-
-        smtpServer.setHostName("me.amsa.gov.au");
-        smtpServer.setPort(25000);
-        // smtpServer.setBindAddress(bindAddress);
-        smtpServer.setRequireTLS(true);
-        smtpServer.start();
     }
 
     private static MessageHandlerFactory createMessageHandlerFactory() {
