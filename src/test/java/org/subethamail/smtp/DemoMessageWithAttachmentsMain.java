@@ -1,10 +1,11 @@
 package org.subethamail.smtp;
 
-import java.nio.charset.StandardCharsets;
+import java.io.File;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -15,11 +16,10 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
 
 public class DemoMessageWithAttachmentsMain {
 
-    //Before running this start BasicSMTPServer.main
+    // Before running this start BasicSMTPServer.main
     public static void main(String[] args) throws MessagingException {
         String to = "me@gmail.com";
         String from = "fred@gmail.com";
@@ -54,10 +54,9 @@ public class DemoMessageWithAttachmentsMain {
 
         // Part two is attachment
         messageBodyPart = new MimeBodyPart();
-        String attachment = "hi there it's me";
-        DataSource source = new ByteArrayDataSource(attachment.getBytes(StandardCharsets.UTF_8), "text/plain");
+        DataSource source = new FileDataSource(new File("src/test/resources/man.png"));
         messageBodyPart.setDataHandler(new DataHandler(source));
-        messageBodyPart.setFileName("message.txt");
+        messageBodyPart.setFileName("man.png");
         multipart.addBodyPart(messageBodyPart);
 
         // Send the complete message parts
