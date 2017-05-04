@@ -23,7 +23,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +33,15 @@ public class StartTLSFullTest {
     private static final int PORT = 25000;
 
     @Test
-    @Ignore
+     @Ignore
     public void testStart() throws Exception {
-
+        System.setProperty("javax.net.debug", "all");
+        System.setProperty("javax.net.ssl.keyStore", new File("src/test/resources/keys.jks").getAbsolutePath());
+        System.setProperty("javax.net.ssl.keyStorePassword", "password");
         InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
-        final SSLContext sslContext = ExtendedTrustManager.createTlsContextWithExtendedTrustManager(trustStore,
-                "password", false);
+        final SSLContext sslContext = ExtendedTrustManager.createTlsContextWithAlwaysHappyExtendedTrustManager();
+        // ExtendedTrustManager.createTlsContextWithExtendedTrustManager(trustStore,
+        // "password", false);
 
         // Your message handler factory.
         MessageHandlerFactory mhf = createMessageHandlerFactory();
@@ -48,7 +50,7 @@ public class StartTLSFullTest {
         server.setHostName("me.com");
         server.setPort(PORT);
         // smtpServer.setBindAddress(bindAddress);
-        server.setRequireTLS(true);
+        // server.setRequireTLS(true);
         server.setEnableTLS(true);
         try {
             server.start();
@@ -122,16 +124,16 @@ public class StartTLSFullTest {
         String from = "fred@gmail.com";
         String host = "127.0.0.1";
         Properties props = new Properties();
+        props.put("mail.debug", "true");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", PORT + "");
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "true");
-        props.put("mail.smtp.from", from);
-        props.put("mail.smtp.socketFactory.port", PORT + "");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.socketFactory.fallback", "false");
+        // props.put("mail.smtp.from", from);
         props.put("mail.smtp.starttls.required", "true");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        // MailSSLSocketFactory sslSocketFactory = new
+        // MailSSLSocketFactory("TLSv1.2");
 
         Session session = Session.getInstance(props);
         // Create a default MimeMessage object.
@@ -170,10 +172,7 @@ public class StartTLSFullTest {
         // Send the complete message parts
         message.setContent(multipart);
 
-        Transport transport = session.getTransport("smtp");
-        // Send message
-        transport.sendMessage(message, toAddresses);
-
+        Transport.send(message);
         System.out.println("Sent message successfully....");
 
     }

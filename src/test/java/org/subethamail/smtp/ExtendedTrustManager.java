@@ -10,8 +10,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -22,8 +24,7 @@ public final class ExtendedTrustManager extends X509ExtendedTrustManager {
     private final X509TrustManager defaultTm; // cacerts
     private final X509TrustManager customTm;
 
-    public ExtendedTrustManager(InputStream trustStoreInputStream, char[] trustStorePassword,
-            boolean extend) {
+    public ExtendedTrustManager(InputStream trustStoreInputStream, char[] trustStorePassword, boolean extend) {
         try {
             if (extend) {
                 X509TrustManager defaultTm = null;
@@ -46,8 +47,7 @@ public final class ExtendedTrustManager extends X509ExtendedTrustManager {
             trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(trustStoreInputStream, trustStorePassword);
 
-            TrustManagerFactory tmf = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(trustStore);
             X509TrustManager customTm = null;
             for (TrustManager tm : tmf.getTrustManagers()) {
@@ -57,23 +57,20 @@ public final class ExtendedTrustManager extends X509ExtendedTrustManager {
                 }
             }
             this.customTm = customTm;
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
-                | IOException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         if (defaultTm != null) {
             defaultTm.checkClientTrusted(chain, authType);
         }
     }
 
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         try {
             customTm.checkServerTrusted(chain, authType);
         } catch (CertificateException e) {
@@ -116,15 +113,46 @@ public final class ExtendedTrustManager extends X509ExtendedTrustManager {
         checkServerTrusted(chain, authType);
     }
 
-    public static SSLContext createTlsContextWithExtendedTrustManager(InputStream trustStore,
-            String trustStorePassword, boolean extend)
-                    throws NoSuchAlgorithmException, KeyManagementException {
+    public static SSLContext createTlsContextWithExtendedTrustManager(InputStream trustStore, String trustStorePassword,
+            boolean extend) throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = SSLContext.getInstance("TLS");
-        TrustManager trustManager = new ExtendedTrustManager(trustStore,
-                trustStorePassword.toCharArray(), extend);
+        TrustManager trustManager = new ExtendedTrustManager(trustStore, trustStorePassword.toCharArray(), extend);
         TrustManager[] trustManagers = new TrustManager[] { trustManager };
         sslContext.init(null, trustManagers, new java.security.SecureRandom());
         return sslContext;
     }
 
+    public static SSLContext createTlsContextWithAlwaysHappyExtendedTrustManager()
+            throws NoSuchAlgorithmException, KeyManagementException {
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        TrustManager trustManager = new AlwaysHappyTrustManager();
+        TrustManager[] trustManagers = new TrustManager[] { trustManager };
+        sslContext.init(null, trustManagers, new java.security.SecureRandom());
+        return sslContext;
+    }
+
+    public static class AlwaysHappyTrustManager implements X509TrustManager {
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            // don't throw exception
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            // don't throw exception
+        }
+
+        @Override
+        public final X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+    }
+
+    public static class AlwaysHappyHostnameVerifier implements HostnameVerifier {
+        @Override
+        public final boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    }
 }
