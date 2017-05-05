@@ -28,14 +28,16 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.subethamail.smtp.server.SMTPServer;
 
 import com.sun.mail.util.MailSSLSocketFactory;
 
 public class StartTLSFullTest {
 
+    private static final String EMAIL_TO = "me@gmail.com";
+    private static final String EMAIL_FROM = "fred@gmail.com";
     private static final String PASSWORD = "password";
     private static final int PORT = 25000;
 
@@ -48,7 +50,7 @@ public class StartTLSFullTest {
         // the send method uses the same trustStore (and the default keyStore?)
         // to send
 
-        System.setProperty("javax.net.debug", "all");
+        // System.setProperty("javax.net.debug", "all");
 
         InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
         InputStream keyStore = StartTLSFullTest.class.getResourceAsStream("/keyStore.jks");
@@ -66,12 +68,13 @@ public class StartTLSFullTest {
         sslContext.init(keyManagers, trustManagers, new java.security.SecureRandom());
 
         // Your message handler factory.
-        MessageHandlerFactory mhf = createMessageHandlerFactory();
+        MessageHandlerFactory mhf = Mockito.mock(MessageHandlerFactory.class);
+        MessageHandler mh = Mockito.mock(MessageHandler.class);
+        Mockito.when(mhf.create(Mockito.any(MessageContext.class))).thenReturn(mh);
 
         SMTPServer server = createTlsSmtpServer(sslContext, mhf);
         server.setHostName("me.com");
         server.setPort(PORT);
-        // smtpServer.setBindAddress(bindAddress);
         server.setRequireTLS(true);
         server.setEnableTLS(true);
         try {
@@ -81,6 +84,13 @@ public class StartTLSFullTest {
         } finally {
             server.stop();
         }
+        InOrder o = Mockito.inOrder(mhf, mh);
+        o.verify(mhf).create(Mockito.any(MessageContext.class));
+        o.verify(mh).from(EMAIL_FROM);
+        o.verify(mh).recipient(EMAIL_TO);
+        o.verify(mh).data(Mockito.any(InputStream.class));
+        o.verify(mh).done();
+        o.verifyNoMoreInteractions();
     }
 
     private SMTPServer createTlsSmtpServer(final SSLContext sslContext, MessageHandlerFactory mhf) {
@@ -109,42 +119,9 @@ public class StartTLSFullTest {
         };
     }
 
-    private static MessageHandlerFactory createMessageHandlerFactory() {
-        final Logger log = LoggerFactory.getLogger("MyMessageHandlerFactory");
-        return new MessageHandlerFactory() {
-
-            @Override
-            public MessageHandler create(MessageContext ctx) {
-                return new MessageHandler() {
-
-                    @Override
-                    public void from(String from) throws RejectException {
-                        log.info("from=" + from);
-                    }
-
-                    @Override
-                    public void recipient(String recipient) throws RejectException {
-                        log.info("recipient=" + recipient);
-                    }
-
-                    @Override
-                    public void data(InputStream data)
-                            throws RejectException, TooMuchDataException, IOException {
-                        log.info("data");
-                    }
-
-                    @Override
-                    public void done() {
-                        log.info("done");
-                    }
-                };
-            }
-        };
-    }
-
     private static void send(TrustManager[] trustManagers) throws Exception {
-        String to = "me@gmail.com";
-        String from = "fred@gmail.com";
+        String to = EMAIL_TO;
+        String from = EMAIL_FROM;
         String host = "127.0.0.1";
         Properties props = new Properties();
         props.put("mail.debug", "true");
@@ -152,7 +129,6 @@ public class StartTLSFullTest {
         props.put("mail.smtp.port", PORT + "");
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.starttls.enable", "true");
-        // props.put("mail.smtp.from", from);
         props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
@@ -199,7 +175,6 @@ public class StartTLSFullTest {
 
         Transport.send(message);
         System.out.println("Sent message successfully....");
-
     }
 
 }
