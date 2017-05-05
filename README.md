@@ -66,6 +66,8 @@ Dave Moten came across this and
 * added multi-JDK continuous integration using Travis
 * added code coverage using coverage.io
 * added round trip unit test of STARTTLS
+* removed MigBase64 because is complex code without unit tests (even in original source) and Java 8 Base64 is faster
+* required Java 8 (just because of Base64 class at the moment, Java 7 required now because of use in unit test of `X509TrustManager`)
 
 ## Project Authors ##
 Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.
