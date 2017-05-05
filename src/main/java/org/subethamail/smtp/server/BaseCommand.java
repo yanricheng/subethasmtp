@@ -21,9 +21,9 @@ abstract public class BaseCommand implements Command
 	private final static Logger log = LoggerFactory.getLogger(BaseCommand.class);
 
 	/** Name of the command, ie HELO */
-	private String name;
+	private final String name;
 	/** The help message for this command*/
-	private HelpMessage helpMsg;
+	private final HelpMessage helpMsg;
 
 	/** */
 	protected BaseCommand(String name, String help)

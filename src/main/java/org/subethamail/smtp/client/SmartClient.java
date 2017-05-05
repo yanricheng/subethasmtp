@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
 public class SmartClient extends SMTPClient
 {
 	/** */
-	private static Logger log = LoggerFactory.getLogger(SmartClient.class);
+	private static final Logger log = LoggerFactory.getLogger(SmartClient.class);
 
 	/** */
-	boolean sentFrom;
+	private boolean sentFrom;
 	int recipientCount;
 	/** The host name which is sent in the HELO and EHLO commands */
 	private String heloHost;

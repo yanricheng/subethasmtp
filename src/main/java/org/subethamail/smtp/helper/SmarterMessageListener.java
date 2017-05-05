@@ -28,7 +28,7 @@ public interface SmarterMessageListener
 	 * @return A Receiver if the listener wants delivery of the message, null if the
 	 *         message is not to be accepted.
 	 */
-	public Receiver accept(String from, String recipient);
+	Receiver accept(String from, String recipient);
 
 	/**
 	 * Interface which accepts delivery of a message.
@@ -46,11 +46,11 @@ public interface SmarterMessageListener
 		 *         An error will be reported to the client.
 		 * @throws IOException if there is an IO error reading the input data.
 		 */
-		public void deliver(InputStream data) throws TooMuchDataException, IOException;
+		void deliver(InputStream data) throws TooMuchDataException, IOException;
 
 		/**
 		 * Called at the end of the SMTP exchange, even if no data was delivered.
 		 */
-		public void done();
+		void done();
 	}
 }

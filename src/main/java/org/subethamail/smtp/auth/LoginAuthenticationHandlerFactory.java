@@ -32,12 +32,12 @@ import org.subethamail.smtp.util.TextUtils;
  */
 public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory
 {
-	static List<String> MECHANISMS = new ArrayList<String>(1);
+	private static final List<String> MECHANISMS = new ArrayList<String>(1);
 	static {
 		MECHANISMS.add("LOGIN");
 	}
 
-	private UsernamePasswordValidator helper;
+	private final UsernamePasswordValidator helper;
 
 	/** */
 	public LoginAuthenticationHandlerFactory(UsernamePasswordValidator helper)

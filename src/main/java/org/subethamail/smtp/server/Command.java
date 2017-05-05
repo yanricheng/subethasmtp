@@ -13,14 +13,14 @@ import org.subethamail.smtp.DropConnectionException;
 public interface Command
 {
 	/** */
-	public void execute(String commandString, Session sess) throws IOException, 
+	void execute(String commandString, Session sess) throws IOException, 
 			DropConnectionException;
 
 	/** */
-	public HelpMessage getHelp() throws CommandException;
+	HelpMessage getHelp() throws CommandException;
 
 	/**
 	 * Returns the name of the command in upper case. For example "QUIT".
 	 */
-	public String getName();
+	String getName();
 }

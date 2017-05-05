@@ -20,12 +20,12 @@ import org.subethamail.smtp.util.Base64;
  */
 public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerFactory
 {
-	static List<String> MECHANISMS = new ArrayList<String>(1);
+	private static final List<String> MECHANISMS = new ArrayList<String>(1);
 	static {
 		MECHANISMS.add("PLAIN");
 	}
 
-	private UsernamePasswordValidator helper;
+	private final UsernamePasswordValidator helper;
 
 	/** */
 	public PlainAuthenticationHandlerFactory(UsernamePasswordValidator helper)

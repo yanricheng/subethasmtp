@@ -13,7 +13,7 @@ import java.io.IOException;
 public class RequireAuthCommandWrapper implements Command
 {
 
-    private Command wrapped;
+    private final Command wrapped;
 
     /**
      * @param wrapped the wrapped command (not null)

@@ -27,7 +27,7 @@ public class CommandHandler
 	 * The map of known SMTP commands. Keys are upper case names of the
 	 * commands.
 	 */
-	private Map<String, Command> commandMap = new HashMap<String, Command>();
+	private final Map<String, Command> commandMap = new HashMap<String, Command>();
 
 	/** */
 	public CommandHandler()

@@ -33,7 +33,7 @@ public interface AuthenticationHandler
 	 * @param clientInput The client's input, eg "AUTH PLAIN dGVzdAB0ZXN0ADEyMzQ="
 	 * @throws org.subethamail.smtp.RejectException if authentication fails.
 	 */
-	public String auth(String clientInput) throws RejectException;
+	String auth(String clientInput) throws RejectException;
 
 	/**
 	 * If the authentication process was successful, this returns the identity
@@ -41,5 +41,5 @@ public interface AuthenticationHandler
 	 * authentication mechanism used, but typically this returns a String username.
 	 * If authentication was not successful, the return value is undefined.
 	 */
-	public Object getIdentity();
+	Object getIdentity();
 }

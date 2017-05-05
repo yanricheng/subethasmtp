@@ -11,7 +11,7 @@ import org.subethamail.smtp.client.SMTPClient.Response;
 @SuppressWarnings("serial")
 public class SMTPException extends IOException
 {
-	Response response;
+	private final Response response;
 
 	public SMTPException(Response resp)
 	{

@@ -22,7 +22,7 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	/**
 	 * Maps the auth type (eg "PLAIN") to a handler. The mechanism name (key) is in upper case. 
 	 */
-	Map<String, AuthenticationHandlerFactory> plugins = new HashMap<String, AuthenticationHandlerFactory>();
+	final Map<String, AuthenticationHandlerFactory> plugins = new HashMap<String, AuthenticationHandlerFactory>();
 
 	/** 
 	 * A more orderly list of the supported mechanisms. Mechanism names are in upper case.

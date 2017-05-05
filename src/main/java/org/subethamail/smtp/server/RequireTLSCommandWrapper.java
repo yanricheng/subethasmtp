@@ -13,7 +13,7 @@ import org.subethamail.smtp.DropConnectionException;
 public class RequireTLSCommandWrapper implements Command
 {
 
-	private Command wrapped;
+	private final Command wrapped;
 
 	/**
 	 * @param wrapped the wrapped command (not null)

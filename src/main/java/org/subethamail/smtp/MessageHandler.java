@@ -41,7 +41,7 @@ public interface MessageHandler
 	 * @throws RejectException if the sender should be denied.
 	 * @throws DropConnectionException if the connection should be dropped
 	 */
-	public void from(String from) throws RejectException;
+	void from(String from) throws RejectException;
 
 	/**
 	 * Called once for every RCPT TO during a SMTP exchange.
@@ -52,7 +52,7 @@ public interface MessageHandler
 	 * @throws RejectException if the recipient should be denied.
 	 * @throws DropConnectionException if the connection should be dropped
 	 */
-	public void recipient(String recipient) throws RejectException;
+	void recipient(String recipient) throws RejectException;
 
 	/**
 	 * Called when the DATA part of the SMTP exchange begins.  This
@@ -70,12 +70,12 @@ public interface MessageHandler
 	 *         An error will be reported to the client.
 	 * @throws IOException if there is an IO error reading the input data.
 	 */
-	public void data(InputStream data) throws RejectException, TooMuchDataException, IOException;
+	void data(InputStream data) throws RejectException, TooMuchDataException, IOException;
 
 	/**
 	 * Called after all other methods are completed.  Note that this method
 	 * will be called even if the mail transaction is aborted at some point 
 	 * after the initial from() call. 
 	 */
-	public void done();
+	void done();
 }

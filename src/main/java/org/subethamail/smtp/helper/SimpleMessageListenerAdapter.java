@@ -31,10 +31,10 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory
 	 * 5 megs by default. The server will buffer incoming messages to disk
 	 * when they hit this limit in the DATA received.
 	 */
-	private static int DEFAULT_DATA_DEFERRED_SIZE = 1024*1024*5;
+	private static final int DEFAULT_DATA_DEFERRED_SIZE = 1024*1024*5;
 
-	private Collection<SimpleMessageListener> listeners;
-	private int dataDeferredSize;
+	private final Collection<SimpleMessageListener> listeners;
+	private final int dataDeferredSize;
 
 	/**
 	 * Initializes this factory with a single listener.
@@ -99,7 +99,7 @@ public class SimpleMessageListenerAdapter implements MessageHandlerFactory
 	 */
 	class Handler implements MessageHandler
 	{
-		MessageContext ctx;
+		final MessageContext ctx;
 		String from;
 		List<Delivery> deliveries = new ArrayList<Delivery>();
 

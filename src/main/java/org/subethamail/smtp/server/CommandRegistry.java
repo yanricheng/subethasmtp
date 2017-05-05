@@ -40,17 +40,20 @@ public enum CommandRegistry
 	VRFY(new VerifyCommand(), true, true),
 	EXPN(new ExpandCommand(), true, true);
 
-	private Command command;
+	private final Command command;
 
 	/** */
 	private CommandRegistry(Command cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired)
 	{
-		if (checkForStartedTLSWhenRequired)
-			this.command = new RequireTLSCommandWrapper(cmd);
+		final Command c;
+        if (checkForStartedTLSWhenRequired)
+			c = new RequireTLSCommandWrapper(cmd);
 		else
-			this.command = cmd;
+			c= cmd;
         if (checkForAuthIfRequired)
-            this.command = new RequireAuthCommandWrapper(this.command);
+            this.command = new RequireAuthCommandWrapper(c);
+        else 
+            this.command = c;
 	}
 
 	/** */

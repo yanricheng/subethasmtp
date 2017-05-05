@@ -16,11 +16,11 @@ public interface AuthenticationHandlerFactory
 	 *
 	 * @return the supported authentication mechanisms as List, names are in upper case.
 	 */
-	public List<String> getAuthenticationMechanisms();
+	List<String> getAuthenticationMechanisms();
 
 	/**
 	 * Create a fresh instance of your handler.
 	 */
-	public AuthenticationHandler create();
+	AuthenticationHandler create();
 
 }

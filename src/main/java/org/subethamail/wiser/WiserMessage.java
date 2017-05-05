@@ -14,10 +14,10 @@ import javax.mail.internet.MimeMessage;
  */
 public class WiserMessage
 {
-	byte[] messageData;
-	Wiser wiser;
-	String envelopeSender;
-	String envelopeReceiver;
+	private final byte[] messageData;
+	private final Wiser wiser;
+	private final String envelopeSender;
+	private final String envelopeReceiver;
 
 	WiserMessage(Wiser wiser, String envelopeSender, String envelopeReceiver, byte[] messageData)
 	{
