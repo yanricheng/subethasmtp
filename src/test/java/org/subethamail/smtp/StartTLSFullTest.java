@@ -49,7 +49,7 @@ public class StartTLSFullTest {
     private static final int PORT = 25000;
 
     @Test
-    public void testStart() throws Exception {
+    public void testStartTLS() throws Exception {
         // the server is started using keyStore.jks and trustStore.jks on the
         // classpath
         // the trustStore contains the keyStore certificate (the server trusts
