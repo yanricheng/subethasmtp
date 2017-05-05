@@ -5,7 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -52,22 +57,13 @@ public class StartTLSFullTest {
 
         // System.setProperty("javax.net.debug", "all");
 
-        InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
-        InputStream keyStore = StartTLSFullTest.class.getResourceAsStream("/keyStore.jks");
-        KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(keyStore, PASSWORD.toCharArray());
-        KeyManagerFactory kmf = KeyManagerFactory
-                .getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(ks, PASSWORD.toCharArray());
-        KeyManager[] keyManagers = kmf.getKeyManagers();
-        TrustManager trustManager = new ExtendedTrustManager(trustStore, PASSWORD.toCharArray(),
-                false);
-        TrustManager[] trustManagers = new TrustManager[] { trustManager };
+        
+        KeyManager[] keyManagers = getKeyManagers();
+        TrustManager[] trustManagers = getTrustManagers();
 
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(keyManagers, trustManagers, new java.security.SecureRandom());
+        SSLContext sslContext = createTlsSslContext(keyManagers, trustManagers);
 
-        // Your message handler factory.
+        //mock a MessageHandlerFactory to check for delivery
         MessageHandlerFactory mhf = Mockito.mock(MessageHandlerFactory.class);
         MessageHandler mh = Mockito.mock(MessageHandler.class);
         Mockito.when(mhf.create(Mockito.any(MessageContext.class))).thenReturn(mh);
@@ -91,6 +87,33 @@ public class StartTLSFullTest {
         o.verify(mh).data(Mockito.any(InputStream.class));
         o.verify(mh).done();
         o.verifyNoMoreInteractions();
+    }
+
+    private SSLContext createTlsSslContext(KeyManager[] keyManagers, TrustManager[] trustManagers)
+            throws NoSuchAlgorithmException, KeyManagementException {
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(keyManagers, trustManagers, new java.security.SecureRandom());
+        return sslContext;
+    }
+
+    private TrustManager[] getTrustManagers() {
+        InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
+        TrustManager trustManager = new ExtendedTrustManager(trustStore, PASSWORD.toCharArray(),
+                false);
+        TrustManager[] trustManagers = new TrustManager[] { trustManager };
+        return trustManagers;
+    }
+
+    private KeyManager[] getKeyManagers() throws KeyStoreException, IOException,
+            NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+        InputStream keyStore = StartTLSFullTest.class.getResourceAsStream("/keyStore.jks");
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(keyStore, PASSWORD.toCharArray());
+        KeyManagerFactory kmf = KeyManagerFactory
+                .getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(ks, PASSWORD.toCharArray());
+        KeyManager[] keyManagers = kmf.getKeyManagers();
+        return keyManagers;
     }
 
     private SMTPServer createTlsSmtpServer(final SSLContext sslContext, MessageHandlerFactory mhf) {
