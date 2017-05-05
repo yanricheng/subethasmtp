@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.security.KeyStore;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -19,9 +20,12 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -30,17 +34,29 @@ import org.subethamail.smtp.server.SMTPServer;
 
 public class StartTLSFullTest {
 
+    private static final String PASSWORD = "password";
     private static final int PORT = 25000;
 
     @Test
     public void testStart() throws Exception {
         System.setProperty("javax.net.debug", "all");
-        System.setProperty("javax.net.ssl.keyStore", new File("src/test/resources/keys.jks").getAbsolutePath());
-        System.setProperty("javax.net.ssl.keyStorePassword", "password");
+        System.setProperty("javax.net.ssl.keyStore",
+                new File("src/test/resources/keyStore.jks").getAbsolutePath());
+        System.setProperty("javax.net.ssl.keyStorePassword", PASSWORD);
         InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
-        final SSLContext sslContext = ExtendedTrustManager.createTlsContextWithAlwaysHappyExtendedTrustManager();
-        // ExtendedTrustManager.createTlsContextWithExtendedTrustManager(trustStore,
-        // "password", false);
+        InputStream keyStore = StartTLSFullTest.class.getResourceAsStream("/keyStore.jks");
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(keyStore, PASSWORD.toCharArray());
+        KeyManagerFactory kmf = KeyManagerFactory
+                .getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(ks, PASSWORD.toCharArray());
+        KeyManager[] keyManagers = kmf.getKeyManagers();
+        TrustManager trustManager = new ExtendedTrustManager(trustStore, PASSWORD.toCharArray(),
+                false);
+        TrustManager[] trustManagers = new TrustManager[] { trustManager };
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(keyManagers, trustManagers, new java.security.SecureRandom());
 
         // Your message handler factory.
         MessageHandlerFactory mhf = createMessageHandlerFactory();
@@ -65,18 +81,19 @@ public class StartTLSFullTest {
         return new SMTPServer(mhf) {
             @Override
             public SSLSocket createSSLSocket(Socket socket) throws IOException {
-                InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+                InetSocketAddress remoteAddress = (InetSocketAddress) socket
+                        .getRemoteSocketAddress();
 
                 SSLSocketFactory sf = sslContext.getSocketFactory();
-                SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
-                        true));
+                SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
+                        socket.getPort(), true));
 
                 // we are a server
                 s.setUseClientMode(false);
 
                 // select protocols and cipher suites
-                s.setEnabledProtocols(s.getSupportedProtocols());
-                s.setEnabledCipherSuites(s.getSupportedCipherSuites());
+                // s.setEnabledProtocols(s.getSupportedProtocols());
+                // s.setEnabledCipherSuites(s.getSupportedCipherSuites());
 
                 //// Client must authenticate
                 // s.setNeedClientAuth(true);
@@ -105,7 +122,8 @@ public class StartTLSFullTest {
                     }
 
                     @Override
-                    public void data(InputStream data) throws RejectException, TooMuchDataException, IOException {
+                    public void data(InputStream data)
+                            throws RejectException, TooMuchDataException, IOException {
                         log.info("data");
                     }
 

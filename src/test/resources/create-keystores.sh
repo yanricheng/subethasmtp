@@ -4,7 +4,7 @@ set -x
 echo =============================
 echo When prompted for a password just enter 'password'
 echo =============================
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -passout pass:password -subj '/C=AU/ST=SomeState/L=Atlantis/CN=testing.com'
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 13650 -passout pass:password -subj '/C=AU/ST=SomeState/L=Atlantis/CN=testing.com'
 openssl pkcs12 -export -out keystore.p12 -inkey key.pem -in cert.pem -passin pass:password -passout pass:password
 rm -f trustStore.jks
 keytool -import -file cert.pem -alias tls-testing -keystore trustStore.jks -storepass password -noprompt
