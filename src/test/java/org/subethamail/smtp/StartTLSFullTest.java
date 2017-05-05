@@ -33,7 +33,6 @@ public class StartTLSFullTest {
     private static final int PORT = 25000;
 
     @Test
-     @Ignore
     public void testStart() throws Exception {
         System.setProperty("javax.net.debug", "all");
         System.setProperty("javax.net.ssl.keyStore", new File("src/test/resources/keys.jks").getAbsolutePath());
