@@ -67,6 +67,8 @@ Dave Moten came across this and
 * added code coverage using coverage.io
 * added round trip unit test of STARTTLS
 * removed MigBase64 because is complex code without unit tests (even in original source) and Java 8 Base64 is faster
+* cleaned up code (made fields private and final where appropriate, remove public keyword from interface methods)
+* minor coverage improvements
 * required Java 8 (just because of Base64 class at the moment, Java 7 required now because of use in unit test of `X509TrustManager`)
 
 ## Project Authors ##
