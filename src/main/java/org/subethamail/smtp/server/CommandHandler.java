@@ -95,7 +95,7 @@ public class CommandHandler
 	{
 		try
 		{
-			Command command = this.getCommandFromString(commandString);
+			Command command = getCommandFromString(commandString);
 			command.execute(commandString, context);
 		}
 		catch (CommandException e)
@@ -110,7 +110,7 @@ public class CommandHandler
 	 */
 	public HelpMessage getHelp(String command) throws CommandException
 	{
-		return this.getCommandFromString(command).getHelp();
+		return getCommandFromString(command).getHelp();
 	}
 
 	/** */
@@ -118,7 +118,7 @@ public class CommandHandler
 		throws UnknownCommandException, InvalidCommandNameException
 	{
 		Command command = null;
-		String key = this.toKey(commandString);
+		String key = toKey(commandString);
 		if (key != null)
 		{
 			command = this.commandMap.get(key);
@@ -126,7 +126,7 @@ public class CommandHandler
 		if (command == null)
 		{
 			// some commands have a verb longer than 4 letters
-			String verb = this.toVerb(commandString);
+			String verb = toVerb(commandString);
 			if (verb != null)
 			{
 				command = this.commandMap.get(verb);
@@ -140,7 +140,7 @@ public class CommandHandler
 	}
 
 	/** */
-	private String toKey(String string) throws InvalidCommandNameException
+	private static String toKey(String string) throws InvalidCommandNameException
 	{
 		if (string == null || string.length() < 4)
 			throw new InvalidCommandNameException("Error: bad syntax");
@@ -149,7 +149,7 @@ public class CommandHandler
 	}
 
 	/** */
-	private String toVerb(String string) throws InvalidCommandNameException
+	private static String toVerb(String string) throws InvalidCommandNameException
 	{
 		StringTokenizer stringTokenizer = new StringTokenizer(string);
 		if (!stringTokenizer.hasMoreTokens())
