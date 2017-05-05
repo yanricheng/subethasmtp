@@ -41,10 +41,15 @@ public class StartTLSFullTest {
 
     @Test
     public void testStart() throws Exception {
-//        System.setProperty("javax.net.debug", "all");
-        System.setProperty("javax.net.ssl.keyStore",
-                new File("src/test/resources/keyStore.jks").getAbsolutePath());
-        System.setProperty("javax.net.ssl.keyStorePassword", PASSWORD);
+        // the server is started using keyStore.jks and trustStore.jks on the
+        // classpath
+        // the trustStore contains the keyStore certificate (the server trusts
+        // itself)
+        // the send method uses the same trustStore (and the default keyStore?)
+        // to send
+
+        System.setProperty("javax.net.debug", "all");
+
         InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
         InputStream keyStore = StartTLSFullTest.class.getResourceAsStream("/keyStore.jks");
         KeyStore ks = KeyStore.getInstance("JKS");
@@ -67,13 +72,12 @@ public class StartTLSFullTest {
         server.setHostName("me.com");
         server.setPort(PORT);
         // smtpServer.setBindAddress(bindAddress);
-        // server.setRequireTLS(true);
+        server.setRequireTLS(true);
         server.setEnableTLS(true);
         try {
             server.start();
             Thread.sleep(1000);
             send(trustManagers);
-            Thread.sleep(3000);
         } finally {
             server.stop();
         }
@@ -151,11 +155,11 @@ public class StartTLSFullTest {
         // props.put("mail.smtp.from", from);
         props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-        
+
         MailSSLSocketFactory sslSocketFactory = new MailSSLSocketFactory("TLSv1.2");
         sslSocketFactory.setTrustManagers(trustManagers);
         props.put("mail.smtp.ssl.socketFactory", sslSocketFactory);
-        
+
         Session session = Session.getInstance(props);
         // Create a default MimeMessage object.
         Message message = new MimeMessage(session);
