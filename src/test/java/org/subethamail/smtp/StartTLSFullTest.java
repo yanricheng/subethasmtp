@@ -57,13 +57,12 @@ public class StartTLSFullTest {
 
         // System.setProperty("javax.net.debug", "all");
 
-        
         KeyManager[] keyManagers = getKeyManagers();
         TrustManager[] trustManagers = getTrustManagers();
 
         SSLContext sslContext = createTlsSslContext(keyManagers, trustManagers);
 
-        //mock a MessageHandlerFactory to check for delivery
+        // mock a MessageHandlerFactory to check for delivery
         MessageHandlerFactory mhf = Mockito.mock(MessageHandlerFactory.class);
         MessageHandler mh = Mockito.mock(MessageHandler.class);
         Mockito.when(mhf.create(Mockito.any(MessageContext.class))).thenReturn(mh);
