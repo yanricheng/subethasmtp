@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.server.SMTPServer;
 
+import com.sun.mail.util.MailSSLSocketFactory;
+
 public class StartTLSFullTest {
 
     private static final String PASSWORD = "password";
@@ -39,7 +41,7 @@ public class StartTLSFullTest {
 
     @Test
     public void testStart() throws Exception {
-        System.setProperty("javax.net.debug", "all");
+//        System.setProperty("javax.net.debug", "all");
         System.setProperty("javax.net.ssl.keyStore",
                 new File("src/test/resources/keyStore.jks").getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", PASSWORD);
@@ -70,7 +72,7 @@ public class StartTLSFullTest {
         try {
             server.start();
             Thread.sleep(1000);
-            send();
+            send(trustManagers);
             Thread.sleep(3000);
         } finally {
             server.stop();
@@ -92,8 +94,8 @@ public class StartTLSFullTest {
                 s.setUseClientMode(false);
 
                 // select protocols and cipher suites
-                // s.setEnabledProtocols(s.getSupportedProtocols());
-                // s.setEnabledCipherSuites(s.getSupportedCipherSuites());
+                s.setEnabledProtocols(s.getSupportedProtocols());
+                s.setEnabledCipherSuites(s.getSupportedCipherSuites());
 
                 //// Client must authenticate
                 // s.setNeedClientAuth(true);
@@ -136,7 +138,7 @@ public class StartTLSFullTest {
         };
     }
 
-    private static void send() throws Exception {
+    private static void send(TrustManager[] trustManagers) throws Exception {
         String to = "me@gmail.com";
         String from = "fred@gmail.com";
         String host = "127.0.0.1";
@@ -149,9 +151,11 @@ public class StartTLSFullTest {
         // props.put("mail.smtp.from", from);
         props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-        // MailSSLSocketFactory sslSocketFactory = new
-        // MailSSLSocketFactory("TLSv1.2");
-
+        
+        MailSSLSocketFactory sslSocketFactory = new MailSSLSocketFactory("TLSv1.2");
+        sslSocketFactory.setTrustManagers(trustManagers);
+        props.put("mail.smtp.ssl.socketFactory", sslSocketFactory);
+        
         Session session = Session.getInstance(props);
         // Create a default MimeMessage object.
         Message message = new MimeMessage(session);
