@@ -1,9 +1,10 @@
 package org.subethamail.smtp.server;
 
+import java.util.Base64;
+
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
 import org.subethamail.smtp.auth.UsernamePasswordValidator;
-import org.subethamail.smtp.util.Base64;
 import org.subethamail.smtp.util.Client;
 import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.TextUtils;
@@ -109,12 +110,12 @@ public class RequireAuthTest  extends ServerTestCase
         this.send("AUTH LOGIN");
         this.expect("334");
 
-        String enc_username = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME), false);
+        String enc_username = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME));
 
         this.send(enc_username);
         this.expect("334");
 
-        String enc_pwd = Base64.encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD), false);
+        String enc_pwd = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD));
         this.send(enc_pwd);
         this.expect("235");
 

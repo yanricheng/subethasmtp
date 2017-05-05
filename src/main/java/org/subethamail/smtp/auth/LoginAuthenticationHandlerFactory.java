@@ -1,13 +1,13 @@
 package org.subethamail.smtp.auth;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.RejectException;
-import org.subethamail.smtp.util.Base64;
 import org.subethamail.smtp.util.TextUtils;
 
 /**
@@ -83,26 +83,25 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 					// the username.
 					// .Net's built in System.Net.Mail.SmtpClient sends its
 					// authentication this way (and this way only).
-					byte[] decoded = Base64.decode(stk.nextToken());
+					byte[] decoded = Base64.getDecoder().decode(stk.nextToken());
 					if (decoded == null)
 						throw new RejectException(501, /*5.5.4*/
 								"Invalid command argument, not a valid Base64 string"); 
 					username = TextUtils.getStringUtf8(decoded);
 
 					return "334 "
-							+ Base64.encodeToString(
-									TextUtils.getAsciiBytes("Password:"),
-									false);
+							+ Base64.getEncoder().encodeToString(
+									TextUtils.getAsciiBytes("Password:"));
 				} else {
 					return "334 "
-							+ Base64.encodeToString(
-									TextUtils.getAsciiBytes("Username:"), false);
+							+ Base64.getEncoder().encodeToString(
+									TextUtils.getAsciiBytes("Username:"));
 				}
 			}
 
 			if (this.username == null)
 			{
-				byte[] decoded = Base64.decode(clientInput);
+				byte[] decoded = Base64.getDecoder().decode(clientInput);
 				if (decoded == null)
 				{
 					throw new RejectException(501, /*5.5.4*/
@@ -112,11 +111,11 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 				this.username = TextUtils.getStringUtf8(decoded);
 
 				return "334 "
-						+ Base64.encodeToString(
-								TextUtils.getAsciiBytes("Password:"), false);
+						+ Base64.getEncoder().encodeToString(
+								TextUtils.getAsciiBytes("Password:"));
 			}
 
-			byte[] decoded = Base64.decode(clientInput);
+			byte[] decoded = Base64.getDecoder().decode(clientInput);
 			if (decoded == null)
 			{
 				throw new RejectException(501, /*5.5.4*/

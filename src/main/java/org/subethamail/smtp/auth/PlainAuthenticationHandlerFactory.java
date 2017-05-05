@@ -1,13 +1,13 @@
 package org.subethamail.smtp.auth;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.RejectException;
-import org.subethamail.smtp.util.Base64;
 
 /**
  * Implements the SMTP AUTH PLAIN mechanism.<br>
@@ -79,7 +79,7 @@ public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerF
 				}
 			}
 
-			byte[] decodedSecret = Base64.decode(secret);
+			byte[] decodedSecret = Base64.getDecoder().decode(secret);
 			if (decodedSecret == null)
 				throw new RejectException(501, /*5.5.4*/
 						"Invalid command argument, not a valid Base64 string");
