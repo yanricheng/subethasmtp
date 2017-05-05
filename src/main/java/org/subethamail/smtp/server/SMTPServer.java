@@ -121,7 +121,7 @@ public class SMTPServer
 	 */
 	public SMTPServer(MessageHandlerFactory handlerFactory)
 	{
-		this(handlerFactory, null, null);
+		this(handlerFactory, null);
 	}
 
 	/**
