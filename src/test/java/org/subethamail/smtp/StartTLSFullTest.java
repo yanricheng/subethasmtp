@@ -41,6 +41,7 @@ import com.sun.mail.util.MailSSLSocketFactory;
 
 public class StartTLSFullTest {
 
+    private static final String LOCALHOST = "127.0.0.1";
     private static final String EMAIL_TO = "me@gmail.com";
     private static final String EMAIL_FROM = "fred@gmail.com";
     private static final String PASSWORD = "password";
@@ -144,15 +145,15 @@ public class StartTLSFullTest {
     private static void send(TrustManager[] trustManagers) throws Exception {
         String to = EMAIL_TO;
         String from = EMAIL_FROM;
-        String host = "127.0.0.1";
+        String host = LOCALHOST;
         Properties props = new Properties();
         props.put("mail.debug", "true");
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", PORT + "");
-        props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.starttls.required", "true");
-        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+//        props.put("mail.transport.protocol", "smtp");
+//        props.put("mail.smtp.starttls.required", "true");
+//        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
         MailSSLSocketFactory sslSocketFactory = new MailSSLSocketFactory("TLSv1.2");
         sslSocketFactory.setTrustManagers(trustManagers);
