@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.subethamail.smtp.server.SMTPServer;
+import org.subethamail.util.ExtendedTrustManager;
 
 import com.sun.mail.util.MailSSLSocketFactory;
 

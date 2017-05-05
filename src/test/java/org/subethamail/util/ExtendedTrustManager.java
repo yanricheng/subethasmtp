@@ -1,21 +1,15 @@
-package org.subethamail.smtp;
+package org.subethamail.util;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -120,52 +114,4 @@ public final class ExtendedTrustManager extends X509ExtendedTrustManager {
         checkServerTrusted(chain, authType);
     }
 
-    public static SSLContext createTlsContextWithExtendedTrustManager(InputStream trustStore,
-            String trustStorePassword, boolean extend)
-                    throws NoSuchAlgorithmException, KeyManagementException {
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        TrustManager trustManager = new ExtendedTrustManager(trustStore,
-                trustStorePassword.toCharArray(), extend);
-        TrustManager[] trustManagers = new TrustManager[] { trustManager };
-        sslContext.init(null, trustManagers, new java.security.SecureRandom());
-        return sslContext;
-    }
-
-    public static SSLContext createTlsContextWithAlwaysHappyExtendedTrustManager(
-            KeyManager[] keyManagers) throws NoSuchAlgorithmException, KeyManagementException,
-                    UnrecoverableKeyException, KeyStoreException, CertificateException,
-                    IOException {
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        TrustManager trustManager = new AlwaysHappyTrustManager();
-        TrustManager[] trustManagers = new TrustManager[] { trustManager };
-        sslContext.init(keyManagers, trustManagers, new java.security.SecureRandom());
-        return sslContext;
-    }
-
-    public static class AlwaysHappyTrustManager implements X509TrustManager {
-
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-            // don't throw exception
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType)
-                throws CertificateException {
-            // don't throw exception
-        }
-
-        @Override
-        public final X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-    }
-
-    public static class AlwaysHappyHostnameVerifier implements HostnameVerifier {
-        @Override
-        public final boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    }
 }
