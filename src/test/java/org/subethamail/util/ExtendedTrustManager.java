@@ -55,8 +55,13 @@ public final class ExtendedTrustManager extends X509ExtendedTrustManager {
                 }
             }
             this.customTm = customTm;
-        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
-                | IOException e) {
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (CertificateException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
