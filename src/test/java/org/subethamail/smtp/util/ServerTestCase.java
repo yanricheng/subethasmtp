@@ -3,9 +3,7 @@ package org.subethamail.smtp.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.server.SMTPServer;
-import org.subethamail.smtp.server.SMTPServer.Builder;
 import org.subethamail.wiser.Wiser;
-import org.subethamail.wiser.Wiser.WiserBuilder;
 
 import junit.framework.TestCase;
 
