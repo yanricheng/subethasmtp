@@ -70,6 +70,8 @@ Dave Moten came across this and
 * cleaned up code (made fields private and final where appropriate, remove public keyword from interface methods)
 * minor coverage improvements
 * required Java 8 (just because of Base64 class at the moment, Java 7 required now because of use in unit test of `X509TrustManager`)
+* converted `SMTPServer` to be largely immutable and is created with a builder pattern
+* adjusted `Wiser` API to cope with an immutable `SMTPServer`
 
 ## Project Authors ##
 Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.
