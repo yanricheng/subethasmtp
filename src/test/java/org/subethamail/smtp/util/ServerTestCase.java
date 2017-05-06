@@ -1,10 +1,12 @@
 package org.subethamail.smtp.util;
 
-import junit.framework.TestCase;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.server.SMTPServer;
+import org.subethamail.smtp.server.SMTPServer.Builder;
 import org.subethamail.wiser.Wiser;
+
+import junit.framework.TestCase;
 
 /**
  * A base class for testing the SMTP server at the raw protocol level.
@@ -28,7 +30,11 @@ public abstract class ServerTestCase extends TestCase
 	 */
 	public class TestWiser extends Wiser
 	{
-		@Override
+		public TestWiser(Builder builder) {
+            super(builder);
+        }
+
+        @Override
 		public boolean accept(String from, String recipient)
 		{
 			if (recipient.equals("failure@subethamail.org"))
@@ -49,11 +55,19 @@ public abstract class ServerTestCase extends TestCase
 	/** */
 	protected Client c;
 
+    private final int maxMessageSize;
+
 	/** */
 	public ServerTestCase(String name)
 	{
-		super(name);
+	    this(name, 0);
 	}
+	
+	public ServerTestCase(String name, int maxMessageSize)
+    {
+        super(name);
+        this.maxMessageSize = maxMessageSize;
+    }
 
 	/** */
 	@Override
@@ -61,9 +75,10 @@ public abstract class ServerTestCase extends TestCase
 	{
 		super.setUp();
 
-		this.wiser = new TestWiser();
-		this.wiser.setHostname("localhost");
-		this.wiser.setPort(PORT);
+		this.wiser = new TestWiser(SMTPServer //
+		        .port(PORT) //
+		        .maxMessageSize(maxMessageSize));
+//		this.wiser.setHostname("localhost");
 		this.wiser.start();
 
 		this.c = new Client("localhost", PORT);

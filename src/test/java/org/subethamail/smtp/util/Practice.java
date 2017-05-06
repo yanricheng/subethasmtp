@@ -28,9 +28,8 @@ public class Practice
 	/** */
 	public static void main(String[] args) throws Exception
 	{
-		Wiser wiser = new Wiser();
-		wiser.setHostname("localhost");
-		wiser.setPort(PORT);
+		Wiser wiser = Wiser.port(PORT);
+//		wiser.setHostname("localhost");
 
 		wiser.start();
 

@@ -7,10 +7,12 @@ import org.subethamail.smtp.util.ServerTestCase;
  */
 public class MailTest extends ServerTestCase
 {
-	/** */
+	private static final int MAX_MESSAGE_SIZE = 1000;
+
+    /** */
 	public MailTest(String name)
 	{
-		super(name);
+		super(name, MAX_MESSAGE_SIZE);
 	}
 
 	/** */
@@ -102,7 +104,6 @@ public class MailTest extends ServerTestCase
 	/** */
 	public void testSize() throws Exception
 	{
-	    this.wiser.getServer().setMaxMessageSize(1000);
 	    this.expect("220");
 
 	    this.send("EHLO foo.com");
@@ -115,7 +116,6 @@ public class MailTest extends ServerTestCase
 	/** */
 	public void testSizeWithoutSize() throws Exception
 	{
-	    this.wiser.getServer().setMaxMessageSize(1000);
 	    this.expect("220");
 
 	    this.send("EHLO foo.com");
@@ -128,7 +128,6 @@ public class MailTest extends ServerTestCase
 	/** */
 	public void testSizeTooLarge() throws Exception
 	{
-	    this.wiser.getServer().setMaxMessageSize(1000);
 	    this.expect("220");
 
 	    this.send("EHLO foo.com");

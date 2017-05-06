@@ -23,10 +23,8 @@ public class RequireTlsTest extends ServerTestCase
 	@Override
 	protected void setUp() throws Exception
 	{
-		this.wiser = new TestWiser();
-		this.wiser.setHostname("localhost");
-		this.wiser.setPort(PORT);
-		this.wiser.getServer().setRequireTLS(true);
+		this.wiser = new TestWiser(SMTPServer.port(PORT).requireTLS());
+//		this.wiser.setHostname("localhost");
 
 		this.wiser.start();
 		this.c = new Client("localhost", PORT);

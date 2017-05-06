@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.subethamail.smtp.server.SMTPServer;
+import org.subethamail.smtp.server.SSLSocketCreator;
 import org.subethamail.util.ExtendedTrustManager;
 
 import com.sun.mail.util.MailSSLSocketFactory;
@@ -69,11 +70,14 @@ public class StartTLSFullTest {
         MessageHandler mh = Mockito.mock(MessageHandler.class);
         Mockito.when(mhf.create(Mockito.any(MessageContext.class))).thenReturn(mh);
 
-        SMTPServer server = createTlsSmtpServer(sslContext, mhf);
-        server.setHostName("me.com");
-        server.setPort(PORT);
-        server.setRequireTLS(true);
-        server.setEnableTLS(true);
+        SSLSocketCreator tlsSocketCreator = createTLSSocketCreator(sslContext);
+        SMTPServer server = SMTPServer //
+                .port(PORT) //
+                .requireTLS() //
+                .enableTLS() //
+                .messageHandlerFactory(mhf) //
+                .sslSocketCreator(tlsSocketCreator) //
+                .build();
         try {
             server.start();
             Thread.sleep(1000);
@@ -99,34 +103,31 @@ public class StartTLSFullTest {
 
     private TrustManager[] getTrustManagers() {
         InputStream trustStore = StartTLSFullTest.class.getResourceAsStream("/trustStore.jks");
-        TrustManager trustManager = new ExtendedTrustManager(trustStore, PASSWORD.toCharArray(),
-                false);
+        TrustManager trustManager = new ExtendedTrustManager(trustStore, PASSWORD.toCharArray(), false);
         TrustManager[] trustManagers = new TrustManager[] { trustManager };
         return trustManagers;
     }
 
-    private KeyManager[] getKeyManagers() throws KeyStoreException, IOException,
-            NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+    private KeyManager[] getKeyManagers() throws KeyStoreException, IOException, NoSuchAlgorithmException,
+            CertificateException, UnrecoverableKeyException {
         InputStream keyStore = StartTLSFullTest.class.getResourceAsStream("/keyStore.jks");
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(keyStore, PASSWORD.toCharArray());
-        KeyManagerFactory kmf = KeyManagerFactory
-                .getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(ks, PASSWORD.toCharArray());
         KeyManager[] keyManagers = kmf.getKeyManagers();
         return keyManagers;
     }
 
-    private SMTPServer createTlsSmtpServer(final SSLContext sslContext, MessageHandlerFactory mhf) {
-        return new SMTPServer(mhf) {
+    private static SSLSocketCreator createTLSSocketCreator(final SSLContext sslContext) {
+        return new SSLSocketCreator() {
             @Override
             public SSLSocket createSSLSocket(Socket socket) throws IOException {
-                InetSocketAddress remoteAddress = (InetSocketAddress) socket
-                        .getRemoteSocketAddress();
+                InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
 
                 SSLSocketFactory sf = sslContext.getSocketFactory();
-                SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
-                        socket.getPort(), true));
+                SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
+                        true));
 
                 // we are a server
                 s.setUseClientMode(false);
@@ -152,9 +153,9 @@ public class StartTLSFullTest {
         props.put("mail.smtp.host", host);
         props.put("mail.smtp.port", PORT + "");
         props.put("mail.smtp.starttls.enable", "true");
-//        props.put("mail.transport.protocol", "smtp");
-//        props.put("mail.smtp.starttls.required", "true");
-//        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+        // props.put("mail.transport.protocol", "smtp");
+        // props.put("mail.smtp.starttls.required", "true");
+        // props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
         MailSSLSocketFactory sslSocketFactory = new MailSSLSocketFactory("TLSv1.2");
         sslSocketFactory.setTrustManagers(trustManagers);

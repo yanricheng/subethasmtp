@@ -5,158 +5,146 @@ import java.util.Base64;
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
 import org.subethamail.smtp.auth.UsernamePasswordValidator;
+import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.util.Client;
 import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.TextUtils;
+import org.subethamail.wiser.Wiser;
 
 /**
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
  * @author Jeff Schnitzer
  */
-public class AuthTest extends ServerTestCase
-{
-	static final String REQUIRED_USERNAME = "myUserName";
-	static final String REQUIRED_PASSWORD = "mySecret01";
+public class AuthTest extends ServerTestCase {
+    static final String REQUIRED_USERNAME = "myUserName";
+    static final String REQUIRED_PASSWORD = "mySecret01";
 
-	class RequiredUsernamePasswordValidator implements UsernamePasswordValidator
-	{
-		public void login(String username, String password) throws LoginFailedException
-		{
-			if (!username.equals(REQUIRED_USERNAME) || !password.equals(REQUIRED_PASSWORD))
-			{
-				throw new LoginFailedException();
-			}
-		}
-	}
+    class RequiredUsernamePasswordValidator implements UsernamePasswordValidator {
+        public void login(String username, String password) throws LoginFailedException {
+            if (!username.equals(REQUIRED_USERNAME) || !password.equals(REQUIRED_PASSWORD)) {
+                throw new LoginFailedException();
+            }
+        }
+    }
 
-	/** */
-	public AuthTest(String name)
-	{
-		super(name);
-	}
+    /** */
+    public AuthTest(String name) {
+        super(name);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.subethamail.smtp.ServerTestCase#setUp()
-	 */
-	@Override
-	protected void setUp() throws Exception
-	{
-		this.wiser = new TestWiser();
-		this.wiser.setHostname("localhost");
-		this.wiser.setPort(PORT);
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.subethamail.smtp.ServerTestCase#setUp()
+     */
+    @Override
+    protected void setUp() throws Exception {
+        UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
+        EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
+        this.wiser = new TestWiser(SMTPServer.port(PORT).authenticationHandlerFactory(fact));
+        // this.wiser.setHostname("localhost");
+        this.wiser.start();
+        this.c = new Client("localhost", PORT);
+    }
 
-		UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.subethamail.smtp.ServerTestCase#tearDown()
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-		EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
-		this.wiser.getServer().setAuthenticationHandlerFactory(fact);
+    /**
+     * Test method for AUTH PLAIN. The sequence under test is as follows:
+     * <ol>
+     * <li>HELO test</li>
+     * <li>User starts AUTH PLAIN</li>
+     * <li>User sends username+password</li>
+     * <li>We expect login to be successful. Also the Base64 transformations are
+     * tested.</li>
+     * <li>User issues another AUTH command</li>
+     * <li>We expect an error message</li>
+     * </ol>
+     * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
+     */
+    public void testAuthPlain() throws Exception {
+        this.expect("220");
 
-		this.wiser.start();
-		this.c = new Client("localhost", PORT);
-	}
+        this.send("HELO foo.com");
+        this.expect("250");
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.subethamail.smtp.ServerTestCase#tearDown()
-	 */
-	@Override
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
+        this.send("AUTH PLAIN");
+        this.expect("334");
 
-	/**
-	 * Test method for AUTH PLAIN.
-	 * The sequence under test is as follows:
-	 * <ol>
-	 * <li>HELO test</li>
-	 * <li>User starts AUTH PLAIN</li>
-	 * <li>User sends username+password</li>
-	 * <li>We expect login to be successful. Also the Base64 transformations are tested.</li>
-	 * <li>User issues another AUTH command</li>
-	 * <li>We expect an error message</li>
-	 * </ol>
-	 * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
-	 */
-	public void testAuthPlain() throws Exception
-	{
-		this.expect("220");
+        String authString = new String(new byte[] { 0 }) + REQUIRED_USERNAME + new String(new byte[] { 0 })
+                + REQUIRED_PASSWORD;
 
-		this.send("HELO foo.com");
-		this.expect("250");
+        String enc_authString = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(authString));
+        this.send(enc_authString);
+        this.expect("235");
 
-		this.send("AUTH PLAIN");
-		this.expect("334");
+        this.send("AUTH");
+        this.expect("503");
+    }
 
-		String authString = new String(new byte[] {0}) + REQUIRED_USERNAME
-						+ new String(new byte[] {0}) + REQUIRED_PASSWORD;
+    /**
+     * Test method for AUTH LOGIN. The sequence under test is as follows:
+     * <ol>
+     * <li>HELO test</li>
+     * <li>User starts AUTH LOGIN</li>
+     * <li>User sends username</li>
+     * <li>User cancels authentication by sending "*"</li>
+     * <li>User restarts AUTH LOGIN</li>
+     * <li>User sends username</li>
+     * <li>User sends password</li>
+     * <li>We expect login to be successful. Also the Base64 transformations are
+     * tested.</li>
+     * <li>User issues another AUTH command</li>
+     * <li>We expect an error message</li>
+     * </ol>
+     * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
+     */
+    public void testAuthLogin() throws Exception {
+        this.expect("220");
 
-		String enc_authString = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(authString));
-		this.send(enc_authString);
-		this.expect("235");
+        this.send("HELO foo.com");
+        this.expect("250");
 
-		this.send("AUTH");
-		this.expect("503");
-	}
+        this.send("AUTH LOGIN");
+        this.expect("334");
 
-	/**
-	 * Test method for AUTH LOGIN.
-	 * The sequence under test is as follows:
-	 * <ol>
-	 * <li>HELO test</li>
-	 * <li>User starts AUTH LOGIN</li>
-	 * <li>User sends username</li>
-	 * <li>User cancels authentication by sending "*"</li>
-	 * <li>User restarts AUTH LOGIN</li>
-	 * <li>User sends username</li>
-	 * <li>User sends password</li>
-	 * <li>We expect login to be successful. Also the Base64 transformations are tested.</li>
-	 * <li>User issues another AUTH command</li>
-	 * <li>We expect an error message</li>
-	 * </ol>
-	 * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
-	 */
-	public void testAuthLogin() throws Exception
-	{
-		this.expect("220");
+        String enc_username = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME));
 
-		this.send("HELO foo.com");
-		this.expect("250");
+        this.send(enc_username);
+        this.expect("334");
 
-		this.send("AUTH LOGIN");
-		this.expect("334");
+        this.send("*");
+        this.expect("501");
 
-		String enc_username = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME));
+        this.send("AUTH LOGIN");
+        this.expect("334");
 
-		this.send(enc_username);
-		this.expect("334");
+        this.send(enc_username);
+        this.expect("334");
 
-		this.send("*");
-		this.expect("501");
+        String enc_pwd = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD));
+        this.send(enc_pwd);
+        this.expect("235");
 
-		this.send("AUTH LOGIN");
-		this.expect("334");
+        this.send("AUTH");
+        this.expect("503");
+    }
 
-		this.send(enc_username);
-		this.expect("334");
+    public void testMailBeforeAuth() throws Exception {
+        this.expect("220");
 
-		String enc_pwd = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD));
-		this.send(enc_pwd);
-		this.expect("235");
+        this.send("HELO foo.com");
+        this.expect("250");
 
-		this.send("AUTH");
-		this.expect("503");
-	}
-	
-	public void testMailBeforeAuth() throws Exception {
-		this.expect("220");
-
-		this.send("HELO foo.com");
-		this.expect("250");
-		
-		this.send("MAIL FROM: <john@example.com>");
-		this.expect("250");
-	}
+        this.send("MAIL FROM: <john@example.com>");
+        this.expect("250");
+    }
 }

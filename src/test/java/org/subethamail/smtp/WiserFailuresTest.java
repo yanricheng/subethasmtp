@@ -49,8 +49,7 @@ public class WiserFailuresTest extends TestCase
 	protected void setUp() throws Exception
 	{
 		super.setUp();
-		this.server = new Wiser();
-		this.server.setPort(SMTP_PORT);
+		this.server = Wiser.port(SMTP_PORT);
 		this.server.start();
 		this.socket = new Socket(HOST_NAME, SMTP_PORT);
 		this.input = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));

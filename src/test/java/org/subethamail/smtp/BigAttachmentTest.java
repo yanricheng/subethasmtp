@@ -60,8 +60,7 @@ public class BigAttachmentTest
 	@Before
 	protected void setUp() throws Exception
 	{
-		this.server = new Wiser();
-		this.server.setPort(SMTP_PORT);
+		this.server = Wiser.port(SMTP_PORT);
 		this.server.start();
 	}
 

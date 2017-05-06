@@ -70,8 +70,7 @@ public class StartStopTest extends TestCase
 	/** */
 	private void startStop(boolean pause) throws Exception
 	{
-		Wiser wiser = new Wiser();
-		wiser.setPort(PORT);
+		Wiser wiser = Wiser.port(PORT);
 
 		wiser.start();
 

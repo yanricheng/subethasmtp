@@ -46,8 +46,7 @@ public class ThreadDeathLoggingTest
 				return false;
 			}
 		});
-		SMTPServer smtpServer = new SMTPServer(handlerFactory);
-		smtpServer.setPort(0);
+		SMTPServer smtpServer = SMTPServer.port(0).messageHandlerFactory(handlerFactory).build();
 		smtpServer.start();
 		try
 		{

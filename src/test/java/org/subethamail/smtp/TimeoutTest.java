@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.subethamail.smtp.client.SMTPClient;
 import org.subethamail.smtp.client.SMTPClient.Response;
+import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.wiser.Wiser;
 
 /**
@@ -23,9 +24,7 @@ public class TimeoutTest {
 	@Test
 	@Ignore
 	public void testTimeout() throws Exception {
-		Wiser wiser = new Wiser();
-		wiser.setPort(PORT);
-		wiser.getServer().setConnectionTimeout(1000);
+		Wiser wiser = Wiser.create(SMTPServer.port(PORT).connectionTimeoutMs(1000));
 		wiser.start();
 
 		SMTPClient client = new SMTPClient("localhost", PORT);

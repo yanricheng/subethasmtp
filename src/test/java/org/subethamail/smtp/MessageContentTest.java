@@ -60,8 +60,7 @@ public class MessageContentTest extends TestCase
 		props.setProperty("mail.smtp.port", Integer.toString(PORT));
 		this.session = Session.getInstance(props);
 
-		this.wiser = new Wiser();
-		this.wiser.setPort(PORT);
+		this.wiser = Wiser.port(PORT);
 
 		this.wiser.start();
 	}

@@ -42,15 +42,10 @@ public class RequireAuthTest  extends ServerTestCase
     @Override
     protected void setUp() throws Exception
     {
-        this.wiser = new TestWiser();
-        this.wiser.setHostname("localhost");
-        this.wiser.setPort(PORT);
-
         UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
-
         EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
-        this.wiser.getServer().setAuthenticationHandlerFactory(fact);
-        this.wiser.getServer().setRequireAuth(true);
+        this.wiser = new TestWiser(SMTPServer.port(PORT).authenticationHandlerFactory(fact).requireAuth(true));
+//        this.wiser.setHostname("localhost");
         this.wiser.start();
         this.c = new Client("localhost", PORT);
     }

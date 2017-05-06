@@ -24,8 +24,7 @@ import org.subethamail.smtp.util.TextUtils;
 public class MessageHandlerTest {
 
     private static SMTPServer create(MessageHandlerFactory f) {
-        SMTPServer server = new SMTPServer(f);
-        server.setPort(2566);
+        SMTPServer server = SMTPServer.port(2566).messageHandlerFactory(f).build();
         server.start();
         return server;
     }
