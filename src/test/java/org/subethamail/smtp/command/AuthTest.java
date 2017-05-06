@@ -44,7 +44,7 @@ public class AuthTest extends ServerTestCase {
         EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
         this.wiser = Wiser.accepter(Testing.ACCEPTER).server(SMTPServer.port(PORT).authenticationHandlerFactory(fact));
         // this.wiser.setHostname("localhost");
-        this.wiser.start();
+        wiser.start();
         this.c = new Client("localhost", PORT);
     }
 
@@ -72,23 +72,23 @@ public class AuthTest extends ServerTestCase {
      * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
      */
     public void testAuthPlain() throws Exception {
-        this.expect("220");
+        expect("220");
 
-        this.send("HELO foo.com");
-        this.expect("250");
+        send("HELO foo.com");
+        expect("250");
 
-        this.send("AUTH PLAIN");
-        this.expect("334");
+        send("AUTH PLAIN");
+        expect("334");
 
         String authString = new String(new byte[] { 0 }) + REQUIRED_USERNAME + new String(new byte[] { 0 })
                 + REQUIRED_PASSWORD;
 
         String enc_authString = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(authString));
-        this.send(enc_authString);
-        this.expect("235");
+        send(enc_authString);
+        expect("235");
 
-        this.send("AUTH");
-        this.expect("503");
+        send("AUTH");
+        expect("503");
     }
 
     /**
@@ -109,43 +109,43 @@ public class AuthTest extends ServerTestCase {
      * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
      */
     public void testAuthLogin() throws Exception {
-        this.expect("220");
+        expect("220");
 
-        this.send("HELO foo.com");
-        this.expect("250");
+        send("HELO foo.com");
+        expect("250");
 
-        this.send("AUTH LOGIN");
-        this.expect("334");
+        send("AUTH LOGIN");
+        expect("334");
 
         String enc_username = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_USERNAME));
 
-        this.send(enc_username);
-        this.expect("334");
+        send(enc_username);
+        expect("334");
 
-        this.send("*");
-        this.expect("501");
+        send("*");
+        expect("501");
 
-        this.send("AUTH LOGIN");
-        this.expect("334");
+        send("AUTH LOGIN");
+        expect("334");
 
-        this.send(enc_username);
-        this.expect("334");
+        send(enc_username);
+        expect("334");
 
         String enc_pwd = Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes(REQUIRED_PASSWORD));
-        this.send(enc_pwd);
-        this.expect("235");
+        send(enc_pwd);
+        expect("235");
 
-        this.send("AUTH");
-        this.expect("503");
+        send("AUTH");
+        expect("503");
     }
 
     public void testMailBeforeAuth() throws Exception {
-        this.expect("220");
+        expect("220");
 
-        this.send("HELO foo.com");
-        this.expect("250");
+        send("HELO foo.com");
+        expect("250");
 
-        this.send("MAIL FROM: <john@example.com>");
-        this.expect("250");
+        send("MAIL FROM: <john@example.com>");
+        expect("250");
     }
 }

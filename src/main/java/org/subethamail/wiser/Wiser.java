@@ -96,7 +96,6 @@ public final class Wiser implements SimpleMessageListener {
             return new Wiser(server, accepter);
         }
         
-        
     }
 
     public static interface Accepter {
