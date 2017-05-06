@@ -2,6 +2,8 @@ package org.subethamail.smtp.server;
 
 import org.subethamail.smtp.util.Client;
 import org.subethamail.smtp.util.ServerTestCase;
+import org.subethamail.smtp.util.Testing;
+import org.subethamail.wiser.Wiser;
 
 /**
  * @author Erik van Oosten
@@ -23,7 +25,7 @@ public class RequireTlsTest extends ServerTestCase
 	@Override
 	protected void setUp() throws Exception
 	{
-		this.wiser = new TestWiser(SMTPServer.port(PORT).requireTLS());
+		this.wiser = Wiser.accepter(Testing.ACCEPTER).server(SMTPServer.port(PORT).requireTLS());
 //		this.wiser.setHostname("localhost");
 
 		this.wiser.start();

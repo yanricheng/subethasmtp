@@ -42,7 +42,7 @@ import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
  * @author Ian McFarland &lt;ian@neo.com&gt;
  * @author Jeff Schnitzer
  */
-public class SMTPServer implements SSLSocketCreator {
+public final class SMTPServer implements SSLSocketCreator {
     private final static Logger log = LoggerFactory.getLogger(SMTPServer.class);
 
     /** Hostname used if we can't find one */

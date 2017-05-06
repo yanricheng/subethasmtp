@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.server.SMTPServer.Builder;
 import org.subethamail.wiser.Wiser;
+import org.subethamail.wiser.Wiser.WiserBuilder;
 
 import junit.framework.TestCase;
 
@@ -24,38 +25,12 @@ public abstract class ServerTestCase extends TestCase
 	/** */
 	public static final int PORT = 2566;
 
-	/**
-	 * Override the accept method in Wiser so we can test
-	 * the accept method().
-	 */
-	public class TestWiser extends Wiser
-	{
-		public TestWiser(Builder builder) {
-            super(builder);
-        }
-
-        @Override
-		public boolean accept(String from, String recipient)
-		{
-			if (recipient.equals("failure@subethamail.org"))
-			{
-				return false;
-			}
-			else if (recipient.equals("success@subethamail.org"))
-			{
-				return true;
-			}
-			return true;
-		}
-	}
-
-	/** */
-	protected TestWiser wiser;
-
 	/** */
 	protected Client c;
 
     private final int maxMessageSize;
+
+    protected Wiser wiser;
 
 	/** */
 	public ServerTestCase(String name)
@@ -75,7 +50,7 @@ public abstract class ServerTestCase extends TestCase
 	{
 		super.setUp();
 
-		this.wiser = new TestWiser(SMTPServer //
+		this.wiser = Wiser.accepter(Testing.ACCEPTER).server(SMTPServer //
 		        .port(PORT) //
 		        .maxMessageSize(maxMessageSize));
 //		this.wiser.setHostname("localhost");

@@ -8,6 +8,7 @@ import org.subethamail.smtp.auth.UsernamePasswordValidator;
 import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.util.Client;
 import org.subethamail.smtp.util.ServerTestCase;
+import org.subethamail.smtp.util.Testing;
 import org.subethamail.smtp.util.TextUtils;
 import org.subethamail.wiser.Wiser;
 
@@ -41,7 +42,7 @@ public class AuthTest extends ServerTestCase {
     protected void setUp() throws Exception {
         UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
         EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);
-        this.wiser = new TestWiser(SMTPServer.port(PORT).authenticationHandlerFactory(fact));
+        this.wiser = Wiser.accepter(Testing.ACCEPTER).server(SMTPServer.port(PORT).authenticationHandlerFactory(fact));
         // this.wiser.setHostname("localhost");
         this.wiser.start();
         this.c = new Client("localhost", PORT);

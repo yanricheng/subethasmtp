@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -39,7 +38,7 @@ import org.subethamail.smtp.server.SMTPServer.Builder;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class Wiser implements SimpleMessageListener {
+public final class Wiser implements SimpleMessageListener {
     /** */
     private final static Logger log = LoggerFactory.getLogger(Wiser.class);
 
@@ -49,23 +48,67 @@ public class Wiser implements SimpleMessageListener {
     /** */
     protected final List<WiserMessage> messages = Collections.synchronizedList(new ArrayList<WiserMessage>());
 
+    private final Accepter accepter;
+
     public static Wiser port(int port) {
         return create(SMTPServer.port(port));
     }
 
     public static Wiser create(Builder builder) {
-        return new Wiser(builder);
+        return new Wiser(builder, ACCEPTER_DEFAULT);
     }
 
     public static Wiser create() {
-        return new Wiser(SMTPServer.port(25).build());
+        return new Wiser(SMTPServer.port(25).build(), ACCEPTER_DEFAULT);
+    }
+    
+    public static WiserBuilder accepter(Accepter accepter) {
+        return new WiserBuilder().accepter(accepter);
+    }
+    
+    private static final Accepter ACCEPTER_DEFAULT = (from, recipient ) -> {
+        if (log.isDebugEnabled())
+            log.debug("Accepting mail from " + from + " to " + recipient);
+
+        return true;
+    };
+    
+    public static final class WiserBuilder {
+        private Accepter accepter = ACCEPTER_DEFAULT;
+        private Builder server;
+        
+        private WiserBuilder() {
+            
+        }
+        
+        public WiserBuilder accepter(Accepter accepter) {
+            this.accepter = accepter;
+            return this;
+        }
+        
+        public Wiser server(SMTPServer.Builder server) {
+            this.server = server;
+            return new Wiser(server, accepter);
+        }
+        
+        public Wiser port(int port) {
+            this.server = SMTPServer.port(port);
+            return new Wiser(server, accepter);
+        }
+        
+        
     }
 
-    protected Wiser(SMTPServer server) {
+    public static interface Accepter {
+        boolean accept(String from, String recipient); 
+    }
+    
+    private Wiser(SMTPServer server, Accepter accepter) {
         this.server = server;
+        this.accepter = accepter;
     }
 
-    protected Wiser(Builder builder) {
+    private Wiser(Builder builder, Accepter accepter) {
         SimpleMessageListener s = new SimpleMessageListener() {
 
             @Override
@@ -80,6 +123,7 @@ public class Wiser implements SimpleMessageListener {
             }
         };
         this.server = builder.simpleMessageListener(s).build();
+        this.accepter = accepter;
     }
 
     /** Starts the SMTP Server */
@@ -92,18 +136,10 @@ public class Wiser implements SimpleMessageListener {
         this.server.stop();
     }
 
-    /** A main() for this class. Starts up the server. */
-    public static void main(String[] args) throws Exception {
-        Wiser wiser = Wiser.create();
-        wiser.start();
-    }
 
     /** Always accept everything */
     public boolean accept(String from, String recipient) {
-        if (log.isDebugEnabled())
-            log.debug("Accepting mail from " + from + " to " + recipient);
-
-        return true;
+        return accepter.accept(from, recipient);
     }
 
     /** Cache the messages in memory */
@@ -125,15 +161,9 @@ public class Wiser implements SimpleMessageListener {
         if (log.isDebugEnabled())
             log.debug("Creating message from data with " + bytes.length + " bytes");
 
+        Session session = Session.getDefaultInstance(new Properties());
         // create a new WiserMessage.
-        this.messages.add(new WiserMessage(this, from, recipient, bytes));
-    }
-
-    /**
-     * Creates the JavaMail Session object for use in WiserMessage
-     */
-    protected Session getSession() {
-        return Session.getDefaultInstance(new Properties());
+        this.messages.add(new WiserMessage(session, from, recipient, bytes));
     }
 
     /**
@@ -166,5 +196,11 @@ public class Wiser implements SimpleMessageListener {
             wmsg.dumpMessage(out);
 
         out.println("----- End printing messages -----");
+    }
+    
+    /** A main() for this class. Starts up the server. */
+    public static void main(String[] args) throws Exception {
+        Wiser wiser = Wiser.create();
+        wiser.start();
     }
 }
