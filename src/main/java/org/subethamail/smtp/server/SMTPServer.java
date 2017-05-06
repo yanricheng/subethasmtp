@@ -221,7 +221,7 @@ public class SMTPServer implements SSLSocketCreator {
             return this;
         }
 
-        public Builder executor(ExecutorService executor) {
+        public Builder executorService(ExecutorService executor) {
             this.executorService = executor;
             return this;
         }

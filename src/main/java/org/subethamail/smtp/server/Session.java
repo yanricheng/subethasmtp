@@ -403,13 +403,6 @@ public class Session implements Runnable, MessageContext
 		this.helo = value;
 	}
 
-	/** @deprecated use {@link #isMailTransactionInProgress()} */
-	@Deprecated
-	public boolean getHasMailFrom()
-	{
-		return isMailTransactionInProgress();
-	}
-
 	/** */
 	public void addRecipient(String recipientAddress)
 	{
@@ -509,13 +502,6 @@ public class Session implements Runnable, MessageContext
 		this.recipientCount = 0;
 		this.singleRecipient = null;
 		this.declaredMessageSize = 0;
-	}
-	
-	/** @deprecated use {@link #resetMailTransaction()} */
-	@Deprecated
-	public void resetMessageState()
-	{
-		resetMailTransaction();
 	}
 	
 	/** Safely calls done() on a message hander, if one exists */

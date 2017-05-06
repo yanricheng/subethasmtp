@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Properties;
+import java.util.concurrent.Executors;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -76,6 +77,7 @@ public class StartTLSFullTest {
                 .requireTLS() //
                 .enableTLS() //
                 .messageHandlerFactory(mhf) //
+                .executorService(Executors.newSingleThreadExecutor()) //
                 .sslSocketCreator(tlsSocketCreator) //
                 .build();
         try {
