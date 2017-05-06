@@ -66,21 +66,19 @@ public class Wiser implements SimpleMessageListener {
     }
 
     protected Wiser(Builder builder) {
-        AtomicReference<Wiser> w = new AtomicReference<Wiser>();
         SimpleMessageListener s = new SimpleMessageListener() {
 
             @Override
             public boolean accept(String from, String recipient) {
-                return w.get().accept(from, recipient);
+                return Wiser.this.accept(from, recipient);
             }
 
             @Override
             public void deliver(String from, String recipient, InputStream data)
                     throws TooMuchDataException, IOException {
-                w.get().deliver(from, recipient, data);
+                Wiser.this.deliver(from, recipient, data);
             }
         };
-        w.set(this);
         this.server = builder.simpleMessageListener(s).build();
     }
 
