@@ -17,8 +17,9 @@ public class DotTerminatedInputStreamTest
 	public void testEmpty() throws IOException
 	{
 		InputStream in = new ByteArrayInputStream(".\r\n".getBytes("US-ASCII"));
-		DotTerminatedInputStream stream = new DotTerminatedInputStream(in);
-		assertEquals(-1, stream.read());
+	    try (DotTerminatedInputStream stream = new DotTerminatedInputStream(in)) {
+		    assertEquals(-1, stream.read());
+		}
 	}
 
 	@Test
