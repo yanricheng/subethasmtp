@@ -10,7 +10,7 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class QuitCommand extends BaseCommand
+public final class QuitCommand extends BaseCommand
 {
 	/** */
 	public QuitCommand()

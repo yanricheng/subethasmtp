@@ -14,7 +14,7 @@ import org.subethamail.smtp.util.EmailUtils;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class ReceiptCommand extends BaseCommand
+public final class ReceiptCommand extends BaseCommand
 {
 	/** */
 	public ReceiptCommand()

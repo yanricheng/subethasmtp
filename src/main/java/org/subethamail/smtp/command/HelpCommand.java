@@ -14,7 +14,7 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Scott Hernandez
  */
-public class HelpCommand extends BaseCommand
+public final class HelpCommand extends BaseCommand
 {
 	/** */
 	public HelpCommand()

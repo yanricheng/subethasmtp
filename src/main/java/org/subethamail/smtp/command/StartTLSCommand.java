@@ -18,7 +18,7 @@ import org.subethamail.smtp.server.Session;
  * @author Michael Wildpaner &lt;mike@wildpaner.com&gt;
  * @author Jeff Schnitzer
  */
-public class StartTLSCommand extends BaseCommand
+public final class StartTLSCommand extends BaseCommand
 {
 	private final static Logger log = LoggerFactory.getLogger(StartTLSCommand.class);
 

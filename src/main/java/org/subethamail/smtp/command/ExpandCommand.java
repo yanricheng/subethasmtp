@@ -9,7 +9,7 @@ import org.subethamail.smtp.server.Session;
  * 
  * @author Michele Zuccala < zuccala.m@gmail.com >
  */
-public class ExpandCommand extends BaseCommand 
+public final class ExpandCommand extends BaseCommand 
 {
 	/** */
 	public ExpandCommand() 

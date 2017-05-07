@@ -11,7 +11,7 @@ import org.subethamail.smtp.server.Session;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
-public class HelloCommand extends BaseCommand
+public final class HelloCommand extends BaseCommand
 {
 	/** */
 	public HelloCommand()

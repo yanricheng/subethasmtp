@@ -17,7 +17,7 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class DataCommand extends BaseCommand
+public final class DataCommand extends BaseCommand
 {
 	private final static int BUFFER_SIZE = 1024 * 32;	// 32k seems reasonable
 

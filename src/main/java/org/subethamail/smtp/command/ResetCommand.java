@@ -10,7 +10,7 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class ResetCommand extends BaseCommand
+public final class ResetCommand extends BaseCommand
 {
 	/** */
 	public ResetCommand()

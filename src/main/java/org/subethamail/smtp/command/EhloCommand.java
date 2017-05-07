@@ -14,7 +14,7 @@ import org.subethamail.smtp.util.TextUtils;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
-public class EhloCommand extends BaseCommand
+public final class EhloCommand extends BaseCommand
 {
 	/** */
 	public EhloCommand()

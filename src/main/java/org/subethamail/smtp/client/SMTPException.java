@@ -9,7 +9,7 @@ import org.subethamail.smtp.client.SMTPClient.Response;
  * indicates an error via the status code.
  */
 @SuppressWarnings("serial")
-public class SMTPException extends IOException
+public final class SMTPException extends IOException
 {
 	private final Response response;
 

@@ -15,7 +15,7 @@ import org.subethamail.smtp.util.EmailUtils;
  * @author Scott Hernandez
  * @author Jeff Schnitzer
  */
-public class MailCommand extends BaseCommand
+public final class MailCommand extends BaseCommand
 {
 	/** */
 	public MailCommand()

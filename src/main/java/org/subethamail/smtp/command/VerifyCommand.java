@@ -9,7 +9,7 @@ import org.subethamail.smtp.server.Session;
  * @author Ian McFarland &lt;ian@neo.com&gt;
  * @author Jon Stevens
  */
-public class VerifyCommand extends BaseCommand
+public final class VerifyCommand extends BaseCommand
 {
 	/** */
 	public VerifyCommand()

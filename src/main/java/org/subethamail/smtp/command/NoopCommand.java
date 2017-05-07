@@ -10,7 +10,7 @@ import org.subethamail.smtp.server.Session;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class NoopCommand extends BaseCommand
+public final class NoopCommand extends BaseCommand
 {
 	/** */
 	public NoopCommand()

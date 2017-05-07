@@ -15,7 +15,7 @@ import org.subethamail.smtp.server.Session;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
-public class AuthCommand extends BaseCommand
+public final class AuthCommand extends BaseCommand
 {
 
 	public static final String VERB = "AUTH";
