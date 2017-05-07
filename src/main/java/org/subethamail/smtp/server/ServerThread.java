@@ -22,7 +22,7 @@ import org.slf4j.MDC;
  * {@link Session} thread for each connection which will handle the connection.
  * On shutdown it terminates not only this thread, but the session threads too.
  */
-class ServerThread extends Thread
+final class ServerThread extends Thread
 {
 	private final Logger log = LoggerFactory.getLogger(ServerThread.class);
 	private final SMTPServer server;

@@ -28,7 +28,7 @@ import org.subethamail.smtp.io.CRLFTerminatedReader;
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public class Session implements Runnable, MessageContext
+public final class Session implements Runnable, MessageContext
 {
 	private final static Logger log = LoggerFactory.getLogger(Session.class);
 

@@ -19,7 +19,7 @@ import org.subethamail.smtp.DropConnectionException;
  * @author Jon Stevens
  * @author Scott Hernandez
  */
-public class CommandHandler
+public final class CommandHandler
 {
 	private final static Logger log = LoggerFactory.getLogger(CommandHandler.class);
 

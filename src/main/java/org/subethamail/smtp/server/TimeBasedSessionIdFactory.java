@@ -11,7 +11,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * it as necessary to make it unique.
  */
 @ThreadSafe
-public class TimeBasedSessionIdFactory implements SessionIdFactory {
+public final class TimeBasedSessionIdFactory implements SessionIdFactory {
 	@GuardedBy("this")
 	private long lastAllocatedId = 0;
 

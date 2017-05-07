@@ -13,7 +13,7 @@ import javax.mail.internet.MimeMessage;
  *
  * @author Jon Stevens
  */
-public class WiserMessage {
+public final class WiserMessage {
     private final byte[] messageData;
     private final Session session;
     private final String envelopeSender;

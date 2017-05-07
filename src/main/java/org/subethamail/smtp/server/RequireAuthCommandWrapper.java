@@ -10,7 +10,7 @@ import java.io.IOException;
  *
  * @author Evgeny Naumenko
  */
-public class RequireAuthCommandWrapper implements Command
+public  final class RequireAuthCommandWrapper implements Command
 {
 
     private final Command wrapped;

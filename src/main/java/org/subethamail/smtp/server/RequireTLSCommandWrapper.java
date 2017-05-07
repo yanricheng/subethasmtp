@@ -10,7 +10,7 @@ import org.subethamail.smtp.DropConnectionException;
  *
  * @author Erik van Oosten
  */
-public class RequireTLSCommandWrapper implements Command
+public final class RequireTLSCommandWrapper implements Command
 {
 
 	private final Command wrapped;

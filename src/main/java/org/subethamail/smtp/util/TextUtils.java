@@ -7,9 +7,14 @@ import java.util.Iterator;
 /**
  * @author Jeff Schnitzer
  */
-public class TextUtils
+public final class TextUtils
 {
-	/**
+    
+    private TextUtils() {
+        //prevent instantiation
+    }
+
+    /**
 	 * @return a delimited string containing the specified items
 	 */
 	public static String joinTogether(Collection<String> items, String delim)

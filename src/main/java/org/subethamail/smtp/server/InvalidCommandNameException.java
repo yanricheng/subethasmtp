@@ -4,7 +4,7 @@ package org.subethamail.smtp.server;
  * @author Ian McFarland &lt;ian@neo.com&gt;
  */
 @SuppressWarnings("serial")
-public class InvalidCommandNameException extends CommandException
+public final class InvalidCommandNameException extends CommandException
 {
 	/** */
 	public InvalidCommandNameException()
