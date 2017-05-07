@@ -34,10 +34,10 @@ import java.io.UnsupportedEncodingException;
  */
 public final class CRLFTerminatedReader extends Reader
 {
-	static int MAX_LINE_LENGTH = 998;
+	private static final int MAX_LINE_LENGTH = 998;
 
 	@SuppressWarnings("serial")
-	public class TerminationException extends IOException
+	public static final class TerminationException extends IOException
 	{
 		private int where;
 
@@ -60,7 +60,7 @@ public final class CRLFTerminatedReader extends Reader
 	}
 
 	@SuppressWarnings("serial")
-	public class MaxLineLengthException extends IOException
+	public static final class MaxLineLengthException extends IOException
 	{
 		public MaxLineLengthException()
 		{
