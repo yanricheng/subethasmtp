@@ -14,7 +14,7 @@ import java.io.OutputStream;
  *
  * @author Jeff Schnitzer
  */
-abstract public class ThresholdingOutputStream extends OutputStream
+abstract class ThresholdingOutputStream extends OutputStream
 {
 	/** */
 	protected OutputStream output;
@@ -29,7 +29,7 @@ abstract public class ThresholdingOutputStream extends OutputStream
 
 	/**
 	 */
-	public ThresholdingOutputStream(OutputStream base, int thresholdBytes)
+	ThresholdingOutputStream(OutputStream base, int thresholdBytes)
 	{
 		this.output = base;
 		this.threshold = thresholdBytes;
@@ -112,7 +112,7 @@ abstract public class ThresholdingOutputStream extends OutputStream
 	/**
 	 * @return the current threshold value.
 	 */
-	public int getThreshold()
+	int getThreshold()
 	{
 		return this.threshold;
 	}

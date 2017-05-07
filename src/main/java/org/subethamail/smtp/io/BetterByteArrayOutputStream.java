@@ -8,7 +8,7 @@ import java.io.InputStream;
  * Adds a getInputStream() method which does not need to make a copy of the
  * underlying array.
  */
-class BetterByteArrayOutputStream extends ByteArrayOutputStream {
+final class BetterByteArrayOutputStream extends ByteArrayOutputStream {
     BetterByteArrayOutputStream() {
     }
 

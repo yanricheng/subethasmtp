@@ -25,7 +25,7 @@ import java.io.InputStream;
  * Removes the dot-stuffing happening during the NNTP and SMTP message
  * transfer
  */
-public class DotUnstuffingInputStream extends FilterInputStream {
+public final class DotUnstuffingInputStream extends FilterInputStream {
 	/**
 	 * An array to hold the last two bytes read off the stream.
 	 * This allows the stream to detect '\r\n' sequences even

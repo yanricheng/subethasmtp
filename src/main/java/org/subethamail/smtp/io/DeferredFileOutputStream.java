@@ -24,7 +24,7 @@ import java.io.InputStream;
  *
  * @author Jeff Schnitzer
  */
-public class DeferredFileOutputStream extends ThresholdingOutputStream
+public final class DeferredFileOutputStream extends ThresholdingOutputStream
 {
 	/**
 	 * Initial size of the byte array buffer.  Better to make this

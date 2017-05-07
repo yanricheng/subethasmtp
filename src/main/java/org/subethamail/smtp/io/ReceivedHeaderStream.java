@@ -18,7 +18,7 @@ import org.subethamail.smtp.util.TextUtils;
 /**
  * Prepends a Received: header at the beginning of the input stream.
  */
-public class ReceivedHeaderStream extends FilterInputStream
+public final class ReceivedHeaderStream extends FilterInputStream
 {
 	ByteArrayInputStream header;
 

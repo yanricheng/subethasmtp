@@ -10,7 +10,7 @@ import java.io.OutputStream;
  *
  * See RFC 5321 4.1.1.4. second paragraph
  */
-public class DotTerminatedOutputStream extends OutputStream
+public final class DotTerminatedOutputStream extends OutputStream
 {
 	private static final byte[] DOT_CRLF = new byte[]{
 			'.', '\r', '\n'

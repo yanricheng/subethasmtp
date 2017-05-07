@@ -32,7 +32,7 @@ import java.io.UnsupportedEncodingException;
  * greater than or equal to MAX_LINE_LENGTH (998) which is defined
  * in <a href="http://rfc.net/rfc2822.html#s2.1.1.">RFC 2822</a>.
  */
-public class CRLFTerminatedReader extends Reader
+public final class CRLFTerminatedReader extends Reader
 {
 	static int MAX_LINE_LENGTH = 998;
 

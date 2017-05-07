@@ -8,7 +8,7 @@ import java.io.InputStream;
  * An InputStream class that terminates the stream when it encounters a US-ASCII
  * encoded dot CR LF byte sequence immediately following a CR LF line end.
  */
-public class DotTerminatedInputStream extends InputStream
+public final class DotTerminatedInputStream extends InputStream
 {
 	/**
 	 * The wrapped input stream.
