@@ -15,7 +15,7 @@ import org.subethamail.smtp.DropConnectionException;
  * @author Jeff Schnitzer
  * @author Scott Hernandez
  */
-abstract public class BaseCommand implements Command
+public abstract class BaseCommand implements Command
 {
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(BaseCommand.class);

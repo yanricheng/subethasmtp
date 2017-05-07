@@ -20,154 +20,142 @@ import org.subethamail.smtp.io.DeferredFileOutputStream;
 
 /**
  * MessageHandlerFactory implementation which adapts to a collection of
- * MessageListeners.  This allows us to preserve the old, convenient
- * interface.
+ * MessageListeners. This allows us to preserve the old, convenient interface.
  *
  * @author Jeff Schnitzer
  */
-public class SimpleMessageListenerAdapter implements MessageHandlerFactory
-{
-	/**
-	 * 5 megs by default. The server will buffer incoming messages to disk
-	 * when they hit this limit in the DATA received.
-	 */
-	private static final int DEFAULT_DATA_DEFERRED_SIZE = 1024*1024*5;
+public final class SimpleMessageListenerAdapter implements MessageHandlerFactory {
+    /**
+     * 5 megs by default. The server will buffer incoming messages to disk when
+     * they hit this limit in the DATA received.
+     */
+    private static final int DEFAULT_DATA_DEFERRED_SIZE = 1024 * 1024 * 5;
 
-	private final Collection<SimpleMessageListener> listeners;
-	private final int dataDeferredSize;
+    private final Collection<SimpleMessageListener> listeners;
+    private final int dataDeferredSize;
 
-	/**
-	 * Initializes this factory with a single listener.
-	 *
-	 * Default data deferred size is 5 megs.
-	 */
-	public SimpleMessageListenerAdapter(SimpleMessageListener listener)
-	{
-		this(Collections.singleton(listener), DEFAULT_DATA_DEFERRED_SIZE);
-	}
+    /**
+     * Initializes this factory with a single listener.
+     *
+     * Default data deferred size is 5 megs.
+     */
+    public SimpleMessageListenerAdapter(SimpleMessageListener listener) {
+        this(Collections.singleton(listener), DEFAULT_DATA_DEFERRED_SIZE);
+    }
 
-	/**
-	 * Initializes this factory with the listeners.
-	 *
-	 * Default data deferred size is 5 megs.
-	 */
-	public SimpleMessageListenerAdapter(Collection<SimpleMessageListener> listeners)
-	{
-		this(listeners, DEFAULT_DATA_DEFERRED_SIZE);
-	}
+    /**
+     * Initializes this factory with the listeners.
+     *
+     * Default data deferred size is 5 megs.
+     */
+    public SimpleMessageListenerAdapter(Collection<SimpleMessageListener> listeners) {
+        this(listeners, DEFAULT_DATA_DEFERRED_SIZE);
+    }
 
-	/**
-	 * Initializes this factory with the listeners.
-	 * @param dataDeferredSize The server will buffer
-	 *        incoming messages to disk when they hit this limit in the
-	 *        DATA received.
-	 */
-	public SimpleMessageListenerAdapter(Collection<SimpleMessageListener> listeners, int dataDeferredSize)
-	{
-		this.listeners = listeners;
-		this.dataDeferredSize = dataDeferredSize;
-	}
+    /**
+     * Initializes this factory with the listeners.
+     * 
+     * @param dataDeferredSize
+     *            The server will buffer incoming messages to disk when they hit
+     *            this limit in the DATA received.
+     */
+    public SimpleMessageListenerAdapter(Collection<SimpleMessageListener> listeners, int dataDeferredSize) {
+        this.listeners = listeners;
+        this.dataDeferredSize = dataDeferredSize;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.MessageContext)
-	 */
-	public MessageHandler create(MessageContext ctx)
-	{
-		return new Handler(ctx);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.
+     * MessageContext)
+     */
+    public MessageHandler create(MessageContext ctx) {
+        return new Handler(ctx);
+    }
 
-	/**
-	 * Needed by this class to track which listeners need delivery.
-	 */
-	static class Delivery
-	{
-		SimpleMessageListener listener;
-		public SimpleMessageListener getListener() { return this.listener; }
+    /**
+     * Needed by this class to track which listeners need delivery.
+     */
+    static class Delivery {
+        private final SimpleMessageListener listener;
 
-		String recipient;
-		public String getRecipient() { return this.recipient; }
+        SimpleMessageListener getListener() {
+            return this.listener;
+        }
 
-		public Delivery(SimpleMessageListener listener, String recipient)
-		{
-			this.listener = listener;
-			this.recipient = recipient;
-		}
-	}
+        private final String recipient;
 
-	/**
-	 * Class which implements the actual handler interface.
-	 */
-	class Handler implements MessageHandler
-	{
-		final MessageContext ctx;
-		String from;
-		List<Delivery> deliveries = new ArrayList<Delivery>();
+        String getRecipient() {
+            return this.recipient;
+        }
 
-		/** */
-		public Handler(MessageContext ctx)
-		{
-			this.ctx = ctx;
-		}
+        Delivery(SimpleMessageListener listener, String recipient) {
+            this.listener = listener;
+            this.recipient = recipient;
+        }
+    }
 
-		/** */
-		public void from(String from) throws RejectException
-		{
-			this.from = from;
-		}
+    /**
+     * Class which implements the actual handler interface.
+     */
+    class Handler implements MessageHandler {
+        final MessageContext ctx;
+        String from;
+        List<Delivery> deliveries = new ArrayList<Delivery>();
 
-		/** */
-		public void recipient(String recipient) throws RejectException
-		{
-			boolean addedListener = false;
+        /** */
+        public Handler(MessageContext ctx) {
+            this.ctx = ctx;
+        }
 
-			for (SimpleMessageListener listener: SimpleMessageListenerAdapter.this.listeners)
-			{
-				if (listener.accept(this.from, recipient))
-				{
-					this.deliveries.add(new Delivery(listener, recipient));
-					addedListener = true;
-				}
-			}
+        /** */
+        public void from(String from) throws RejectException {
+            this.from = from;
+        }
 
-			if (!addedListener)
-				throw new RejectException(553, "<" + recipient + "> address unknown.");
-		}
+        /** */
+        public void recipient(String recipient) throws RejectException {
+            boolean addedListener = false;
 
-		/** */
-		public void data(InputStream data) throws TooMuchDataException, IOException
-		{
-			if (this.deliveries.size() == 1)
-			{
-				Delivery delivery = this.deliveries.get(0);
-				delivery.getListener().deliver(this.from, delivery.getRecipient(), data);
-			}
-			else
-			{
-				DeferredFileOutputStream dfos = new DeferredFileOutputStream(SimpleMessageListenerAdapter.this.dataDeferredSize);
+            for (SimpleMessageListener listener : SimpleMessageListenerAdapter.this.listeners) {
+                if (listener.accept(this.from, recipient)) {
+                    this.deliveries.add(new Delivery(listener, recipient));
+                    addedListener = true;
+                }
+            }
 
-				try
-				{
-					int value;
-					while ((value = data.read()) >= 0)
-					{
-						dfos.write(value);
-					}
+            if (!addedListener)
+                throw new RejectException(553, "<" + recipient + "> address unknown.");
+        }
 
-					for (Delivery delivery: this.deliveries)
-					{
-						delivery.getListener().deliver(this.from, delivery.getRecipient(), dfos.getInputStream());
-					}
-				}
-				finally
-				{
-					dfos.close();
-				}
-			}
-		}
+        /** */
+        public void data(InputStream data) throws TooMuchDataException, IOException {
+            if (this.deliveries.size() == 1) {
+                Delivery delivery = this.deliveries.get(0);
+                delivery.getListener().deliver(this.from, delivery.getRecipient(), data);
+            } else {
+                DeferredFileOutputStream dfos = new DeferredFileOutputStream(
+                        SimpleMessageListenerAdapter.this.dataDeferredSize);
 
-		/** */
-		public void done()
-		{
-		}
-	}
+                try {
+                    int value;
+                    while ((value = data.read()) >= 0) {
+                        dfos.write(value);
+                    }
+
+                    for (Delivery delivery : this.deliveries) {
+                        delivery.getListener().deliver(this.from, delivery.getRecipient(), dfos.getInputStream());
+                    }
+                } finally {
+                    dfos.close();
+                }
+            }
+        }
+
+        /** */
+        public void done() {
+        }
+    }
 }
