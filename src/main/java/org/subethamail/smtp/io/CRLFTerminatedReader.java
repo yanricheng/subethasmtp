@@ -97,8 +97,8 @@ public final class CRLFTerminatedReader extends Reader
 		this(in);
 	}
 
-	private StringBuffer lineBuffer = new StringBuffer();
-	private final int
+	private final StringBuffer lineBuffer = new StringBuffer();
+	private final static int
 			EOF = -1,
 			CR  = 13,
 			LF  = 10;

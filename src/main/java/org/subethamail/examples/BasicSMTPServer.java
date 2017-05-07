@@ -23,14 +23,12 @@ public final class BasicSMTPServer {
     static final class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
         public MessageHandler create(MessageContext ctx) {
-            return new Handler(ctx);
+            return new Handler();
         }
 
-        class Handler implements MessageHandler {
-            MessageContext ctx;
+        static class Handler implements MessageHandler {
 
-            public Handler(MessageContext ctx) {
-                this.ctx = ctx;
+            public Handler() {
             }
 
             public void from(String from) throws RejectException {
