@@ -72,7 +72,7 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 
 	/**
 	 */
-	class Handler implements AuthenticationHandler
+	final class Handler implements AuthenticationHandler
 	{
 		AuthenticationHandler active;
 

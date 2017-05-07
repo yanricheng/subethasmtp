@@ -18,7 +18,7 @@ import org.subethamail.smtp.RejectException;
  * @author Jeff Schnitzer
  * @author Ian White <ibwhite@gmail.com>
  */
-public class PlainAuthenticationHandlerFactory implements AuthenticationHandlerFactory
+public final class PlainAuthenticationHandlerFactory implements AuthenticationHandlerFactory
 {
 	private static final List<String> MECHANISMS = new ArrayList<String>(1);
 	static {

@@ -30,7 +30,7 @@ import org.subethamail.smtp.util.TextUtils;
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
  * @author Jeff Schnitzer
  */
-public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory
+public final class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory
 {
 	private static final List<String> MECHANISMS = new ArrayList<String>(1);
 	static {
@@ -59,10 +59,9 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 
 	/**
 	 */
-	class Handler implements AuthenticationHandler
+	final class Handler implements AuthenticationHandler
 	{
 		private String username;
-		private String password;
 
 		@Override
 		public String auth(String clientInput) throws RejectException
@@ -122,10 +121,10 @@ public class LoginAuthenticationHandlerFactory implements AuthenticationHandlerF
 						"Invalid command argument, not a valid Base64 string");
 			}
 
-			this.password = TextUtils.getStringUtf8(decoded);
+			String password = TextUtils.getStringUtf8(decoded);
 			try
 			{
-				LoginAuthenticationHandlerFactory.this.helper.login(this.username, this.password);
+				LoginAuthenticationHandlerFactory.this.helper.login(this.username, password);
 			}
 			catch (LoginFailedException lfe)
 			{

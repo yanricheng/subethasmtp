@@ -8,7 +8,7 @@ package org.subethamail.smtp.auth;
  *
  * @author Jeff Schnitzer
  */
-public class EasyAuthenticationHandlerFactory extends MultipleAuthenticationHandlerFactory
+public final class EasyAuthenticationHandlerFactory extends MultipleAuthenticationHandlerFactory
 {
 	/** Just hold on to this so that the caller can get it later, if necessary */
 	private final UsernamePasswordValidator validator;

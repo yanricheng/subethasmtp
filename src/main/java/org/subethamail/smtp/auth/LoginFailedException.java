@@ -6,7 +6,7 @@ package org.subethamail.smtp.auth;
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
  */
 @SuppressWarnings("serial")
-public class LoginFailedException extends Exception
+public final class LoginFailedException extends Exception
 {
 
 	/** Creates a new instance of LoginFailedException */

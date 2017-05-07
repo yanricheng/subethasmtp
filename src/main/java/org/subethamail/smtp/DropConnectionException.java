@@ -11,7 +11,7 @@ package org.subethamail.smtp;
  * @author Jeff Schnitzer
  */
 @SuppressWarnings("serial")
-public class DropConnectionException extends RejectException
+public final class DropConnectionException extends RejectException
 {
 	int code;
 

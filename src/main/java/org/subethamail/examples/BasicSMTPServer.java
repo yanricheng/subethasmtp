@@ -9,14 +9,9 @@ import java.io.InputStreamReader;
 
 import org.subethamail.smtp.server.SMTPServer;
 
-public class BasicSMTPServer {
+public final class BasicSMTPServer {
 
     static int defaultListenPort = 25000;
-
-    public static void main(String[] args) {
-        new BasicSMTPServer().start(defaultListenPort);
-        System.out.println("Server running!");
-    }
 
     void start(int listenPort) {
         BasicMessageHandlerFactory myFactory = new BasicMessageHandlerFactory();
@@ -25,7 +20,7 @@ public class BasicSMTPServer {
         smtpServer.start();
     }
 
-    public class BasicMessageHandlerFactory implements MessageHandlerFactory {
+    static final class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
         public MessageHandler create(MessageContext ctx) {
             return new Handler(ctx);
@@ -75,4 +70,8 @@ public class BasicSMTPServer {
         }
     }
 
+    public static void main(String[] args) {
+        new BasicSMTPServer().start(defaultListenPort);
+        System.out.println("Server running!");
+    }
 }

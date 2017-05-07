@@ -14,7 +14,7 @@ import java.util.Set;
  * @see <a href="http://tools.ietf.org/html/rfc4616">RFC 4616: The PLAIN Simple
  *      Authentication and Security Layer (SASL) Mechanism</a>
  */
-public class PlainAuthenticator implements Authenticator {
+public final class PlainAuthenticator implements Authenticator {
     private final String user;
     private final String password;
     private final SmartClient smartClient;

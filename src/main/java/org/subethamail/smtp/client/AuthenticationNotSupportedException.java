@@ -7,7 +7,7 @@ import java.io.IOException;
  * authentication mechanism exists which is supported by both the server and the
  * client.
  */
-public class AuthenticationNotSupportedException extends IOException {
+public final class AuthenticationNotSupportedException extends IOException {
 	private static final long serialVersionUID = 4269158574227243089L;
 
 	public AuthenticationNotSupportedException(String message) {
