@@ -176,7 +176,7 @@ public class StartTLSFullTest {
         message.setRecipients(Message.RecipientType.TO, toAddresses);
 
         // Set Subject: header field
-        message.setSubject("Testing Subject");
+        message.setSubject("Testing Subject "  + "\u2191");
 
         // Create the message part
         BodyPart messageBodyPart = new MimeBodyPart();
@@ -194,7 +194,7 @@ public class StartTLSFullTest {
         messageBodyPart = new MimeBodyPart();
         DataSource source = new FileDataSource(new File("src/test/resources/man.png"));
         messageBodyPart.setDataHandler(new DataHandler(source));
-        messageBodyPart.setFileName("man.png");
+        messageBodyPart.setFileName("man" +  "\u2191" + ".png");
         multipart.addBodyPart(messageBodyPart);
 
         // Send the complete message parts

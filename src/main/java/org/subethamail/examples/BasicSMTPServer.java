@@ -51,7 +51,7 @@ public final class BasicSMTPServer {
             }
 
             public String convertStreamToString(InputStream is) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, Constants.SMTP_CHARSET));
                 StringBuilder sb = new StringBuilder();
 
                 String line = null;

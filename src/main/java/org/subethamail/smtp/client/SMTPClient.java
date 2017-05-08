@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.Constants;
 import org.subethamail.smtp.io.DotTerminatedOutputStream;
 import org.subethamail.smtp.io.ExtraDotOutputStream;
 
@@ -160,7 +161,7 @@ public class SMTPClient
 		{
 			this.bindpoint = this.socket.getLocalSocketAddress();
 
-			this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+			this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream(), Constants.SMTP_CHARSET));
 
 			this.rawOutput = this.socket.getOutputStream();
 			this.dotTerminatedOutput = new DotTerminatedOutputStream(this.rawOutput);
