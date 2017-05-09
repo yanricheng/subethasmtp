@@ -19,6 +19,7 @@ import org.subethamail.smtp.client.SMTPClient.Response;
  *
  * @author Jeff Schnitzer
  */
+// not final so can mock with Mockito
 public class SmartClient  {
     /** */
     private static final Logger log = LoggerFactory.getLogger(SmartClient.class);
