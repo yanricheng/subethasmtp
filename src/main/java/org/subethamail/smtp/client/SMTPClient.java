@@ -36,7 +36,9 @@ public final class SMTPClient
 	private static Logger log = LoggerFactory.getLogger(SMTPClient.class);
 
 	/** the local socket address */
-	private SocketAddress bindpoint;
+	private final SocketAddress bindpoint;
+	
+	private volatile SocketAddress localSocketAddress;
 	
 	/**
 	 * True if the client has been successfully connected to the server and not
@@ -156,7 +158,7 @@ public final class SMTPClient
 
 		try
 		{
-			this.bindpoint = this.socket.getLocalSocketAddress();
+			this.localSocketAddress = this.socket.getLocalSocketAddress();
 
 			this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream(), Constants.SMTP_CHARSET));
 
@@ -322,9 +324,9 @@ public final class SMTPClient
 	/**
 	 * Returns the local socket address.
 	 */
-	public SocketAddress getBindpoint()
+	public SocketAddress getLocalSocketAddress()
 	{
-		return bindpoint;
+		return localSocketAddress;
 	}
 
 	/**
