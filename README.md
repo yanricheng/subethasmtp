@@ -26,7 +26,7 @@ Use this maven dependency:
 <dependency>
     <groupId>com.github.davidmoten</groupId>
     <artifactId>subethasmtp</artifactId>
-    <version>3.1.9-RC1</version>
+    <version>4.0-RC1</version>
 </dependency>
 ```
 
@@ -76,6 +76,9 @@ Dave Moten came across this and
 * `Wiser` now created with builder pattern (disallowed inheritance and added `accepter` builder method)
 * use composition instead of inheritance in `SmartClient`
 * use static factory method for `SmartClient` so that references don't escape the constructor (connect was called from the constructor)
+* use explicit character set with `InputStreamReader` (US_ASCII) in `SMTPClient` and `SmartClient`
+* use `java.util.Optional` and `Preconditions` in `SmartClient`, `SMTPClient` and `SMTPServer`
+
 
 ## Project Authors ##
 Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.
