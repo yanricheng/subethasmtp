@@ -97,14 +97,6 @@ public class SMTPClient
 	}
 
 	/**
-	 * Creates an unconnected client.
-	 */
-	public SMTPClient()
-	{
-		// nothing to do
-	}
-
-	/**
 	 * Establishes a connection to host and port.
 	 * 
 	 * @throws UnknownHostException

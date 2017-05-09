@@ -52,14 +52,6 @@ public class SmartClient extends SMTPClient
 	private Authenticator authenticator = null;
 
 	/**
-	 * Creates an unconnected client.
-	 */
-	public SmartClient()
-	{
-		// nothing to do
-	}
-	
-	/**
 	 * Connects to the specified server and issues the initial HELO command.
 	 * 
 	 * @throws UnknownHostException if problem looking up hostname
