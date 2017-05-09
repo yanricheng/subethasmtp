@@ -104,9 +104,9 @@ public class SMTPClient
 	 * @throws IOException
 	 *             if there is a problem connecting to the port
 	 */
-	public SMTPClient(String host, int port) throws UnknownHostException, IOException
+	public SMTPClient() throws UnknownHostException, IOException
 	{
-		this(host, port, null);
+		this(null);
 	}
 
 	/**
@@ -121,10 +121,15 @@ public class SMTPClient
 	 * @throws IOException
 	 *             if there is a problem connecting to the port
 	 */
-	public SMTPClient(String host, int port, SocketAddress bindpoint) throws UnknownHostException, IOException
+	public SMTPClient(SocketAddress bindpoint) throws UnknownHostException, IOException
 	{
 		this.bindpoint = bindpoint;
-		connect(host, port);
+	}
+	
+	public static SMTPClient createAndConnect(String host, int port) throws UnknownHostException, IOException {
+	    SMTPClient client = new SMTPClient(null);
+	    client.connect(host, port);
+	    return client;
 	}
 
 	/**
@@ -312,15 +317,6 @@ public class SMTPClient
 	public String toString()
 	{
 		return this.getClass().getSimpleName() + " { " + this.hostPort + "}";
-	}
-
-	/**
-	 * Sets the local socket address. If null, the system will pick up an
-	 * ephemeral port and a valid local address. Default is null.
-	 */
-	public void setBindpoint(SocketAddress bindpoint)
-	{
-		this.bindpoint = bindpoint;
 	}
 
 	/**

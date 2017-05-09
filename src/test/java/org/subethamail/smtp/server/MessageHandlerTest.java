@@ -36,7 +36,7 @@ public class MessageHandlerTest {
         Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
-            SmartClient client = new SmartClient("localhost", server.getPort(), "localhost");
+            SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
             client.from("john@example.com");
             client.to("jane@example.com");
             client.dataStart();
@@ -60,7 +60,7 @@ public class MessageHandlerTest {
         MessageHandlerFactory f = Mockito.mock(MessageHandlerFactory.class);
         SMTPServer server = create(f);
         try {
-            SmartClient client = new SmartClient("localhost", server.getPort(), "localhost");
+            SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
             client.quit();
         } finally {
             server.stop();
@@ -75,7 +75,7 @@ public class MessageHandlerTest {
         Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
-            SmartClient client = new SmartClient("localhost", server.getPort(), "localhost");
+            SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
             client.from("john@example.com");
             client.quit();
         } finally {
@@ -96,7 +96,7 @@ public class MessageHandlerTest {
         Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
-            SmartClient client = new SmartClient("localhost", server.getPort(), "localhost");
+            SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
 
             client.from("john1@example.com");
             client.to("jane1@example.com");
@@ -146,7 +146,7 @@ public class MessageHandlerTest {
         Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
-            SmartClient client = new SmartClient("localhost", server.getPort(), "localhost");
+            SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
             try {
                 client.from("john1@example.com");
                 Assert.fail();

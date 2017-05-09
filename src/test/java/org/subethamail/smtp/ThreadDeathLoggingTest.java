@@ -50,7 +50,7 @@ public class ThreadDeathLoggingTest
 		smtpServer.start();
 		try
 		{
-			SmartClient client = new SmartClient("localhost", smtpServer.getPort(), "test-client.example.org");
+			SmartClient client = SmartClient.createAndConnect("localhost", smtpServer.getPort(), "test-client.example.org");
 			client.from("john@exmaple.com");
 			client.to("jane@example.org");
 			client.quit();

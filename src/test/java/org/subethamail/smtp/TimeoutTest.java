@@ -27,7 +27,7 @@ public class TimeoutTest {
 		Wiser wiser = Wiser.create(SMTPServer.port(PORT).connectionTimeoutMs(1000));
 		wiser.start();
 
-		SMTPClient client = new SMTPClient("localhost", PORT);
+		SMTPClient client = SMTPClient.createAndConnect("localhost", PORT);
 		client.sendReceive("HELO foo");
 		Thread.sleep(2000);
 		try {
