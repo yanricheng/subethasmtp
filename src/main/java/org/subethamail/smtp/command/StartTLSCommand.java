@@ -73,7 +73,7 @@ public final class StartTLSCommand extends BaseCommand
 				}
 				catch (SSLPeerUnverifiedException e)
 				{
-					// IGNORE, just leave the certificate chain null
+					// IGNORE, just leave the certificate chain empty
 				}
 			}
 		}

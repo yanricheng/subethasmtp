@@ -95,7 +95,7 @@ public final class Session implements Runnable, MessageContext
 
 	/** Some more state information */
 	private boolean tlsStarted;
-	private Optional<Certificate[]> tlsPeerCertificates;
+	private Optional<Certificate[]> tlsPeerCertificates = Optional.empty();
 
 	/**
 	 * Creates the Runnable Session object.
