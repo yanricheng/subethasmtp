@@ -73,7 +73,7 @@ public final class SMTPClient
 	/**
 	 * Result of an SMTP exchange.
 	 */
-	public static class Response
+	public static final class Response
 	{
 		int code;
 		String message;
