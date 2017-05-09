@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.client.SMTPClient.Response;
 
+import com.github.davidmoten.guavamini.Preconditions;
+
 /**
  * A somewhat smarter abstraction of an SMTP client which doesn't require
  * knowing anything about the nitty gritty of SMTP.
@@ -20,7 +22,7 @@ import org.subethamail.smtp.client.SMTPClient.Response;
  * @author Jeff Schnitzer
  */
 // not final so can mock with Mockito
-public class SmartClient  {
+public class SmartClient {
     /** */
     private static final Logger log = LoggerFactory.getLogger(SmartClient.class);
 
@@ -28,7 +30,7 @@ public class SmartClient  {
     private boolean sentFrom;
     int recipientCount;
     /** The host name which is sent in the HELO and EHLO commands */
-    private String heloHost;
+    private final String heloHost;
 
     /**
      * True if the server sent a 421
@@ -50,9 +52,9 @@ public class SmartClient  {
      * If supplied (not null), then it will be called after EHLO, to
      * authenticate this client to the server.
      */
-    private Authenticator authenticator = null;
+    private final Authenticator authenticator;
 
-    private SMTPClient client;
+    private final SMTPClient client;
 
     /**
      * Connects to the specified server and issues the initial HELO command.
@@ -64,37 +66,47 @@ public class SmartClient  {
      * @throws IOException
      *             if problem communicating with host
      */
-    private SmartClient(String myHost)
-            throws UnknownHostException, IOException, SMTPException {
-        this(null, myHost);
+    private SmartClient(String myHost) throws UnknownHostException, IOException, SMTPException {
+        this(null, myHost, null);
     }
-    
+
     /**
-     * Connects to the specified server and issues the initial HELO command.
+     * Constructor.
      * 
+     * @param bindpoint
+     * @param clientHeloHost
+     * @param authenticator
+     *            the Authenticator object which will be called after the EHLO
+     *            command to authenticate this client to the server. If is null
+     *            then no authentication will happen.
      * @throws UnknownHostException
      *             if problem looking up hostname
-     * @throws SMTPException
-     *             if problem reported by the server
      * @throws IOException
      *             if problem communicating with host
+     * @throws SMTPException
+     *             if problem reported by the server
      */
-    private SmartClient(SocketAddress bindpoint, String myHost)
+    private SmartClient(SocketAddress bindpoint, String clientHeloHost, Authenticator authenticator)
             throws UnknownHostException, IOException, SMTPException {
-        client = new SMTPClient(bindpoint);
-        this.setHeloHost(myHost);
+        Preconditions.checkNotNull(clientHeloHost, "clientHeloHost is required");
+        this.client = new SMTPClient(bindpoint);
+        this.heloHost = clientHeloHost;
+        this.authenticator = authenticator;
     }
-   
-    public final static SmartClient createAndConnect(String host, int port, String myHost) throws UnknownHostException, SMTPException, IOException {
-        return createAndConnect(host, port, null, myHost);
+
+    public final static SmartClient createAndConnect(String host, int port, String clientHeloHost)
+            throws UnknownHostException, SMTPException, IOException {
+        return createAndConnect(host, port, null, clientHeloHost, null);
     }
-    
-    public final static SmartClient createAndConnect(String host, int port, SocketAddress bindpoint, String myHost) throws UnknownHostException, SMTPException, IOException {
-        SmartClient client = new SmartClient(bindpoint, myHost);
+
+    public final static SmartClient createAndConnect(String host, int port, SocketAddress bindpoint,
+            String clientHeloHost, Authenticator authenticator)
+                    throws UnknownHostException, SMTPException, IOException {
+        SmartClient client = new SmartClient(bindpoint, clientHeloHost, authenticator);
         client.connect(host, port);
         return client;
     }
-    
+
     /**
      * Connects to the specified server and issues the initial HELO command. It
      * gracefully closes the connection if it could be established but
@@ -102,9 +114,6 @@ public class SmartClient  {
      */
     public void connect(String host, int port)
             throws SMTPException, AuthenticationNotSupportedException, IOException {
-        if (heloHost == null)
-            throw new IllegalStateException("Helo host must be specified before connecting");
-
         client.connect(host, port);
         try {
             client.receiveAndCheck(); // The server announces itself first
@@ -118,7 +127,8 @@ public class SmartClient  {
             this.quit();
             throw e;
         } catch (IOException e) {
-            client.close(); // just close the socket, issuing QUIT is hopeless now
+            client.close(); // just close the socket, issuing QUIT is hopeless
+                            // now
             throw e;
         }
     }
@@ -259,15 +269,6 @@ public class SmartClient  {
     }
 
     /**
-     * Sets the domain name or address literal of this system, which name will
-     * be sent to the server in the parameter of the HELO and EHLO commands.
-     * This has no default and is required.
-     */
-    public void setHeloHost(String myHost) {
-        this.heloHost = myHost;
-    }
-
-    /**
      * Returns the HELO name of this system.
      */
     public String getHeloHost() {
@@ -280,15 +281,6 @@ public class SmartClient  {
      */
     public Authenticator getAuthenticator() {
         return authenticator;
-    }
-
-    /**
-     * Sets the Authenticator object which will be called after the EHLO command
-     * to authenticate this client to the server. The default is that no
-     * authentication will happen.
-     */
-    public void setAuthenticator(Authenticator authenticator) {
-        this.authenticator = authenticator;
     }
 
     public void sendAndCheck(String msg) throws SMTPException, IOException {
