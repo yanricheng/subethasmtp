@@ -28,7 +28,7 @@ import com.github.davidmoten.guavamini.Preconditions;
  * Main SMTPServer class. Construct this object, set the hostName, port, and
  * bind address if you wish to override the defaults, and call start().
  *
- * This class starts opens a ServerSocket and creates a new instance of the
+ * This class starts a ServerSocket and creates a new instance of the
  * ConnectionHandler class when a new connection comes in. The ConnectionHandler
  * then parses the incoming SMTP stream and hands off the processing to the
  * CommandHandler which will execute the appropriate SMTP command class.
@@ -39,7 +39,7 @@ import com.github.davidmoten.guavamini.Preconditions;
  * pass in a org.subethamail.smtp.helper.SimpleMessageListenerAdapter.
  *
  * By default, no authentication methods are offered. To use authentication, set
- * an AuthenticationHandlerFactory.
+ * an {@link AuthenticationHandlerFactory}.
  *
  * @author Jon Stevens
  * @author Ian McFarland &lt;ian@neo.com&gt;
