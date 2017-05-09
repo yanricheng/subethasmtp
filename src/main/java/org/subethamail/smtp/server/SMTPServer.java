@@ -72,6 +72,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
     /** If true, a TLS handshake is required; ignored if enableTLS=false */
     private final boolean requireTLS;
+
     /**
      * If true, this server will accept no mail until auth succeeded; ignored if
      * no AuthenticationHandlerFactory has been set
@@ -347,10 +348,13 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
+         * Sets whether authentication is required. If set to true then no mail
+         * will be accepted till authentication succeeds.
+         * 
          * @param requireAuth
          *            true for mandatory smtp authentication, i.e. no mail mail
          *            be accepted until authentication succeeds. Don't forget to
-         *            set AuthenticationHandlerFactory to allow client
+         *            set {@code authenticationHandlerFactory} to allow client
          *            authentication. Defaults to false.
          */
         public Builder requireAuth(boolean value) {
@@ -446,6 +450,8 @@ public final class SMTPServer implements SSLSocketCreator {
             int maxConnections, int connectionTimeout, int maxRecipients, int maxMessageSize,
             SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator) {
         Preconditions.checkNotNull(messageHandlerFactory);
+        Preconditions.checkArgument(!requireAuth || authenticationHandlerFactory != null,
+                "if requireAuth is set to true then you must specify an authenticationHandlerFactory");
         this.bindAddress = bindAddress;
         this.port = port;
         this.backlog = backlog;
