@@ -51,7 +51,8 @@ public final class SMTPServer implements SSLSocketCreator {
     /** Hostname used if we can't find one */
     private final static String UNKNOWN_HOSTNAME = "localhost";
 
-    private final Optional<InetAddress> bindAddress; // default to all interfaces
+    private final Optional<InetAddress> bindAddress; // default to all
+                                                     // interfaces
     private final int port; // default to 25
     private final String hostName; // defaults to a lookup of the local address
     private final int backlog;
@@ -132,7 +133,9 @@ public final class SMTPServer implements SSLSocketCreator {
 
     public static final class Builder {
         private String hostName;
-        private Optional<InetAddress> bindAddress = Optional.empty(); // default to all interfaces
+        private Optional<InetAddress> bindAddress = Optional.empty(); // default
+                                                                      // to all
+                                                                      // interfaces
         private int port = 25; // default to 25
         private int backlog = 50;
         private String softwareName = "SubEthaSMTP " + Version.getSpecification();
@@ -194,13 +197,13 @@ public final class SMTPServer implements SSLSocketCreator {
             this.bindAddress = Optional.of(bindAddress);
             return this;
         }
-        
+
         public Builder bindAddress(Optional<InetAddress> bindAddress) {
             Preconditions.checkNotNull(bindAddress, "bindAddress cannot be null");
             this.bindAddress = bindAddress;
             return this;
         }
-        
+
         public Builder hostName(String hostName) {
             Preconditions.checkNotNull(hostName);
             this.hostName = hostName;
@@ -212,8 +215,18 @@ public final class SMTPServer implements SSLSocketCreator {
             return this;
         }
 
+        /**
+         * Sets the Socket backlog (?).
+         *
+         * @param backlogSize
+         *            The backlog argument must be a positive value greater than
+         *            0. If the value passed if equal or less than 0, then the
+         *            default value will be assumed.
+         *
+         * @return this
+         */
         public Builder backlog(int backlogSize) {
-            Preconditions.checkArgument(backlogSize>=0);
+            Preconditions.checkArgument(backlogSize >= 0);
             this.backlog = backlogSize;
             return this;
         }
@@ -235,12 +248,38 @@ public final class SMTPServer implements SSLSocketCreator {
             return this;
         }
 
+        /**
+         * Sets authenticationHandlerFactory.
+         * 
+         * @param factory
+         *            the {@link AuthenticationHandlerFactory} which performs
+         *            authentication in the SMTP AUTH command. If empty,
+         *            authentication is not supported. Note that setting an
+         *            authentication handler does not enforce authentication, it
+         *            only makes authentication possible. Enforcing
+         *            authentication is the responsibility of the client
+         *            application, which usually enforces it only selectively.
+         *            Use {@link Session#isAuthenticated} to check whether the
+         *            client was authenticated in the session.
+         * @return this
+         */
         public Builder authenticationHandlerFactory(AuthenticationHandlerFactory factory) {
             Preconditions.checkNotNull(factory);
             this.authenticationHandlerFactory = Optional.of(factory);
             return this;
         }
 
+        /**
+         * Sets the executor service that will handle client connections.
+         * 
+         * @param executor
+         *            the ExecutorService that will handle client connections,
+         *            one task per connection. The SMTPServer will shut down
+         *            this ExecutorService when the SMTPServer itself stops. If
+         *            not specified, a default one is created by
+         *            {@link Executors#newCachedThreadPool()}.
+         * @return this
+         */
         public Builder executorService(ExecutorService executor) {
             Preconditions.checkNotNull(executor);
             this.executorService = Optional.of(executor);
@@ -369,20 +408,20 @@ public final class SMTPServer implements SSLSocketCreator {
 
         public SMTPServer build() {
             return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
-                    authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS,
-                    requireAuth, disableReceivedHeaders, maxConnections, connectionTimeout,
-                    maxRecipients, maxMessageSize, sessionIdFactory, sslSocketCreator);
+                    authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
+                    disableReceivedHeaders, maxConnections, connectionTimeout, maxRecipients, maxMessageSize,
+                    sessionIdFactory, sslSocketCreator);
         }
 
     }
 
-    private SMTPServer(String hostName, Optional<InetAddress> bindAddress, int port, int backlog,
-            String softwareName, MessageHandlerFactory messageHandlerFactory,
+    private SMTPServer(String hostName, Optional<InetAddress> bindAddress, int port, int backlog, String softwareName,
+            MessageHandlerFactory messageHandlerFactory,
             Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
             Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
-            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections,
-            int connectionTimeout, int maxRecipients, int maxMessageSize,
-            SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator) {
+            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeout,
+            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory,
+            SSLSocketCreator sslSocketCreator) {
         Preconditions.checkNotNull(messageHandlerFactory);
         this.bindAddress = bindAddress;
         this.port = port;
@@ -428,8 +467,7 @@ public final class SMTPServer implements SSLSocketCreator {
         public SSLSocket createSSLSocket(Socket socket) throws IOException {
             SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
             InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
-                    socket.getPort(), true));
+            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
 
             // we are a server
             s.setUseClientMode(false);
@@ -440,43 +478,6 @@ public final class SMTPServer implements SSLSocketCreator {
             return s;
         }
     };
-
-    // /**
-    // * Simple constructor.
-    // */
-    // public SMTPServer(MessageHandlerFactory handlerFactory) {
-    // this(handlerFactory, null);
-    // }
-
-    // /**
-    // * Constructor with {@link AuthenticationHandlerFactory}.
-    // */
-    // public SMTPServer(MessageHandlerFactory handlerFactory,
-    // AuthenticationHandlerFactory authHandlerFact) {
-    // this(handlerFactory, authHandlerFact, null);
-    // }
-
-    // /**
-    // * Complex constructor.
-    // *
-    // * @param authHandlerFact
-    // * the {@link AuthenticationHandlerFactory} which performs
-    // * authentication in the SMTP AUTH command. If null,
-    // * authentication is not supported. Note that setting an
-    // * authentication handler does not enforce authentication, it
-    // * only makes authentication possible. Enforcing authentication
-    // * is the responsibility of the client application, which usually
-    // * enforces it only selectively. Use
-    // * {@link Session#isAuthenticated} to check whether the client
-    // * was authenticated in the session.
-    // * @param executorService
-    // * the ExecutorService which will handle client connections, one
-    // * task per connection. The SMTPServer will shut down this
-    // * ExecutorService when the SMTPServer itself stops. If null, a
-    // * default one is created by
-    // * {@link Executors#newCachedThreadPool()}.
-    // */
-    //
 
     /** @return the host name that will be reported to SMTP clients */
     public String getHostName() {
@@ -628,8 +629,10 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     /**
-     * @return the factory for auth handlers, or null if no such factory has
-     *         been set.
+     * Returns the factor for authentication handling.
+     * 
+     * @return the factory for auth handlers, or empty if no factory has been
+     *         set.
      */
     public Optional<AuthenticationHandlerFactory> getAuthenticationHandlerFactory() {
         return this.authenticationHandlerFactory;
