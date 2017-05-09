@@ -582,7 +582,7 @@ public final class SMTPServer implements SSLSocketCreator {
     protected ServerSocket createServerSocket() throws IOException {
         InetSocketAddress isa;
 
-        if (this.bindAddress == null) {
+        if (!this.bindAddress.isPresent()) {
             isa = new InetSocketAddress(this.port);
         } else {
             isa = new InetSocketAddress(this.bindAddress.orElse(null), this.port);
@@ -617,7 +617,7 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     public String getDisplayableLocalSocketAddress() {
-        return (this.bindAddress == null ? "*" : this.bindAddress) + ":" + this.port;
+        return this.bindAddress.map(x -> x.toString()).orElse("*") + ":" + this.port;
     }
 
     /**
