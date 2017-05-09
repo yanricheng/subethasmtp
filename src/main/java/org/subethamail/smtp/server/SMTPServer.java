@@ -383,6 +383,7 @@ public final class SMTPServer implements SSLSocketCreator {
             boolean requireAuth, boolean disableReceivedHeaders, int maxConnections,
             int connectionTimeout, int maxRecipients, int maxMessageSize,
             SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator) {
+        Preconditions.checkNotNull(messageHandlerFactory);
         this.bindAddress = bindAddress;
         this.port = port;
         this.backlog = backlog;
