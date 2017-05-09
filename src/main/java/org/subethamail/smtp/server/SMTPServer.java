@@ -141,7 +141,8 @@ public final class SMTPServer implements SSLSocketCreator {
         private String softwareName = "SubEthaSMTP " + Version.getSpecification();
 
         private MessageHandlerFactory messageHandlerFactory;
-        private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional.empty();
+        private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional
+                .empty();
         private Optional<ExecutorService> executorService = Optional.empty();
 
         /** If true, TLS is enabled */
@@ -381,11 +382,32 @@ public final class SMTPServer implements SSLSocketCreator {
             return this;
         }
 
+        /**
+         * Sets the maximum number of recipients per message delivery request.
+         * 
+         * @param maxRecipients
+         *            The maximum number of recipients that this server accepts
+         *            per message delivery request.
+         * @return this
+         */
         public Builder maxRecipients(int maxRecipients) {
             this.maxRecipients = maxRecipients;
             return this;
         }
 
+        /**
+         * Sets the maximum messages size (does not enforce though!).
+         * 
+         * @param maxMessageSize
+         *            The maximum size of a message that the server will accept.
+         *            This value is advertised during the EHLO phase if it is
+         *            larger than 0. If the message size specified by the client
+         *            during the MAIL phase, the message will be rejected at
+         *            that time. (RFC 1870) Default is 0. Note this doesn't
+         *            actually enforce any limits on the message being read; you
+         *            must do that yourself when reading data.
+         * @return this
+         */
         public Builder maxMessageSize(int maxMessageSize) {
             this.maxMessageSize = maxMessageSize;
             return this;
@@ -407,21 +429,22 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public SMTPServer build() {
-            return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
-                    authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
-                    disableReceivedHeaders, maxConnections, connectionTimeout, maxRecipients, maxMessageSize,
-                    sessionIdFactory, sslSocketCreator);
+            return new SMTPServer(hostName, bindAddress, port, backlog, softwareName,
+                    messageHandlerFactory, authenticationHandlerFactory, executorService, enableTLS,
+                    hideTLS, requireTLS, requireAuth, disableReceivedHeaders, maxConnections,
+                    connectionTimeout, maxRecipients, maxMessageSize, sessionIdFactory,
+                    sslSocketCreator);
         }
 
     }
 
-    private SMTPServer(String hostName, Optional<InetAddress> bindAddress, int port, int backlog, String softwareName,
-            MessageHandlerFactory messageHandlerFactory,
+    private SMTPServer(String hostName, Optional<InetAddress> bindAddress, int port, int backlog,
+            String softwareName, MessageHandlerFactory messageHandlerFactory,
             Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
-            Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
-            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeout,
-            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory,
-            SSLSocketCreator sslSocketCreator) {
+            Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS,
+            boolean requireTLS, boolean requireAuth, boolean disableReceivedHeaders,
+            int maxConnections, int connectionTimeout, int maxRecipients, int maxMessageSize,
+            SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator) {
         Preconditions.checkNotNull(messageHandlerFactory);
         this.bindAddress = bindAddress;
         this.port = port;
@@ -467,7 +490,8 @@ public final class SMTPServer implements SSLSocketCreator {
         public SSLSocket createSSLSocket(Socket socket) throws IOException {
             SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
             InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
+            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
+                    socket.getPort(), true));
 
             // we are a server
             s.setUseClientMode(false);

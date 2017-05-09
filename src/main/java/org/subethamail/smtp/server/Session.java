@@ -83,7 +83,7 @@ public final class Session implements Runnable, MessageContext
 	 * This information is useful in the construction of the FOR clause of the
 	 * Received header.
 	 */
-	private String singleRecipient;
+	private Optional<String> singleRecipient;
 
 	/**
 	 * If the client told us the size of the message, this is the value.
@@ -408,7 +408,7 @@ public final class Session implements Runnable, MessageContext
 	public void addRecipient(String recipientAddress)
 	{
 		this.recipientCount++;
-		this.singleRecipient = this.recipientCount == 1 ? recipientAddress : null;
+		this.singleRecipient = this.recipientCount == 1 ? Optional.of(recipientAddress) : Optional.empty();
 	}
 
 	/** */
@@ -421,7 +421,7 @@ public final class Session implements Runnable, MessageContext
 	 * Returns the first accepted recipient if there is exactly one accepted
 	 * recipient, otherwise it returns null.
 	 */
-	public String getSingleRecipient()
+	public Optional<String> getSingleRecipient()
 	{
 		return singleRecipient;
 	}
@@ -501,7 +501,7 @@ public final class Session implements Runnable, MessageContext
 		this.endMessageHandler();
 		this.messageHandler = null;
 		this.recipientCount = 0;
-		this.singleRecipient = null;
+		this.singleRecipient = Optional.empty();
 		this.declaredMessageSize = 0;
 	}
 	
