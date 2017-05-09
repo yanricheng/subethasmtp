@@ -49,9 +49,9 @@ public interface MessageContext
 	 * {@link javax.net.ssl.SSLSocket#setNeedClientAuth(boolean) setNeedClientAuth(true)} on the created socket.
 	 *
 	 * @return an ordered array of peer certificates, with the peer's own certificate first followed
-	 *         by any certificate authorities, or null when no such information is available
+	 *         by any certificate authorities, or empty when no such information is available
 	 * @see javax.net.ssl.SSLSession#getPeerCertificates()
 	 */
-	Certificate[] getTlsPeerCertificates();
+	Optional<Certificate[]> getTlsPeerCertificates();
 
 }

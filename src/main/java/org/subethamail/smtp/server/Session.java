@@ -95,7 +95,7 @@ public final class Session implements Runnable, MessageContext
 
 	/** Some more state information */
 	private boolean tlsStarted;
-	private Certificate[] tlsPeerCertificates;
+	private Optional<Certificate[]> tlsPeerCertificates;
 
 	/**
 	 * Creates the Runnable Session object.
@@ -557,7 +557,7 @@ public final class Session implements Runnable, MessageContext
 		this.tlsStarted = tlsStarted;
 	}
 
-	public void setTlsPeerCertificates(Certificate[] tlsPeerCertificates)
+	public void setTlsPeerCertificates(Optional<Certificate[]> tlsPeerCertificates)
 	{
 		this.tlsPeerCertificates = tlsPeerCertificates;
 	}
@@ -566,7 +566,7 @@ public final class Session implements Runnable, MessageContext
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Certificate[] getTlsPeerCertificates()
+	public Optional<Certificate[]> getTlsPeerCertificates()
 	{
 		return tlsPeerCertificates;
 	}
