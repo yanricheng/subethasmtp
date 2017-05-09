@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,6 +21,8 @@ import org.subethamail.smtp.MessageHandlerFactory;
 import org.subethamail.smtp.Version;
 import org.subethamail.smtp.helper.SimpleMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
+
+import com.github.davidmoten.guavamini.Preconditions;
 
 /**
  * Main SMTPServer class. Construct this object, set the hostName, port, and
@@ -48,14 +51,14 @@ public final class SMTPServer implements SSLSocketCreator {
     /** Hostname used if we can't find one */
     private final static String UNKNOWN_HOSTNAME = "localhost";
 
-    private final InetAddress bindAddress; // default to all interfaces
+    private final Optional<InetAddress> bindAddress; // default to all interfaces
     private final int port; // default to 25
     private final String hostName; // defaults to a lookup of the local address
     private final int backlog;
     private final String softwareName;
 
     private final MessageHandlerFactory messageHandlerFactory;
-    private final AuthenticationHandlerFactory authenticationHandlerFactory;
+    private final Optional<AuthenticationHandlerFactory> authenticationHandlerFactory;
     private final ExecutorService executorService;
 
     private final CommandHandler commandHandler;
@@ -129,14 +132,14 @@ public final class SMTPServer implements SSLSocketCreator {
 
     public static final class Builder {
         private String hostName;
-        private InetAddress bindAddress = null; // default to all interfaces
+        private Optional<InetAddress> bindAddress = Optional.empty(); // default to all interfaces
         private int port = 25; // default to 25
         private int backlog = 50;
         private String softwareName = "SubEthaSMTP " + Version.getSpecification();
 
         private MessageHandlerFactory messageHandlerFactory;
-        private AuthenticationHandlerFactory authenticationHandlerFactory;
-        private ExecutorService executorService;
+        private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional.empty();
+        private Optional<ExecutorService> executorService = Optional.empty();
 
         /** If true, TLS is enabled */
         private boolean enableTLS = false;
@@ -187,11 +190,19 @@ public final class SMTPServer implements SSLSocketCreator {
         private SSLSocketCreator sslSocketCreator = SSL_SOCKET_CREATOR_DEFAULT;
 
         public Builder bindAddress(InetAddress bindAddress) {
+            Preconditions.checkNotNull(bindAddress, "bindAddress cannot be null");
+            this.bindAddress = Optional.of(bindAddress);
+            return this;
+        }
+        
+        public Builder bindAddress(Optional<InetAddress> bindAddress) {
+            Preconditions.checkNotNull(bindAddress, "bindAddress cannot be null");
             this.bindAddress = bindAddress;
             return this;
         }
         
         public Builder hostName(String hostName) {
+            Preconditions.checkNotNull(hostName);
             this.hostName = hostName;
             return this;
         }
@@ -202,16 +213,19 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public Builder backlog(int backlogSize) {
+            Preconditions.checkArgument(backlogSize>=0);
             this.backlog = backlogSize;
             return this;
         }
 
         public Builder softwareName(String name) {
+            Preconditions.checkNotNull(name);
             this.softwareName = name;
             return this;
         }
 
         public Builder messageHandlerFactory(MessageHandlerFactory factory) {
+            Preconditions.checkNotNull(factory);
             this.messageHandlerFactory = factory;
             return this;
         }
@@ -222,12 +236,14 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public Builder authenticationHandlerFactory(AuthenticationHandlerFactory factory) {
-            this.authenticationHandlerFactory = factory;
+            Preconditions.checkNotNull(factory);
+            this.authenticationHandlerFactory = Optional.of(factory);
             return this;
         }
 
         public Builder executorService(ExecutorService executor) {
-            this.executorService = executor;
+            Preconditions.checkNotNull(executor);
+            this.executorService = Optional.of(executor);
             return this;
         }
 
@@ -352,7 +368,7 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public SMTPServer build() {
-            return new SMTPServer(hostName,bindAddress, port, backlog, softwareName, messageHandlerFactory,
+            return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
                     authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS,
                     requireAuth, disableReceivedHeaders, maxConnections, connectionTimeout,
                     maxRecipients, maxMessageSize, sessionIdFactory, sslSocketCreator);
@@ -360,10 +376,10 @@ public final class SMTPServer implements SSLSocketCreator {
 
     }
 
-    private SMTPServer(String hostName, InetAddress bindAddress, int port, int backlog,
+    private SMTPServer(String hostName, Optional<InetAddress> bindAddress, int port, int backlog,
             String softwareName, MessageHandlerFactory messageHandlerFactory,
-            AuthenticationHandlerFactory authenticationHandlerFactory,
-            ExecutorService executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
+            Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
+            Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
             boolean requireAuth, boolean disableReceivedHeaders, int maxConnections,
             int connectionTimeout, int maxRecipients, int maxMessageSize,
             SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator) {
@@ -386,8 +402,8 @@ public final class SMTPServer implements SSLSocketCreator {
         this.commandHandler = new CommandHandler();
         this.sslSocketCreator = sslSocketCreator;
 
-        if (executorService != null) {
-            this.executorService = executorService;
+        if (executorService.isPresent()) {
+            this.executorService = executorService.get();
         } else {
             this.executorService = Executors.newCachedThreadPool();
         }
@@ -467,7 +483,7 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     /** null means all interfaces */
-    public InetAddress getBindAddress() {
+    public Optional<InetAddress> getBindAddress() {
         return this.bindAddress;
     }
 
@@ -568,7 +584,7 @@ public final class SMTPServer implements SSLSocketCreator {
         if (this.bindAddress == null) {
             isa = new InetSocketAddress(this.port);
         } else {
-            isa = new InetSocketAddress(this.bindAddress, this.port);
+            isa = new InetSocketAddress(this.bindAddress.orElse(null), this.port);
         }
 
         ServerSocket serverSocket = new ServerSocket();
@@ -614,7 +630,7 @@ public final class SMTPServer implements SSLSocketCreator {
      * @return the factory for auth handlers, or null if no such factory has
      *         been set.
      */
-    public AuthenticationHandlerFactory getAuthenticationHandlerFactory() {
+    public Optional<AuthenticationHandlerFactory> getAuthenticationHandlerFactory() {
         return this.authenticationHandlerFactory;
     }
 

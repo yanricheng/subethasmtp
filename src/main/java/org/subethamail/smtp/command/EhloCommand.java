@@ -2,6 +2,7 @@ package org.subethamail.smtp.command;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.server.BaseCommand;
@@ -68,10 +69,10 @@ public final class EhloCommand extends BaseCommand
 		}
 
 		// Check to see if we support authentication
-		AuthenticationHandlerFactory authFact = sess.getServer().getAuthenticationHandlerFactory();
-		if (authFact != null)
+		Optional<AuthenticationHandlerFactory> authFact = sess.getServer().getAuthenticationHandlerFactory();
+		if (authFact.isPresent())
 		{
-			List<String> supportedMechanisms = authFact.getAuthenticationMechanisms();
+			List<String> supportedMechanisms = authFact.get().getAuthenticationMechanisms();
 			if (!supportedMechanisms.isEmpty())
 			{
 				response.append("\r\n" + "250-" + AuthCommand.VERB + " ");

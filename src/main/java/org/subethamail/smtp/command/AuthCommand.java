@@ -2,6 +2,7 @@ package org.subethamail.smtp.command;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
@@ -44,15 +45,15 @@ public final class AuthCommand extends BaseCommand
 			return;
 		}
 
-		AuthenticationHandlerFactory authFactory = sess.getServer().getAuthenticationHandlerFactory();
+		Optional<AuthenticationHandlerFactory> authFactory = sess.getServer().getAuthenticationHandlerFactory();
 
-		if (authFactory == null)
+		if (!authFactory.isPresent())
 		{
 			sess.sendResponse("502 Authentication not supported");
 			return;
 		}
 
-		AuthenticationHandler authHandler = authFactory.create();
+		AuthenticationHandler authHandler = authFactory.get().create();
 
 		String[] args = this.getArgs(commandString);
 		// Let's check the command syntax
@@ -64,7 +65,7 @@ public final class AuthCommand extends BaseCommand
 
 		// Let's check if we support the required authentication mechanism
 		String mechanism = args[1];
-		if (!authFactory.getAuthenticationMechanisms().contains(mechanism.toUpperCase(Locale.ENGLISH)))
+		if (!authFactory.get().getAuthenticationMechanisms().contains(mechanism.toUpperCase(Locale.ENGLISH)))
 		{
 			sess.sendResponse("504 The requested authentication mechanism is not supported");
 			return;
