@@ -68,7 +68,7 @@ public final class StartTLSCommand extends BaseCommand
 			{
 				try
 				{
-					Optional<Certificate[]> peerCertificates = Optional.ofNullable(s.getSession().getPeerCertificates());
+					Certificate[] peerCertificates = s.getSession().getPeerCertificates();
 					sess.setTlsPeerCertificates(peerCertificates);
 				}
 				catch (SSLPeerUnverifiedException e)

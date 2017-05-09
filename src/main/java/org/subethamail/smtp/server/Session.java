@@ -21,8 +21,6 @@ import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.io.CRLFTerminatedReader;
 
-import com.github.davidmoten.guavamini.Preconditions;
-
 /**
  * The thread that handles a connection. This class
  * passes most of it's responsibilities off to the
@@ -95,7 +93,7 @@ public final class Session implements Runnable, MessageContext
 
 	/** Some more state information */
 	private boolean tlsStarted;
-	private Optional<Certificate[]> tlsPeerCertificates = Optional.empty();
+	private Certificate[] tlsPeerCertificates;
 
 	/**
 	 * Creates the Runnable Session object.
@@ -557,7 +555,7 @@ public final class Session implements Runnable, MessageContext
 		this.tlsStarted = tlsStarted;
 	}
 
-	public void setTlsPeerCertificates(Optional<Certificate[]> tlsPeerCertificates)
+	public void setTlsPeerCertificates(Certificate[] tlsPeerCertificates)
 	{
 		this.tlsPeerCertificates = tlsPeerCertificates;
 	}
@@ -566,7 +564,7 @@ public final class Session implements Runnable, MessageContext
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Optional<Certificate[]> getTlsPeerCertificates()
+	public Certificate[] getTlsPeerCertificates()
 	{
 		return tlsPeerCertificates;
 	}
