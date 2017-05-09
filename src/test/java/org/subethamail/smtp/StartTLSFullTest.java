@@ -74,6 +74,7 @@ public class StartTLSFullTest {
         SSLSocketCreator tlsSocketCreator = createTLSSocketCreator(sslContext);
         SMTPServer server = SMTPServer //
                 .port(PORT) //
+                .hostName("email-server.me.com") //
                 .requireTLS() //
                 .enableTLS() //
                 .messageHandlerFactory(mhf) //

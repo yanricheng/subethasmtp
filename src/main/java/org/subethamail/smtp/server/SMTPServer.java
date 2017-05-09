@@ -128,7 +128,7 @@ public final class SMTPServer implements SSLSocketCreator {
     private final SSLSocketCreator sslSocketCreator;
 
     public static final class Builder {
-
+        private String hostName;
         private InetAddress bindAddress = null; // default to all interfaces
         private int port = 25; // default to 25
         private int backlog = 50;
@@ -190,6 +190,11 @@ public final class SMTPServer implements SSLSocketCreator {
             this.bindAddress = bindAddress;
             return this;
         }
+        
+        public Builder hostName(String hostName) {
+            this.hostName = hostName;
+            return this;
+        }
 
         public Builder port(int port) {
             this.port = port;
@@ -246,8 +251,8 @@ public final class SMTPServer implements SSLSocketCreator {
          * Up to SubEthaSMTP 3.1.5 the default was true, i.e. TLS was enabled.
          * 
          * @see <a href=
-         *      "http://blog.jteam.nl/2009/11/10/securing-connections-with-tls/">Securing
-         *      Connections with TLS</a>
+         *      "http://blog.jteam.nl/2009/11/10/securing-connections-with-tls/">
+         *      Securing Connections with TLS</a>
          */
         public Builder enableTLS() {
             return enableTLS(true);
@@ -347,20 +352,21 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public SMTPServer build() {
-            return new SMTPServer(bindAddress, port, backlog, softwareName, messageHandlerFactory,
-                    authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
-                    disableReceivedHeaders, maxConnections, connectionTimeout, maxRecipients, maxMessageSize,
-                    sessionIdFactory, sslSocketCreator);
+            return new SMTPServer(hostName,bindAddress, port, backlog, softwareName, messageHandlerFactory,
+                    authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS,
+                    requireAuth, disableReceivedHeaders, maxConnections, connectionTimeout,
+                    maxRecipients, maxMessageSize, sessionIdFactory, sslSocketCreator);
         }
 
     }
 
-    private SMTPServer(InetAddress bindAddress, int port, int backlog, String softwareName,
-            MessageHandlerFactory messageHandlerFactory, AuthenticationHandlerFactory authenticationHandlerFactory,
+    private SMTPServer(String hostName, InetAddress bindAddress, int port, int backlog,
+            String softwareName, MessageHandlerFactory messageHandlerFactory,
+            AuthenticationHandlerFactory authenticationHandlerFactory,
             ExecutorService executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
-            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeout,
-            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory,
-            SSLSocketCreator sslSocketCreator) {
+            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections,
+            int connectionTimeout, int maxRecipients, int maxMessageSize,
+            SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator) {
         this.bindAddress = bindAddress;
         this.port = port;
         this.backlog = backlog;
@@ -385,14 +391,17 @@ public final class SMTPServer implements SSLSocketCreator {
         } else {
             this.executorService = Executors.newCachedThreadPool();
         }
-
-        String s;
-        try {
-            s = InetAddress.getLocalHost().getCanonicalHostName();
-        } catch (UnknownHostException e) {
-            s = UNKNOWN_HOSTNAME;
+        if (hostName == null) {
+            String s;
+            try {
+                s = InetAddress.getLocalHost().getCanonicalHostName();
+            } catch (UnknownHostException e) {
+                s = UNKNOWN_HOSTNAME;
+            }
+            this.hostName = s;
+        } else {
+            this.hostName = hostName;
         }
-        this.hostName = s;
         this.allocatedPort = port;
     }
 
@@ -402,7 +411,8 @@ public final class SMTPServer implements SSLSocketCreator {
         public SSLSocket createSSLSocket(Socket socket) throws IOException {
             SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
             InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
+            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
+                    socket.getPort(), true));
 
             // we are a server
             s.setUseClientMode(false);
@@ -453,10 +463,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
     /** @return the host name that will be reported to SMTP clients */
     public String getHostName() {
-        if (this.hostName == null)
-            return UNKNOWN_HOSTNAME;
-        else
-            return this.hostName;
+        return this.hostName;
     }
 
     /** null means all interfaces */
