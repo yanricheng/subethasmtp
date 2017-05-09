@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,22 +24,12 @@ import com.github.davidmoten.guavamini.Preconditions;
  */
 // not final so can mock with Mockito
 public class SmartClient {
-    /** */
+
     private static final Logger log = LoggerFactory.getLogger(SmartClient.class);
 
-    /** */
-    private boolean sentFrom;
-    int recipientCount;
     /** The host name which is sent in the HELO and EHLO commands */
     private final String heloHost;
-
-    /**
-     * True if the server sent a 421
-     * "Service not available, closing transmission channel" response. In this
-     * case the QUIT command should not be sent.
-     */
-    private boolean serverClosingTransmissionChannel = false;
-
+    
     /**
      * SMTP extensions supported by the server, and their parameters as the
      * server specified it in response to the EHLO command. Key is the extension
@@ -52,10 +43,24 @@ public class SmartClient {
      * If supplied (not null), then it will be called after EHLO, to
      * authenticate this client to the server.
      */
-    private final Authenticator authenticator;
+    private final Optional<Authenticator> authenticator;
 
     private final SMTPClient client;
 
+    //mutable state
+    
+    private boolean sentFrom;
+    
+    private int recipientCount;
+
+    /**
+     * True if the server sent a 421
+     * "Service not available, closing transmission channel" response. In this
+     * case the QUIT command should not be sent.
+     */
+    private boolean serverClosingTransmissionChannel = false;
+
+    
     /**
      * Connects to the specified server and issues the initial HELO command.
      * 
@@ -67,7 +72,7 @@ public class SmartClient {
      *             if problem communicating with host
      */
     private SmartClient(String myHost) throws UnknownHostException, IOException, SMTPException {
-        this(null, myHost, null);
+        this(Optional.empty(), myHost, Optional.empty());
     }
 
     /**
@@ -86,21 +91,23 @@ public class SmartClient {
      * @throws SMTPException
      *             if problem reported by the server
      */
-    private SmartClient(SocketAddress bindpoint, String clientHeloHost, Authenticator authenticator)
+    private SmartClient(Optional<SocketAddress> bindpoint, String clientHeloHost, Optional<Authenticator> authenticator)
             throws UnknownHostException, IOException, SMTPException {
-        Preconditions.checkNotNull(clientHeloHost, "clientHeloHost is required");
-        this.client = new SMTPClient(bindpoint);
+        Preconditions.checkNotNull(bindpoint, "bindpoint cannot be null");
+        Preconditions.checkNotNull(clientHeloHost, "clientHeloHost cannot be null");
+        Preconditions.checkNotNull(authenticator, "authenticator cannot be null");
+        this.client = new SMTPClient(bindpoint, Optional.empty());
         this.heloHost = clientHeloHost;
         this.authenticator = authenticator;
     }
 
     public final static SmartClient createAndConnect(String host, int port, String clientHeloHost)
             throws UnknownHostException, SMTPException, IOException {
-        return createAndConnect(host, port, null, clientHeloHost, null);
+        return createAndConnect(host, port, Optional.empty(), clientHeloHost, Optional.empty());
     }
 
-    public final static SmartClient createAndConnect(String host, int port, SocketAddress bindpoint,
-            String clientHeloHost, Authenticator authenticator)
+    public final static SmartClient createAndConnect(String host, int port, Optional<SocketAddress> bindpoint,
+            String clientHeloHost, Optional<Authenticator> authenticator)
                     throws UnknownHostException, SMTPException, IOException {
         SmartClient client = new SmartClient(bindpoint, clientHeloHost, authenticator);
         client.connect(host, port);
@@ -118,8 +125,8 @@ public class SmartClient {
         try {
             client.receiveAndCheck(); // The server announces itself first
             this.sendHeloOrEhlo();
-            if (this.authenticator != null)
-                this.authenticator.authenticate();
+            if (this.authenticator.isPresent())
+                this.authenticator.get().authenticate();
         } catch (SMTPException e) {
             this.quit();
             throw e;
@@ -279,7 +286,7 @@ public class SmartClient {
      * Returns the Authenticator object, which is used to authenticate this
      * client to the server, or null, if no authentication is required.
      */
-    public Authenticator getAuthenticator() {
+    public Optional<Authenticator> getAuthenticator() {
         return authenticator;
     }
 
