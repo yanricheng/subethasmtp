@@ -3,6 +3,7 @@ package org.subethamail.smtp.auth;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 import org.subethamail.smtp.AuthenticationHandler;
@@ -64,7 +65,7 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 		private String username;
 
 		@Override
-		public String auth(String clientInput) throws RejectException
+		public Optional<String> auth(String clientInput) throws RejectException
 		{
 			StringTokenizer stk = new StringTokenizer(clientInput);
 			String token = stk.nextToken();
@@ -88,13 +89,13 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 								"Invalid command argument, not a valid Base64 string"); 
 					username = TextUtils.getStringUtf8(decoded);
 
-					return "334 "
+					return Optional.of("334 "
 							+ Base64.getEncoder().encodeToString(
-									TextUtils.getAsciiBytes("Password:"));
+									TextUtils.getAsciiBytes("Password:")));
 				} else {
-					return "334 "
+					return Optional.of("334 "
 							+ Base64.getEncoder().encodeToString(
-									TextUtils.getAsciiBytes("Username:"));
+									TextUtils.getAsciiBytes("Username:")));
 				}
 			}
 
@@ -109,9 +110,9 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 
 				this.username = TextUtils.getStringUtf8(decoded);
 
-				return "334 "
+				return Optional.of("334 "
 						+ Base64.getEncoder().encodeToString(
-								TextUtils.getAsciiBytes("Password:"));
+								TextUtils.getAsciiBytes("Password:")));
 			}
 
 			byte[] decoded = Base64.getDecoder().decode(clientInput);
@@ -132,7 +133,7 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 						"Authentication credentials invalid");
 			}
 
-			return null;
+			return Optional.empty();
 		}
 
 		/* */

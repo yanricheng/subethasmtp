@@ -1,5 +1,6 @@
 package org.subethamail.smtp;
 
+import java.util.Optional;
 
 /**
  * The interface that enables challenge-response communication necessary for SMTP AUTH.<p>
@@ -15,7 +16,7 @@ public interface AuthenticationHandler
 
 	/**
 	 * Initially called using an input string in the RFC2554 form: "AUTH <mechanism> [initial-response]". <br>
-	 * This method must return text which will be delivered to the client, or null if the exchange
+	 * This method must return text which will be delivered to the client, or empty if the exchange
 	 * has been completed successfully.  If a response is provided to the client, this continues
 	 * the exchange - there will be another auth() call with the client's response.
 	 * <p>
@@ -29,11 +30,11 @@ public interface AuthenticationHandler
 	 * <p>
 	 * AuthenticationHandlers do not need to handle the "*" cancel response; this is handled by the framework.
 	 *
-	 * @return <code>null</code> if the authentication process is finished, otherwise a string to hand back to the client.
+	 * @return <code>empty</code> if the authentication process is finished, otherwise a string to hand back to the client.
 	 * @param clientInput The client's input, eg "AUTH PLAIN dGVzdAB0ZXN0ADEyMzQ="
 	 * @throws org.subethamail.smtp.RejectException if authentication fails.
 	 */
-	String auth(String clientInput) throws RejectException;
+	Optional<String> auth(String clientInput) throws RejectException;
 
 	/**
 	 * If the authentication process was successful, this returns the identity

@@ -2,12 +2,13 @@ package org.subethamail.smtp;
 
 import java.io.ByteArrayInputStream;
 import java.net.InetAddress;
-
-import junit.framework.TestCase;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.io.ReceivedHeaderStream;
+
+import junit.framework.TestCase;
 
 /**
  * This class tests a bug in ReceivedHeaderStream which
@@ -39,7 +40,7 @@ public class ReceivedHeaderStreamTest extends TestCase
 		int BUF_SIZE = 10000;
 		int offset = 10;
 		ByteArrayInputStream in = new ByteArrayInputStream("hello world".getBytes());
-		try (ReceivedHeaderStream hdrIS = new ReceivedHeaderStream(in, "ehlo",
+		try (ReceivedHeaderStream hdrIS = new ReceivedHeaderStream(in, Optional.of("ehlo"),
 				InetAddress.getLocalHost(), "foo", null, "123", null)) {
     		byte[] buf = new byte[BUF_SIZE];
     		int len = hdrIS.read(buf, offset, BUF_SIZE-offset);

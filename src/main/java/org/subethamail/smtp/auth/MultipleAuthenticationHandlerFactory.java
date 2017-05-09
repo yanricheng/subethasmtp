@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 import org.subethamail.smtp.AuthenticationHandler;
@@ -77,7 +78,7 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 		AuthenticationHandler active;
 
 		/* */
-		public String auth(String clientInput) throws RejectException
+		public Optional<String> auth(String clientInput) throws RejectException
 		{
 			if (this.active == null)
 			{

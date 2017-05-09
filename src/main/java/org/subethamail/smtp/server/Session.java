@@ -10,6 +10,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.security.cert.Certificate;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,8 @@ import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.io.CRLFTerminatedReader;
+
+import com.github.davidmoten.guavamini.Preconditions;
 
 /**
  * The thread that handles a connection. This class
@@ -64,7 +67,7 @@ public final class Session implements Runnable, MessageContext
 	private PrintWriter writer;
 
 	/** Might exist if the client has successfully authenticated */
-	private AuthenticationHandler authenticationHandler;
+	private Optional<AuthenticationHandler> authenticationHandler = Optional.empty();
 
 	/**
 	 * It exists if a mail transaction is in progress (from the MAIL command
@@ -73,7 +76,7 @@ public final class Session implements Runnable, MessageContext
 	private MessageHandler messageHandler;
 
 	/** Some state information */
-	private String helo;
+	private Optional<String> helo = Optional.empty();
 	private int recipientCount;
 	/**
 	 * The recipient address in the first accepted RCPT command, but only if
@@ -392,7 +395,7 @@ public final class Session implements Runnable, MessageContext
 
 	/** Simple state */
 	@Override
-	public String getHelo()
+	public Optional<String> getHelo()
 	{
 		return this.helo;
 	}
@@ -400,7 +403,7 @@ public final class Session implements Runnable, MessageContext
 	/** */
 	public void setHelo(String value)
 	{
-		this.helo = value;
+		this.helo = Optional.of(value);
 	}
 
 	/** */
@@ -428,12 +431,12 @@ public final class Session implements Runnable, MessageContext
 	/** */
 	public boolean isAuthenticated()
 	{
-		return this.authenticationHandler != null;
+		return this.authenticationHandler.isPresent();
 	}
 
 	/** */
 	@Override
-	public AuthenticationHandler getAuthenticationHandler()
+	public Optional<AuthenticationHandler> getAuthenticationHandler()
 	{
 		return this.authenticationHandler;
 	}
@@ -444,7 +447,7 @@ public final class Session implements Runnable, MessageContext
 	 */
 	public void setAuthenticationHandler(AuthenticationHandler handler)
 	{
-		this.authenticationHandler = handler;
+		this.authenticationHandler = Optional.of(handler);
 	}
 
 	/**
@@ -526,7 +529,7 @@ public final class Session implements Runnable, MessageContext
 	 */
 	public void resetSmtpProtocol() {
 		resetMailTransaction();
-		this.helo = null;
+		this.helo = Optional.empty();
 	}
 	
 	/**

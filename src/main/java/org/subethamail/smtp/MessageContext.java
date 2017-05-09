@@ -6,6 +6,7 @@ package org.subethamail.smtp;
 
 import java.net.SocketAddress;
 import java.security.cert.Certificate;
+import java.util.Optional;
 
 import org.subethamail.smtp.server.SMTPServer;
 
@@ -29,16 +30,16 @@ public interface MessageContext
 	/**
 	 * @return the handler instance that was used to authenticate.
 	 */
-	AuthenticationHandler getAuthenticationHandler();
+	Optional<AuthenticationHandler> getAuthenticationHandler();
 
 	/**
 	 * @return the host name or address literal the client supplied in the HELO
-	 *         or EHLO command, or null if neither of these commands were
+	 *         or EHLO command, or empty if neither of these commands were
 	 *         received yet. Note that SubEthaSMTP (along with some MTAs, but
 	 *         contrary to RFC 5321) accept mail transactions without these
 	 *         commands.
 	 */
-	String getHelo();
+	Optional<String> getHelo();
 
 	/**
 	 * Returns the identity of the peer which was established as part of the TLS handshake

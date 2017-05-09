@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.subethamail.smtp.util.TextUtils;
 
@@ -30,7 +31,7 @@ public final class ReceivedHeaderStream extends FilterInputStream
 	 *            The single recipient of the message. If there are more than
 	 *            one recipients then this must be null.
 	 */
-	public ReceivedHeaderStream(InputStream in, String heloHost, InetAddress host, String whoami, String softwareName,
+	public ReceivedHeaderStream(InputStream in, Optional<String> heloHost, InetAddress host, String whoami, String softwareName,
 			String id, String singleRecipient)
 	{
 		super(in);
@@ -44,7 +45,7 @@ Received: from iamhelo (wasabi.infohazard.org [209.237.247.14])
 		String timestamp = fmt.format(new Date());
 
 		StringBuilder header = new StringBuilder();
-		header.append("Received: from " + heloHost + " (" + constructTcpInfo(host) + ")\r\n");
+		header.append("Received: from " + heloHost.orElse(null) + " (" + constructTcpInfo(host) + ")\r\n");
 		header.append("        by " + whoami + "\r\n");
 		header.append("        with SMTP");
 		if (softwareName != null)

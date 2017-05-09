@@ -3,6 +3,7 @@ package org.subethamail.smtp.auth;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 import org.subethamail.smtp.AuthenticationHandler;
@@ -53,7 +54,7 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 		private String password;
 
 		/* */
-		public String auth(String clientInput) throws RejectException
+		public Optional<String> auth(String clientInput) throws RejectException
 		{
 			StringTokenizer stk = new StringTokenizer(clientInput);
 			String secret = stk.nextToken();
@@ -75,7 +76,7 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 				else
 				{
 					// the client did not submit an initial response, we'll get it in the next pass
-					return "334 Ok";
+					return Optional.of("334 Ok");
 				}
 			}
 
@@ -130,7 +131,7 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 						"Authentication credentials invalid");
 			}
 
-			return null;
+			return Optional.empty();
 		}
 
 		/* */

@@ -76,14 +76,14 @@ public final class AuthCommand extends BaseCommand
 			// The authentication process may require a series of challenge-responses
 			CRLFTerminatedReader reader = sess.getReader();
 
-			String response = authHandler.auth(commandString);
-			if (response != null)
+			Optional<String> response = authHandler.auth(commandString);
+			if (response.isPresent())
 			{
 				// challenge-response iteration
-				sess.sendResponse(response);
+				sess.sendResponse(response.get());
 			}
 
-			while (response != null)
+			while (response.isPresent())
 			{
 				String clientInput = reader.readLine();
 				if (clientInput.trim().equals(AUTH_CANCEL_COMMAND))
@@ -95,10 +95,10 @@ public final class AuthCommand extends BaseCommand
 				else
 				{
 					response = authHandler.auth(clientInput);
-					if (response != null)
+					if (response.isPresent())
 					{
 						// challenge-response iteration
-						sess.sendResponse(response);
+						sess.sendResponse(response.get());
 					}
 				}
 			}
