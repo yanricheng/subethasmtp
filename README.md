@@ -74,6 +74,8 @@ Dave Moten came across this and
 * adjusted `Wiser` API to cope with an immutable `SMTPServer`
 * disallowed inheritance of `SMTPServer` (now final)
 * `Wiser` now created with builder pattern (disallowed inheritance and added `accepter` builder method)
+* use composition instead of inheritance in `SmartClient`
+* use static factory method for `SmartClient` so that references don't escape the constructor (connect was called from the constructor)
 
 ## Project Authors ##
 Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.
