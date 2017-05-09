@@ -24,7 +24,7 @@ import org.subethamail.smtp.io.ExtraDotOutputStream;
  *
  * @author Jeff Schnitzer
  */
-public class SMTPClient
+public final class SMTPClient
 {
 	/** 5 minutes */
 	private static final int CONNECT_TIMEOUT = 300 * 1000;

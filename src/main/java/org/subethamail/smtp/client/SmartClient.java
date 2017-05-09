@@ -84,11 +84,11 @@ public class SmartClient  {
         this.setHeloHost(myHost);
     }
    
-    public static SmartClient createAndConnect(String host, int port, String myHost) throws UnknownHostException, SMTPException, IOException {
+    public final static SmartClient createAndConnect(String host, int port, String myHost) throws UnknownHostException, SMTPException, IOException {
         return createAndConnect(host, port, null, myHost);
     }
     
-    public static SmartClient createAndConnect(String host, int port, SocketAddress bindpoint, String myHost) throws UnknownHostException, SMTPException, IOException {
+    public final static SmartClient createAndConnect(String host, int port, SocketAddress bindpoint, String myHost) throws UnknownHostException, SMTPException, IOException {
         SmartClient client = new SmartClient(bindpoint, myHost);
         client.connect(host, port);
         return client;
