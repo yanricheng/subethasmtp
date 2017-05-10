@@ -163,12 +163,12 @@ public final class CRLFTerminatedReader extends Reader
 					case CR: //we got two (or more) CRs in a row
 						if (this.tainted == -1)
 							this.tainted = this.lineBuffer.length();
-						this.lineBuffer.append((char) this.CR);
+						this.lineBuffer.append((char) CR);
 						break;
 					default: //we got some other character following a CR
 						if (this.tainted == -1)
 							this.tainted = this.lineBuffer.length();
-						this.lineBuffer.append((char) this.CR);
+						this.lineBuffer.append((char) CR);
 						this.lineBuffer.append((char) inChar);
 						cr_just_received = false;
 				}
