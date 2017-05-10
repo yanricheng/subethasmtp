@@ -27,6 +27,7 @@ public class SmartClientTest {
             assertEquals("clientHeloHost", client.getHeloHost());
             assertEquals(0, client.getRecipientCount());
             Assert.assertFalse(client.getAuthenticator().isPresent());
+            assertEquals(2, client.getExtensions().size());
         } finally {
             server.stop();
         }

@@ -245,20 +245,6 @@ public class SmartClient {
     }
 
     /**
-     * @return true if we have already specified from()
-     */
-    public boolean sentFrom() {
-        return this.sentFrom;
-    }
-
-    /**
-     * @return true if we have already specified to()
-     */
-    public boolean sentTo() {
-        return this.recipientCount > 0;
-    }
-
-    /**
      * @return the number of recipients that have been accepted by the server
      */
     public int getRecipientCount() {
