@@ -2,6 +2,7 @@ package org.subethamail.smtp.util;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.subethamail.smtp.internal.util.EmailUtils;
 
 import com.github.davidmoten.junit.Asserts;
 

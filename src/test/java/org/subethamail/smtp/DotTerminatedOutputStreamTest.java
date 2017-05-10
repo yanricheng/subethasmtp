@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.subethamail.smtp.io.DotTerminatedOutputStream;
+import org.subethamail.smtp.internal.io.DotTerminatedOutputStream;
 
 public class DotTerminatedOutputStreamTest
 {

@@ -15,7 +15,7 @@ import org.subethamail.smtp.MessageHandlerFactory;
 import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.client.SMTPException;
 import org.subethamail.smtp.client.SmartClient;
-import org.subethamail.smtp.util.TextUtils;
+import org.subethamail.smtp.internal.util.TextUtils;
 
 /**
  * This class tests whether the event handler methods defined in MessageHandler

@@ -21,6 +21,7 @@ import org.subethamail.smtp.MessageHandlerFactory;
 import org.subethamail.smtp.Version;
 import org.subethamail.smtp.helper.SimpleMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
+import org.subethamail.smtp.internal.server.CommandHandler;
 
 import com.github.davidmoten.guavamini.Preconditions;
 

@@ -17,7 +17,7 @@ import org.subethamail.smtp.MessageHandlerFactory;
 import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.TooMuchDataException;
 import org.subethamail.smtp.helper.SmarterMessageListener.Receiver;
-import org.subethamail.smtp.io.DeferredFileOutputStream;
+import org.subethamail.smtp.internal.io.DeferredFileOutputStream;
 
 /**
  * MessageHandlerFactory implementation which adapts to a collection of

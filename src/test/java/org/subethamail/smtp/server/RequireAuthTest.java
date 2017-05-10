@@ -5,10 +5,10 @@ import java.util.Base64;
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
 import org.subethamail.smtp.auth.UsernamePasswordValidator;
+import org.subethamail.smtp.internal.util.TextUtils;
 import org.subethamail.smtp.util.Client;
 import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.Testing;
-import org.subethamail.smtp.util.TextUtils;
 import org.subethamail.wiser.Wiser;
 
 /**

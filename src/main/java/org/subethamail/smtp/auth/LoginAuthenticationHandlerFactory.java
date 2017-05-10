@@ -9,7 +9,7 @@ import java.util.StringTokenizer;
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.RejectException;
-import org.subethamail.smtp.util.TextUtils;
+import org.subethamail.smtp.internal.util.TextUtils;
 
 /**
  * Implements the SMTP AUTH LOGIN mechanism.<br>

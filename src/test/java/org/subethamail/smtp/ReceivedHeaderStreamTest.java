@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.subethamail.smtp.io.ReceivedHeaderStream;
+import org.subethamail.smtp.internal.io.ReceivedHeaderStream;
 
 import junit.framework.TestCase;
 

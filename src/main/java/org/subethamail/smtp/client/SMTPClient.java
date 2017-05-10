@@ -14,9 +14,9 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.subethamail.smtp.Constants;
-import org.subethamail.smtp.io.DotTerminatedOutputStream;
-import org.subethamail.smtp.io.ExtraDotOutputStream;
+import org.subethamail.smtp.internal.Constants;
+import org.subethamail.smtp.internal.io.DotTerminatedOutputStream;
+import org.subethamail.smtp.internal.io.ExtraDotOutputStream;
 
 import com.github.davidmoten.guavamini.Preconditions;
 

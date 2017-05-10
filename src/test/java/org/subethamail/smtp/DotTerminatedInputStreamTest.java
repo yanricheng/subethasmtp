@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Test;
-import org.subethamail.smtp.io.DotTerminatedInputStream;
+import org.subethamail.smtp.internal.io.DotTerminatedInputStream;
 
 public class DotTerminatedInputStreamTest
 {

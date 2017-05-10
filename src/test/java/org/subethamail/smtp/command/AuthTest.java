@@ -5,11 +5,11 @@ import java.util.Base64;
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
 import org.subethamail.smtp.auth.UsernamePasswordValidator;
+import org.subethamail.smtp.internal.util.TextUtils;
 import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.util.Client;
 import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.Testing;
-import org.subethamail.smtp.util.TextUtils;
 import org.subethamail.wiser.Wiser;
 
 /**
@@ -69,7 +69,7 @@ public class AuthTest extends ServerTestCase {
      * <li>User issues another AUTH command</li>
      * <li>We expect an error message</li>
      * </ol>
-     * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
+     * {@link org.subethamail.smtp.internal.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
      */
     public void testAuthPlain() throws Exception {
         expect("220");
@@ -106,7 +106,7 @@ public class AuthTest extends ServerTestCase {
      * <li>User issues another AUTH command</li>
      * <li>We expect an error message</li>
      * </ol>
-     * {@link org.subethamail.smtp.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
+     * {@link org.subethamail.smtp.internal.command.AuthCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)}.
      */
     public void testAuthLogin() throws Exception {
         expect("220");

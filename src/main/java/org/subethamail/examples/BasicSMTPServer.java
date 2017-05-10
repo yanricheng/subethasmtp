@@ -1,12 +1,15 @@
 package org.subethamail.examples;
 
-import org.subethamail.smtp.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.subethamail.smtp.MessageContext;
+import org.subethamail.smtp.MessageHandler;
+import org.subethamail.smtp.MessageHandlerFactory;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.internal.Constants;
 import org.subethamail.smtp.server.SMTPServer;
 
 public final class BasicSMTPServer {
