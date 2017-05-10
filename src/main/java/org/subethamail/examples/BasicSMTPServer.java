@@ -26,23 +26,27 @@ public final class BasicSMTPServer {
     
     static final class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
+        @Override
         public MessageHandler create(MessageContext ctx) {
             return new Handler();
         }
 
-        static class Handler implements MessageHandler {
+        static final class Handler implements MessageHandler {
 
-            public Handler() {
+            Handler() {
             }
 
+            @Override
             public void from(String from) throws RejectException {
                 System.out.println("FROM:" + from);
             }
 
+            @Override
             public void recipient(String recipient) throws RejectException {
                 System.out.println("RECIPIENT:" + recipient);
             }
 
+            @Override
             public void data(InputStream data) throws IOException {
                 System.out.println("MAIL DATA");
                 System.out.println("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =");
@@ -50,11 +54,12 @@ public final class BasicSMTPServer {
                 System.out.println("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =");
             }
 
+            @Override
             public void done() {
                 System.out.println("Finished");
             }
 
-            public String convertStreamToString(InputStream is) {
+            private String convertStreamToString(InputStream is) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, Constants.SMTP_CHARSET));
                 StringBuilder sb = new StringBuilder();
 
