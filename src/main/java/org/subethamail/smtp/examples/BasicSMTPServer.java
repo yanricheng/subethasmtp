@@ -1,4 +1,4 @@
-package org.subethamail.examples;
+package org.subethamail.smtp.examples;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,7 @@ public final class BasicSMTPServer {
 
     static int defaultListenPort = 25000;
 
-    SMTPServer start(int listenPort) {
+    public SMTPServer start(int listenPort) {
         BasicMessageHandlerFactory myFactory = new BasicMessageHandlerFactory();
         SMTPServer smtpServer = SMTPServer.port(listenPort).messageHandlerFactory(myFactory).build();
         System.out.println("Starting Basic SMTP Server on port " + listenPort + "...");
