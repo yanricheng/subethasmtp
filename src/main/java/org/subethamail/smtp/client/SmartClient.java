@@ -49,8 +49,6 @@ public class SmartClient {
 
     //mutable state
     
-    private boolean sentFrom;
-    
     private int recipientCount;
 
     /**
@@ -189,7 +187,6 @@ public class SmartClient {
     /** */
     public void from(String from) throws IOException, SMTPException {
         client.sendAndCheck("MAIL FROM: <" + from + ">");
-        this.sentFrom = true;
     }
 
     /** */
