@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.cert.Certificate;
 import java.util.Locale;
-import java.util.Optional;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
