@@ -16,13 +16,14 @@ public final class BasicSMTPServer {
 
     static int defaultListenPort = 25000;
 
-    void start(int listenPort) {
+    SMTPServer start(int listenPort) {
         BasicMessageHandlerFactory myFactory = new BasicMessageHandlerFactory();
         SMTPServer smtpServer = SMTPServer.port(listenPort).messageHandlerFactory(myFactory).build();
         System.out.println("Starting Basic SMTP Server on port " + listenPort + "...");
         smtpServer.start();
+        return smtpServer;
     }
-
+    
     static final class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
         public MessageHandler create(MessageContext ctx) {
