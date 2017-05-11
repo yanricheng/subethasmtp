@@ -74,10 +74,13 @@ Dave Moten came across this and
 * adjusted `Wiser` API to cope with an immutable `SMTPServer`
 * disallowed inheritance of `SMTPServer` (now final)
 * `Wiser` now created with builder pattern (disallowed inheritance and added `accepter` builder method)
-* use composition instead of inheritance in `SmartClient`
-* use static factory method for `SmartClient` so that references don't escape the constructor (connect was called from the constructor)
-* use explicit character set with `InputStreamReader` (US_ASCII) in `SMTPClient` and `SmartClient`
-* use `java.util.Optional` and `Preconditions` in `SmartClient`, `SMTPClient` and `SMTPServer`
+* used composition instead of inheritance in `SmartClient`
+* used static factory method for `SmartClient` so that references don't escape the constructor (connect was called from the constructor)
+* used explicit character set with `InputStreamReader` (US_ASCII) in `SMTPClient` and `SmartClient`
+* used `java.util.Optional` and `Preconditions` in `SmartClient`, `SMTPClient` and `SMTPServer`
+* added `@Override` annotations
+* added `EmailUtils` tests
+* moved classes that are not part of the public API to internal packages
 
 
 ## Project Authors ##
