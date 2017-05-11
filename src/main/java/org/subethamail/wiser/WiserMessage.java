@@ -7,6 +7,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
+import org.subethamail.smtp.internal.Constants;
+
 /**
  * This class wraps a received message and provides a way to generate a JavaMail
  * MimeMessage from the data.
@@ -66,7 +68,7 @@ public final class WiserMessage {
         out.println("Envelope recipient: " + this.getEnvelopeReceiver());
 
         // It should all be convertible with ascii or utf8
-        String content = new String(this.getData());
+        String content = new String(this.getData(), Constants.SMTP_CHARSET);
         out.println(content);
 
         out.println("===== End message dump =====");
@@ -82,6 +84,6 @@ public final class WiserMessage {
         if (this.getData() == null)
             return "";
 
-        return new String(this.getData());
+        return new String(this.getData(), Constants.SMTP_CHARSET);
     }
 }
