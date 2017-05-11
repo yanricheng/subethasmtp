@@ -75,7 +75,7 @@ public class StartStopTest extends TestCase
 		wiser.start();
 
 		if (pause)
-			Thread.sleep(1000);
+			Thread.sleep(200);
 
 		wiser.stop();
 
