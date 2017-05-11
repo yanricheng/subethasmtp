@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +45,7 @@ final class ServerThread extends Thread
 	 */
 	private volatile boolean shuttingDown;
 
-	public ServerThread(SMTPServer server, ServerSocket serverSocket)
+	ServerThread(SMTPServer server, ServerSocket serverSocket)
 	{
 		super(ServerThread.class.getName() + " " + server.getDisplayableLocalSocketAddress());
 		this.server = server;
@@ -183,7 +184,7 @@ final class ServerThread extends Thread
 	/**
 	 * Closes the server socket and all client sockets.
 	 */
-	public void shutdown()
+	void shutdown()
 	{
 		// First make sure we aren't accepting any new connections
 		shutdownServerThread();
@@ -246,12 +247,12 @@ final class ServerThread extends Thread
 		}
 	}
 
-	public synchronized boolean hasTooManyConnections()
+	synchronized boolean hasTooManyConnections()
 	{
 		return sessionThreads.size() > server.getMaxConnections();
 	}
 
-	public synchronized int getNumberOfConnections()
+	synchronized int getNumberOfConnections()
 	{
 		return sessionThreads.size();
 	}
@@ -260,7 +261,7 @@ final class ServerThread extends Thread
 	 * Registers that the specified {@link Session} thread ended. Session
 	 * threads must call this function.
 	 */
-	public void sessionEnded(Session session)
+	void sessionEnded(Session session)
 	{
 		synchronized (this)
 		{

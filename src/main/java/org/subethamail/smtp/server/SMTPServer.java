@@ -565,8 +565,10 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     /**
-     * Call this method to get things rolling after instantiating the
-     * SMTPServer.
+     * Starts the server listening for connections. When this method returns the
+     * server socket will have been established and will accept connections
+     * though the thread that processes accepted connections (queued) may
+     * not have started yet (it runs asynchronously).
      * <p>
      * An SMTPServer which has been shut down, must not be reused.
      */

@@ -84,7 +84,6 @@ public class StartTLSFullTest {
                 .build();
         try {
             server.start();
-            Thread.sleep(1000);
             send(trustManagers);
         } finally {
             server.stop();

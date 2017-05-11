@@ -22,7 +22,6 @@ public class SmartClientTest {
         SMTPServer server = SMTPServer.port(25000).messageHandlerFactory(createMessageHandlerFactory()).build();
         try {
             server.start();
-            Thread.sleep(500);
             SmartClient client = SmartClient.createAndConnect("localhost", 25000, "clientHeloHost");
             assertEquals("clientHeloHost", client.getHeloHost());
             assertEquals(0, client.getRecipientCount());
