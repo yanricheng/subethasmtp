@@ -43,10 +43,10 @@ public final class Wiser implements SimpleMessageListener {
     private final static Logger log = LoggerFactory.getLogger(Wiser.class);
 
     /** */
-    SMTPServer server;
+    private final SMTPServer server;
 
     /** */
-    protected final List<WiserMessage> messages = Collections.synchronizedList(new ArrayList<WiserMessage>());
+    private final List<WiserMessage> messages = Collections.synchronizedList(new ArrayList<WiserMessage>());
 
     private final Accepter accepter;
 
