@@ -47,13 +47,15 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 	}
 
 	/** */
-	public List<String> getAuthenticationMechanisms()
+	@Override
+    public List<String> getAuthenticationMechanisms()
 	{
 		return MECHANISMS;
 	}
 
 	/** */
-	public AuthenticationHandler create()
+	@Override
+    public AuthenticationHandler create()
 	{
 		return new Handler();
 	}
@@ -137,7 +139,8 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 		}
 
 		/* */
-		public Object getIdentity()
+		@Override
+        public Object getIdentity()
 		{
 			return this.username;
 		}

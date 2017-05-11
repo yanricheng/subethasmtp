@@ -137,11 +137,13 @@ public final class Wiser implements SimpleMessageListener {
 
 
     /** Always accept everything */
+    @Override
     public boolean accept(String from, String recipient) {
         return accepter.accept(from, recipient);
     }
 
     /** Cache the messages in memory */
+    @Override
     public void deliver(String from, String recipient, InputStream data) throws TooMuchDataException, IOException {
         if (log.isDebugEnabled())
             log.debug("Delivering mail from " + from + " to " + recipient);

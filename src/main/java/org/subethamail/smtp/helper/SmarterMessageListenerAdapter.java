@@ -76,6 +76,7 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
      * org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.
      * MessageContext)
      */
+    @Override
     public MessageHandler create(MessageContext ctx) {
         return new Handler();
     }

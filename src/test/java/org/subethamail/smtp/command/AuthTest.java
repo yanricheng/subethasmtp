@@ -21,6 +21,7 @@ public class AuthTest extends ServerTestCase {
     static final String REQUIRED_PASSWORD = "mySecret01";
 
     class RequiredUsernamePasswordValidator implements UsernamePasswordValidator {
+        @Override
         public void login(String username, String password) throws LoginFailedException {
             if (!username.equals(REQUIRED_USERNAME) || !password.equals(REQUIRED_PASSWORD)) {
                 throw new LoginFailedException();

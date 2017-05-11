@@ -35,13 +35,15 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 	}
 
 	/** */
-	public List<String> getAuthenticationMechanisms()
+	@Override
+    public List<String> getAuthenticationMechanisms()
 	{
 		return MECHANISMS;
 	}
 
 	/** */
-	public AuthenticationHandler create()
+	@Override
+    public AuthenticationHandler create()
 	{
 		return new Handler();
 	}
@@ -54,7 +56,8 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 		private String password;
 
 		/* */
-		public Optional<String> auth(String clientInput) throws RejectException
+		@Override
+        public Optional<String> auth(String clientInput) throws RejectException
 		{
 			StringTokenizer stk = new StringTokenizer(clientInput);
 			String secret = stk.nextToken();
@@ -135,7 +138,8 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 		}
 
 		/* */
-		public Object getIdentity()
+		@Override
+        public Object getIdentity()
 		{
 			return this.username;
 		}

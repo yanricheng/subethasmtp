@@ -71,6 +71,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
      * org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.
      * MessageContext)
      */
+    @Override
     public MessageHandler create(MessageContext ctx) {
         return new Handler(ctx);
     }
@@ -111,11 +112,13 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
         }
 
         /** */
+        @Override
         public void from(String from) throws RejectException {
             this.from = from;
         }
 
         /** */
+        @Override
         public void recipient(String recipient) throws RejectException {
             boolean addedListener = false;
 
@@ -131,6 +134,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
         }
 
         /** */
+        @Override
         public void data(InputStream data) throws TooMuchDataException, IOException {
             if (this.deliveries.size() == 1) {
                 Delivery delivery = this.deliveries.get(0);
@@ -155,6 +159,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
         }
 
         /** */
+        @Override
         public void done() {
         }
     }

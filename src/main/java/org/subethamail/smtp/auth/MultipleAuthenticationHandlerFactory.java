@@ -60,13 +60,15 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	}
 
 	/** */
-	public List<String> getAuthenticationMechanisms()
+	@Override
+    public List<String> getAuthenticationMechanisms()
 	{
 		return this.mechanisms;
 	}
 
 	/** */
-	public AuthenticationHandler create()
+	@Override
+    public AuthenticationHandler create()
 	{
 		return new Handler();
 	}
@@ -78,7 +80,8 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 		AuthenticationHandler active;
 
 		/* */
-		public Optional<String> auth(String clientInput) throws RejectException
+		@Override
+        public Optional<String> auth(String clientInput) throws RejectException
 		{
 			if (this.active == null)
 			{
@@ -101,7 +104,8 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 		}
 
 		/* */
-		public Object getIdentity()
+		@Override
+        public Object getIdentity()
 		{
 			return this.active.getIdentity();
 		}

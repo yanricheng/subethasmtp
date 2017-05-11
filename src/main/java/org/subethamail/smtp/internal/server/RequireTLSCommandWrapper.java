@@ -24,7 +24,8 @@ public final class RequireTLSCommandWrapper implements Command
 		this.wrapped = wrapped;
 	}
 
-	public void execute(String commandString, Session sess) 
+	@Override
+    public void execute(String commandString, Session sess) 
 			throws IOException, DropConnectionException
 	{
 		if (!sess.getServer().getRequireTLS() || sess.isTLSStarted())
@@ -33,12 +34,14 @@ public final class RequireTLSCommandWrapper implements Command
 			sess.sendResponse("530 Must issue a STARTTLS command first");
 	}
 
-	public HelpMessage getHelp() throws CommandException
+	@Override
+    public HelpMessage getHelp() throws CommandException
 	{
 		return wrapped.getHelp();
 	}
 
-	public String getName()
+	@Override
+    public String getName()
 	{
 		return wrapped.getName();
 	}

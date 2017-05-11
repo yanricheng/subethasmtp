@@ -7,6 +7,7 @@ import javax.mail.MessagingException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.subethamail.smtp.MessageContext;
@@ -33,7 +34,7 @@ public class MessageHandlerTest {
     public void testCompletedMailTransaction() throws Exception {
         MessageHandlerFactory f = Mockito.mock(MessageHandlerFactory.class);
         MessageHandler h = Mockito.mock(MessageHandler.class);
-        Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
+        Mockito.when(f.create(ArgumentMatchers.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
             SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
@@ -47,10 +48,10 @@ public class MessageHandlerTest {
             server.stop(); // wait for the server to catch up
         }
         InOrder o = Mockito.inOrder(f, h);
-        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(f).create(ArgumentMatchers.any(MessageContext.class));
         o.verify(h).from("john@example.com");
         o.verify(h).recipient("jane@example.com");
-        o.verify(h).data(Mockito.any(InputStream.class));
+        o.verify(h).data(ArgumentMatchers.any(InputStream.class));
         o.verify(h).done();
         Mockito.verifyNoMoreInteractions(f, h);
     }
@@ -72,7 +73,7 @@ public class MessageHandlerTest {
     public void testAbortedMailTransaction() throws Exception {
         MessageHandlerFactory f = Mockito.mock(MessageHandlerFactory.class);
         MessageHandler h = Mockito.mock(MessageHandler.class);
-        Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
+        Mockito.when(f.create(ArgumentMatchers.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
             SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
@@ -82,7 +83,7 @@ public class MessageHandlerTest {
             server.stop(); // wait for the server to catch up
         }
         InOrder o = Mockito.inOrder(f, h);
-        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(f).create(ArgumentMatchers.any(MessageContext.class));
         o.verify(h).from("john@example.com");
         o.verify(h).done();
         Mockito.verifyNoMoreInteractions(f, h);
@@ -93,7 +94,7 @@ public class MessageHandlerTest {
 
         MessageHandlerFactory f = Mockito.mock(MessageHandlerFactory.class);
         MessageHandler h = Mockito.mock(MessageHandler.class);
-        Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
+        Mockito.when(f.create(ArgumentMatchers.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
             SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
@@ -114,15 +115,15 @@ public class MessageHandlerTest {
             server.stop(); // wait for the server to catch up
         }
         InOrder o = Mockito.inOrder(f, h);
-        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(f).create(ArgumentMatchers.any(MessageContext.class));
         o.verify(h).from("john1@example.com");
         o.verify(h).recipient("jane1@example.com");
-        o.verify(h).data(Mockito.any(InputStream.class));
+        o.verify(h).data(ArgumentMatchers.any(InputStream.class));
         o.verify(h).done();
-        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(f).create(ArgumentMatchers.any(MessageContext.class));
         o.verify(h).from("john2@example.com");
         o.verify(h).recipient("jane2@example.com");
-        o.verify(h).data(Mockito.any(InputStream.class));
+        o.verify(h).data(ArgumentMatchers.any(InputStream.class));
         o.verify(h).done();
         Mockito.verifyNoMoreInteractions(f, h);
     }
@@ -143,7 +144,7 @@ public class MessageHandlerTest {
         MessageHandler h = Mockito.mock(MessageHandler.class);
         Mockito.doThrow(new RejectException("Test MAIL FROM rejection")).when(h).from("john1@example.com");
         Mockito.doNothing().when(h).from("john2@example.com");
-        Mockito.when(f.create(Mockito.any(MessageContext.class))).thenReturn(h);
+        Mockito.when(f.create(ArgumentMatchers.any(MessageContext.class))).thenReturn(h);
         SMTPServer server = create(f);
         try {
             SmartClient client = SmartClient.createAndConnect("localhost", server.getPort(), "localhost");
@@ -159,10 +160,10 @@ public class MessageHandlerTest {
             server.stop(); // wait for the server to catch up
         }
         InOrder o = Mockito.inOrder(f, h);
-        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(f).create(ArgumentMatchers.any(MessageContext.class));
         o.verify(h).from("john1@example.com");
         o.verify(h).done();
-        o.verify(f).create(Mockito.any(MessageContext.class));
+        o.verify(f).create(ArgumentMatchers.any(MessageContext.class));
         o.verify(h).from("john2@example.com");
         o.verify(h).done();
         Mockito.verifyNoMoreInteractions(f, h);

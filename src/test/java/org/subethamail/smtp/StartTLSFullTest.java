@@ -34,6 +34,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.subethamail.smtp.server.SMTPServer;
@@ -69,7 +70,7 @@ public class StartTLSFullTest {
         // mock a MessageHandlerFactory to check for delivery
         MessageHandlerFactory mhf = Mockito.mock(MessageHandlerFactory.class);
         MessageHandler mh = Mockito.mock(MessageHandler.class);
-        Mockito.when(mhf.create(Mockito.any(MessageContext.class))).thenReturn(mh);
+        Mockito.when(mhf.create(ArgumentMatchers.any(MessageContext.class))).thenReturn(mh);
 
         SSLSocketCreator tlsSocketCreator = createTLSSocketCreator(sslContext);
         SMTPServer server = SMTPServer //
@@ -89,10 +90,10 @@ public class StartTLSFullTest {
             server.stop();
         }
         InOrder o = Mockito.inOrder(mhf, mh);
-        o.verify(mhf).create(Mockito.any(MessageContext.class));
+        o.verify(mhf).create(ArgumentMatchers.any(MessageContext.class));
         o.verify(mh).from(EMAIL_FROM);
         o.verify(mh).recipient(EMAIL_TO);
-        o.verify(mh).data(Mockito.any(InputStream.class));
+        o.verify(mh).data(ArgumentMatchers.any(InputStream.class));
         o.verify(mh).done();
         o.verifyNoMoreInteractions();
     }

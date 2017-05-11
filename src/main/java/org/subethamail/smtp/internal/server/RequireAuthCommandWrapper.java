@@ -27,6 +27,7 @@ public  final class RequireAuthCommandWrapper implements Command
     /**
      * {@inheritDoc}
      */
+    @Override
     public void execute(String commandString, Session sess)
             throws IOException, DropConnectionException
     {
@@ -39,6 +40,7 @@ public  final class RequireAuthCommandWrapper implements Command
     /**
      * {@inheritDoc}
      */
+    @Override
     public HelpMessage getHelp() throws CommandException
     {
         return wrapped.getHelp();
@@ -47,6 +49,7 @@ public  final class RequireAuthCommandWrapper implements Command
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getName()
     {
         return wrapped.getName();

@@ -43,17 +43,20 @@ public abstract class BaseCommand implements Command
 	/**
 	 * This is the main method that you need to override in order to implement a command.
 	 */
-	abstract public void execute(String commandString, Session context)
+	@Override
+    abstract public void execute(String commandString, Session context)
 			throws IOException, DropConnectionException;
 
 	/** */
-	public HelpMessage getHelp()
+	@Override
+    public HelpMessage getHelp()
 	{
 		return this.helpMsg;
 	}
 
 	/** */
-	public String getName()
+	@Override
+    public String getName()
 	{
 		return this.name;
 	}

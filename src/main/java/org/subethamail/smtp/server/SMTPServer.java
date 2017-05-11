@@ -644,6 +644,7 @@ public final class SMTPServer implements SSLSocketCreator {
      * @throws IOException
      *             when creating the socket failed
      */
+    @Override
     public final SSLSocket createSSLSocket(Socket socket) throws IOException {
         return sslSocketCreator.createSSLSocket(socket);
     }
