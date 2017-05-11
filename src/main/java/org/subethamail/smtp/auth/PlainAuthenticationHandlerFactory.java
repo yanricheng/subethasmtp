@@ -1,5 +1,7 @@
 package org.subethamail.smtp.auth;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.subethamail.smtp.RejectException;
  */
 public final class PlainAuthenticationHandlerFactory implements AuthenticationHandlerFactory
 {
+    private static final Charset AUTHORIZATION_CHARSET = StandardCharsets.UTF_8;
 	private static final List<String> MECHANISMS = new ArrayList<String>(1);
 	static {
 		MECHANISMS.add("PLAIN");
@@ -52,7 +55,7 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 	 */
 	class Handler implements AuthenticationHandler
 	{
-		private String username;
+        private String username;
 		private String password;
 
 		/* */
@@ -114,9 +117,9 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 			}
 
 			@SuppressWarnings("unused")
-			String authorizationId = new String(decodedSecret, 0, i);
-			String authenticationId = new String(decodedSecret, i + 1, j - i - 1);
-			String passwd = new String(decodedSecret, j + 1, decodedSecret.length - j - 1);
+			String authorizationId = new String(decodedSecret, 0, i, AUTHORIZATION_CHARSET);
+			String authenticationId = new String(decodedSecret, i + 1, j - i - 1, AUTHORIZATION_CHARSET);
+			String passwd = new String(decodedSecret, j + 1, decodedSecret.length - j - 1, AUTHORIZATION_CHARSET);
 
 			// might be nice to do something with authorizationId, but for
 			// purposes of the UsernamePasswordValidator, we just want to use
