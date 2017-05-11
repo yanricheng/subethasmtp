@@ -24,16 +24,23 @@ public class EmailUtilsTest {
     public void testBlankAddressIsValid() {
         Assert.assertTrue(EmailUtils.isValidEmailAddress(""));
     }
-    
+
     @Test
     public void testExtract() {
-        assertEquals("anyone2@anywhere.com", EmailUtils.extractEmailAddress("TO:<anyone2@anywhere.com>" ,3));
+        assertEquals("anyone2@anywhere.com",
+                EmailUtils.extractEmailAddress("TO:<anyone2@anywhere.com>", 3));
     }
-    
+
     @Test
-    public void testExtractWithSpace() {
-        assertEquals("anyone2@anywhere.com", EmailUtils.extractEmailAddress("TO:<anyone2@anywhere.com> something" ,3));
+    public void testExtractWithNoLessThanSymbolAtStartOfEmailAndPrecedingSpace() {
+        assertEquals("test@example.com",
+                EmailUtils.extractEmailAddress("FROM: test@example.com", 5));
     }
-    
+
+    @Test
+    public void testExtractWithNoLessThanSymbolAtStartOfEmailAndNoPrecedingSpace() {
+        assertEquals("test@example.com",
+                EmailUtils.extractEmailAddress("FROM:test@example.com", 5));
+    }
 
 }
