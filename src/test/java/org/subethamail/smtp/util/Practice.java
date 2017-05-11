@@ -41,8 +41,9 @@ public class Practice
 			line = in.readLine();
 			line = line.trim();
 
-			if ("dump".equals(line));
+			if ("dump".equals(line)) {
 				wiser.dumpMessages(System.out);
+			}
 
 			if (line.startsWith("dump "))
 			{
