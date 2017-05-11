@@ -43,4 +43,10 @@ public class EmailUtilsTest {
                 EmailUtils.extractEmailAddress("FROM:test@example.com", 5));
     }
 
+    
+    @Test
+    public void testExtractWithNoLessThanSymbolAtStartOfEmailAndSIZECommand() {
+        assertEquals("test@example.com",
+                EmailUtils.extractEmailAddress("FROM:test@example.com SIZE=1000", 5));
+    }
 }

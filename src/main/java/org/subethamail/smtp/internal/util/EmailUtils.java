@@ -37,7 +37,6 @@ public final class EmailUtils {
      * Extracts the email address within a <> after a specified offset.
      */
     public static String extractEmailAddress(String args, int offset) {
-        System.out.println("extractEmailAddress "+ args  + ":"+offset);
         String address = args.substring(offset).trim();
         if (address.indexOf('<') == 0) {
             address = address.substring(1, address.indexOf('>'));
