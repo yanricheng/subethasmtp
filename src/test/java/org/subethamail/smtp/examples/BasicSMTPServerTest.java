@@ -26,4 +26,8 @@ public class BasicSMTPServerTest {
         server.stop();
     }
     
+    public static void main(String[] args) {
+        BasicSMTPServer.main(args);
+    }
+    
 }

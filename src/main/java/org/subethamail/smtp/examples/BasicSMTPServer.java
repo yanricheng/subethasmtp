@@ -14,12 +14,12 @@ import org.subethamail.smtp.server.SMTPServer;
 
 public final class BasicSMTPServer {
 
-    static int defaultListenPort = 25000;
+    public static final int DEFAULT_PORT = 25000;
 
-    public SMTPServer start(int listenPort) {
+    public SMTPServer start(int port) {
         BasicMessageHandlerFactory myFactory = new BasicMessageHandlerFactory();
-        SMTPServer smtpServer = SMTPServer.port(listenPort).messageHandlerFactory(myFactory).build();
-        System.out.println("Starting Basic SMTP Server on port " + listenPort + "...");
+        SMTPServer smtpServer = SMTPServer.port(port).messageHandlerFactory(myFactory).build();
+        System.out.println("Starting Basic SMTP Server on port " + port + "...");
         smtpServer.start();
         return smtpServer;
     }
@@ -78,7 +78,7 @@ public final class BasicSMTPServer {
     }
 
     public static void main(String[] args) {
-        new BasicSMTPServer().start(defaultListenPort);
+        new BasicSMTPServer().start(DEFAULT_PORT);
         System.out.println("Server running!");
     }
 }
