@@ -117,7 +117,8 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 			}
 
 			@SuppressWarnings("unused")
-			String authorizationId = new String(decodedSecret, 0, i, AUTHORIZATION_CHARSET);
+			//authorizationId not used so commented out
+			// String authorizationId = new String(decodedSecret, 0, i, AUTHORIZATION_CHARSET);
 			String authenticationId = new String(decodedSecret, i + 1, j - i - 1, AUTHORIZATION_CHARSET);
 			String passwd = new String(decodedSecret, j + 1, decodedSecret.length - j - 1, AUTHORIZATION_CHARSET);
 
