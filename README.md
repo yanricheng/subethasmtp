@@ -75,7 +75,7 @@ Dave Moten came across this and
 * disallowed inheritance of `SMTPServer` (now final)
 * `Wiser` now created with builder pattern (disallowed inheritance and added `accepter` builder method)
 * used composition instead of inheritance in `SmartClient`
-* used static factory method for `SmartClient` so that references don't escape the constructor (connect was called from the constructor)
+* used static factory method for `SmartClient` so that references don't escape the constructor (`connect` was called from the constructor)
 * used explicit character set with `InputStreamReader` (US_ASCII) in `SMTPClient` and `SmartClient`
 * used `java.util.Optional` and `Preconditions` in `SmartClient`, `SMTPClient` and `SMTPServer`
 * added `@Override` annotations
