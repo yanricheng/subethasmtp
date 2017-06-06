@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.annotation.concurrent.GuardedBy;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -432,18 +433,22 @@ public final class SMTPServer implements SSLSocketCreator {
             return this;
         }
 
-        public Builder serverSocketCreator(ServerSocketCreator serverSocketCreator) {
+        public Builder serverSocketFactory(ServerSocketCreator serverSocketCreator) {
             this.serverSocketCreator = serverSocketCreator;
             return this;
         }
         
-        public Builder serverSocketCreator(SSLServerSocketFactory factory) {
+        public Builder serverSocketFactory(SSLServerSocketFactory factory) {
             this.serverSocketCreator = new ServerSocketCreator() {
                 @Override
                 public ServerSocket createServerSocket() throws IOException {
                     return factory.createServerSocket();
                 }};
                 return this;
+        }
+        
+        public Builder serverSocketFactory(SSLContext context) {
+            return serverSocketFactory(context.getServerSocketFactory());
         }
 
         public Builder sslSocketCreator(SSLSocketCreator creator) {
