@@ -69,7 +69,6 @@ public class StartTLSFullTest {
         MessageHandler mh = Mockito.mock(MessageHandler.class);
         Mockito.when(mhf.create(ArgumentMatchers.any(MessageContext.class))).thenReturn(mh);
 
-        SSLSocketCreator tlsSocketCreator = createTLSSocketCreator(sslContext);
         SMTPServer server = SMTPServer //
                 .port(PORT) //
                 .hostName("email-server.me.com") //
@@ -77,7 +76,7 @@ public class StartTLSFullTest {
                 .enableTLS() //
                 .messageHandlerFactory(mhf) //
                 .executorService(Executors.newSingleThreadExecutor()) //
-                .sslSocketCreator(tlsSocketCreator) //
+                .startTlsSocketFactory(sslContext) //
                 .build();
         try {
             server.start();
@@ -92,31 +91,6 @@ public class StartTLSFullTest {
         o.verify(mh).data(ArgumentMatchers.any(InputStream.class));
         o.verify(mh).done();
         o.verifyNoMoreInteractions();
-    }
-
-    private static SSLSocketCreator createTLSSocketCreator(final SSLContext sslContext) {
-        return new SSLSocketCreator() {
-            @Override
-            public SSLSocket createSSLSocket(Socket socket) throws IOException {
-                InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-
-                SSLSocketFactory sf = sslContext.getSocketFactory();
-                SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
-                        true));
-
-                // we are a server
-                s.setUseClientMode(false);
-
-                // select protocols and cipher suites
-                s.setEnabledProtocols(s.getSupportedProtocols());
-                s.setEnabledCipherSuites(s.getSupportedCipherSuites());
-
-                //// Client must authenticate
-                // s.setNeedClientAuth(true);
-
-                return s;
-            }
-        };
     }
 
 }

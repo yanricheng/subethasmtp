@@ -135,7 +135,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
     private final SSLSocketCreator sslSocketCreator;
 
-    private final ServerSocketCreator serverSocketCreator;
+    private final ServerSocketCreator startTlsSocketFactory;
 
     public static final class Builder {
         private String hostName;
@@ -196,7 +196,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
         private SessionIdFactory sessionIdFactory = new TimeBasedSessionIdFactory();
 
-        private SSLSocketCreator sslSocketCreator = SSL_SOCKET_CREATOR_DEFAULT;
+        private SSLSocketCreator startTlsSocketCreator = SSL_SOCKET_CREATOR_DEFAULT;
 
         private ServerSocketCreator serverSocketCreator = SERVER_SOCKET_CREATOR_DEFAULT;
 
@@ -437,31 +437,55 @@ public final class SMTPServer implements SSLSocketCreator {
             this.serverSocketCreator = serverSocketCreator;
             return this;
         }
-        
+
         public Builder serverSocketFactory(SSLServerSocketFactory factory) {
-            this.serverSocketCreator = new ServerSocketCreator() {
+            return serverSocketFactory(new ServerSocketCreator() {
                 @Override
                 public ServerSocket createServerSocket() throws IOException {
                     return factory.createServerSocket();
-                }};
-                return this;
+                }
+            });
         }
-        
+
         public Builder serverSocketFactory(SSLContext context) {
             return serverSocketFactory(context.getServerSocketFactory());
         }
 
-        public Builder sslSocketCreator(SSLSocketCreator creator) {
-            this.sslSocketCreator = creator;
+        public Builder startTlsSocketFactory(SSLSocketCreator creator) {
+            this.startTlsSocketCreator = creator;
             return this;
-        }
+        } 
         
+        public Builder startTlsSocketFactory(SSLContext context) {
+            return startTlsSocketFactory(new SSLSocketCreator() {
+                @Override
+                public SSLSocket createSSLSocket(Socket socket) throws IOException {
+                    InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+
+                    SSLSocketFactory sf = context.getSocketFactory();
+                    SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
+                            true));
+
+                    // we are a server
+                    s.setUseClientMode(false);
+
+                    // select protocols and cipher suites
+                    s.setEnabledProtocols(s.getSupportedProtocols());
+                    s.setEnabledCipherSuites(s.getSupportedCipherSuites());
+
+                    //// Client must authenticate
+                    // s.setNeedClientAuth(true);
+
+                    return s;
+                }
+            });
+        }
 
         public SMTPServer build() {
             return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
                     authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
                     disableReceivedHeaders, maxConnections, connectionTimeout, maxRecipients, maxMessageSize,
-                    sessionIdFactory, sslSocketCreator, serverSocketCreator);
+                    sessionIdFactory, startTlsSocketCreator, serverSocketCreator);
         }
 
     }
@@ -472,11 +496,11 @@ public final class SMTPServer implements SSLSocketCreator {
             Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
             boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeout,
             int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator,
-            ServerSocketCreator serverSocketCreator) {
+            ServerSocketCreator startTlsSocketFactory) {
         Preconditions.checkNotNull(messageHandlerFactory);
         Preconditions.checkArgument(!requireAuth || authenticationHandlerFactory != null,
                 "if requireAuth is set to true then you must specify an authenticationHandlerFactory");
-        Preconditions.checkNotNull(serverSocketCreator, "serverSocketCreator cannot be null");
+        Preconditions.checkNotNull(startTlsSocketFactory, "serverSocketCreator cannot be null");
         this.bindAddress = bindAddress;
         this.port = port;
         this.backlog = backlog;
@@ -495,7 +519,7 @@ public final class SMTPServer implements SSLSocketCreator {
         this.sessionIdFactory = sessionIdFactory;
         this.commandHandler = new CommandHandler();
         this.sslSocketCreator = sslSocketCreator;
-        this.serverSocketCreator = serverSocketCreator;
+        this.startTlsSocketFactory = startTlsSocketFactory;
 
         if (executorService.isPresent()) {
             this.executorService = executorService.get();
@@ -648,7 +672,7 @@ public final class SMTPServer implements SSLSocketCreator {
             isa = new InetSocketAddress(this.bindAddress.orElse(null), this.port);
         }
 
-        ServerSocket serverSocket = serverSocketCreator.createServerSocket();
+        ServerSocket serverSocket = startTlsSocketFactory.createServerSocket();
         serverSocket.bind(isa, backlog);
         if (this.port == 0) {
             this.allocatedPort = serverSocket.getLocalPort();
