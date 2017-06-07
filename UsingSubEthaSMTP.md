@@ -6,7 +6,7 @@ SubEthaSMTP implements a powerful, low-level API that lets you handle incoming m
 
 ## The Basic API ##
 ```
-SMTPServer smtpServer = new SMTPServer(myFactory);
+SMTPServer smtpServer = SMTPServer.port(25).messageHandlerFactory(myFactory).build();
 smtpServer.start();
 ```
 
@@ -46,8 +46,11 @@ For every message delivery, SubEthaSMTP will call your Factory to create a Messa
 If you simply wish to receive one copy of each message/recipient combination, the SimpleMessageListener will help you.
 
 ```
-SMTPServer smtpServer = new SMTPServer(new SimpleMessageListenerAdapter(myListener));
-smtpServer.start();
+SMTPServer server = SMTPServer
+  .port(25)
+  .messageHandlerFactory(new SimpleMessageListenerAdapter(myListener))
+  .build();
+server.start();
 ```
 
 The SimpleMessageListener is easy to implement:
@@ -81,9 +84,12 @@ Look at the source code for [Wiser](Wiser.md) to see a simple example of how to 
 SubEtha SMTP supports the SMTP AUTH commands through a factory interface similar to the MessageHandlerFactory.  For convenience, a pluggable authenticator implementation that supports PLAIN and LOGIN is provided with the distribution.
 
 ```
-SMTPServer smtpServer = new SMTPServer(myMessageHandlerFactory);
-smtpServer.setAuthenticationHandlerFactory(new EasyAuthenticationHandlerFactory(myUsernamePasswordValidator));
-smtpServer.start();
+SMTPServer server = SMTPServer
+  .port(port)
+  .messageHandlerFactory(myMessageHandlerFactory);
+  .authenticationHandlerFactory(new EasyAuthenticationHandlerFactory(myUsernamePasswordValidator))
+  .build();
+server.start();
 ```
 
 If you do not explicitly set an AuthenticationHandlerFactory, SMTP AUTH will not be advertised or supported.  See the javadocs for AuthenticationHandlerFactory for more information.
@@ -97,5 +103,4 @@ SubEthaSMTP is a multithreaded server.  You may change settings on a stopped ser
 On unix, it is possible to run SubEthatSMTP on port 25 without running the JVM as root. Please see the iptables/ipfw instructions here: [UsingPort25](http://code.google.com/p/subetha/wiki/UsingPort25)
 
 ## SSL Configuration ##
-
-Erik van Oosten has written an excellent blog posting about [how to configure this](http://blog.jteam.nl/2009/11/10/securing-connections-with-tls/).
+A fully worked example of StartTLS is available in the unit test [StartTLSFullTest.java](src/test/java/org/subethamail/smtp/StartTLSFullTest.java). The basis of the unit test was the excellent [blog posting](https://blog.trifork.com/2009/11/10/securing-connections-with-tls/) by Erik van Oosten. 

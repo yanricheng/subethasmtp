@@ -7,9 +7,9 @@ The SubEtha SMTP binary, source, and JavaDocs jars are published to the Maven Ce
 To use the binary jar, add the dependency to the POM (adjust the version as necessary):
 ```
 <dependency>
-  <groupId>org.subethamail</groupId>
+  <groupId>com.github.davidmoten</groupId>
   <artifactId>subethasmtp</artifactId>
-  <version>3.1.3</version>
+  <version>VERSION_HERE</version>
 </dependency>
 ```
 
