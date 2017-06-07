@@ -116,7 +116,6 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 						"Invalid command argument, does not contain the second NUL");
 			}
 
-			@SuppressWarnings("unused")
 			//authorizationId not used so commented out
 			// String authorizationId = new String(decodedSecret, 0, i, AUTHORIZATION_CHARSET);
 			String authenticationId = new String(decodedSecret, i + 1, j - i - 1, AUTHORIZATION_CHARSET);
