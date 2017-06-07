@@ -24,7 +24,7 @@ public final class BasicSMTPServer {
         return smtpServer;
     }
     
-    static final class BasicMessageHandlerFactory implements MessageHandlerFactory {
+    private static final class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
         @Override
         public MessageHandler create(MessageContext ctx) {

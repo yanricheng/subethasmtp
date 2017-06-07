@@ -46,7 +46,8 @@ public final class Wiser implements SimpleMessageListener {
     private final SMTPServer server;
 
     /** */
-    private final List<WiserMessage> messages = Collections.synchronizedList(new ArrayList<WiserMessage>());
+    private final List<WiserMessage> messages = Collections
+            .synchronizedList(new ArrayList<WiserMessage>());
 
     private final Accepter accepter;
 
@@ -61,47 +62,45 @@ public final class Wiser implements SimpleMessageListener {
     public static Wiser create() {
         return new Wiser(SMTPServer.port(25).build(), ACCEPTER_DEFAULT);
     }
-    
+
     public static WiserBuilder accepter(Accepter accepter) {
         return new WiserBuilder().accepter(accepter);
     }
-    
-    private static final Accepter ACCEPTER_DEFAULT = (from, recipient ) -> {
-        if (log.isDebugEnabled())
-            log.debug("Accepting mail from " + from + " to " + recipient);
 
+    private static final Accepter ACCEPTER_DEFAULT = (from, recipient) -> {
+        log.debug("Accepting mail from {} to {}", from, recipient);
         return true;
     };
-    
+
     public static final class WiserBuilder {
         private Accepter accepter = ACCEPTER_DEFAULT;
         private Builder server;
-        
+
         private WiserBuilder() {
-            
+
         }
-        
+
         public WiserBuilder accepter(Accepter accepter) {
             this.accepter = accepter;
             return this;
         }
-        
+
         public Wiser server(SMTPServer.Builder server) {
             this.server = server;
             return new Wiser(server, accepter);
         }
-        
+
         public Wiser port(int port) {
             this.server = SMTPServer.port(port);
             return new Wiser(server, accepter);
         }
-        
+
     }
 
     public static interface Accepter {
-        boolean accept(String from, String recipient); 
+        boolean accept(String from, String recipient);
     }
-    
+
     private Wiser(SMTPServer server, Accepter accepter) {
         this.server = server;
         this.accepter = accepter;
@@ -135,7 +134,6 @@ public final class Wiser implements SimpleMessageListener {
         this.server.stop();
     }
 
-
     /** Always accept everything */
     @Override
     public boolean accept(String from, String recipient) {
@@ -144,9 +142,9 @@ public final class Wiser implements SimpleMessageListener {
 
     /** Cache the messages in memory */
     @Override
-    public void deliver(String from, String recipient, InputStream data) throws TooMuchDataException, IOException {
-        if (log.isDebugEnabled())
-            log.debug("Delivering mail from " + from + " to " + recipient);
+    public void deliver(String from, String recipient, InputStream data)
+            throws TooMuchDataException, IOException {
+        log.debug("Delivering mail from {} to {}", from, recipient);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         data = new BufferedInputStream(data);
@@ -159,8 +157,7 @@ public final class Wiser implements SimpleMessageListener {
 
         byte[] bytes = out.toByteArray();
 
-        if (log.isDebugEnabled())
-            log.debug("Creating message from data with " + bytes.length + " bytes");
+        log.debug("Creating message from data with {} bytes", bytes.length);
 
         Session session = Session.getDefaultInstance(new Properties());
         // create a new WiserMessage.
@@ -198,7 +195,7 @@ public final class Wiser implements SimpleMessageListener {
 
         out.println("----- End printing messages -----");
     }
-    
+
     /** A main() for this class. Starts up the server. */
     public static void main(String[] args) throws Exception {
         Wiser wiser = Wiser.create();

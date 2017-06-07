@@ -22,550 +22,487 @@ import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.internal.io.CRLFTerminatedReader;
 
 /**
- * The thread that handles a connection. This class
- * passes most of it's responsibilities off to the
- * CommandHandler.
+ * The thread that handles a connection. This class passes most of it's
+ * responsibilities off to the CommandHandler.
  *
  * @author Jon Stevens
  * @author Jeff Schnitzer
  */
-public final class Session implements Runnable, MessageContext
-{
-	private final static Logger log = LoggerFactory.getLogger(Session.class);
+public final class Session implements Runnable, MessageContext {
+    private final static Logger log = LoggerFactory.getLogger(Session.class);
 
-	/** A link to our parent server */
-	private final SMTPServer server;
+    /** A link to our parent server */
+    private final SMTPServer server;
 
-	/**
-	 * A link to our parent server thread, which must be notified when this
-	 * connection is finished.
-	 */
-	private final ServerThread serverThread;
-	
-	/**
-	 * Saved SLF4J mapped diagnostic context of the parent thread. The parent
-	 * thread is the one which calls the constructor. MDC is usually inherited
-	 * by new threads, but this mechanism does not work with executors.
-	 */
-	private final Map<String, String> parentLoggingMdcContext = MDC.getCopyOfContextMap();
-	
-	/**
-	 * Uniquely identifies this session within an extended time period, useful
-	 * for logging.
-	 */
-	private String sessionId;
+    /**
+     * A link to our parent server thread, which must be notified when this
+     * connection is finished.
+     */
+    private final ServerThread serverThread;
 
-	/** Set this true when doing an ordered shutdown */
-	private volatile boolean quitting = false;
+    /**
+     * Saved SLF4J mapped diagnostic context of the parent thread. The parent
+     * thread is the one which calls the constructor. MDC is usually inherited
+     * by new threads, but this mechanism does not work with executors.
+     */
+    private final Map<String, String> parentLoggingMdcContext = MDC.getCopyOfContextMap();
 
-	/** I/O to the client */
-	private Socket socket;
-	private InputStream input;
-	private CRLFTerminatedReader reader;
-	private PrintWriter writer;
+    /**
+     * Uniquely identifies this session within an extended time period, useful
+     * for logging.
+     */
+    private String sessionId;
 
-	/** Might exist if the client has successfully authenticated */
-	private Optional<AuthenticationHandler> authenticationHandler = Optional.empty();
+    /** Set this true when doing an ordered shutdown */
+    private volatile boolean quitting = false;
 
-	/**
-	 * It exists if a mail transaction is in progress (from the MAIL command
-	 * up to the end of the DATA command).
-	 */
-	private MessageHandler messageHandler;
+    /** I/O to the client */
+    private Socket socket;
+    private InputStream input;
+    private CRLFTerminatedReader reader;
+    private PrintWriter writer;
 
-	/** Some state information */
-	private Optional<String> helo = Optional.empty();
-	private int recipientCount;
-	/**
-	 * The recipient address in the first accepted RCPT command, but only if
-	 * there is exactly one such accepted recipient. If there is no accepted
-	 * recipient yet, or if there are more than one, then this value is null.
-	 * This information is useful in the construction of the FOR clause of the
-	 * Received header.
-	 */
-	private Optional<String> singleRecipient;
+    /** Might exist if the client has successfully authenticated */
+    private Optional<AuthenticationHandler> authenticationHandler = Optional.empty();
 
-	/**
-	 * If the client told us the size of the message, this is the value.
-	 * If they didn't, the value will be 0.
-	 */
-	private int declaredMessageSize = 0;
+    /**
+     * It exists if a mail transaction is in progress (from the MAIL command up
+     * to the end of the DATA command).
+     */
+    private MessageHandler messageHandler;
 
-	/** Some more state information */
-	private boolean tlsStarted;
-	private Certificate[] tlsPeerCertificates;
+    /** Some state information */
+    private Optional<String> helo = Optional.empty();
+    private int recipientCount;
+    /**
+     * The recipient address in the first accepted RCPT command, but only if
+     * there is exactly one such accepted recipient. If there is no accepted
+     * recipient yet, or if there are more than one, then this value is null.
+     * This information is useful in the construction of the FOR clause of the
+     * Received header.
+     */
+    private Optional<String> singleRecipient;
 
-	/**
-	 * Creates the Runnable Session object.
-	 *
-	 * @param server a link to our parent
-	 * @param socket is the socket to the client
-	 * @throws IOException
-	 */
-	public Session(SMTPServer server, ServerThread serverThread, Socket socket)
-		throws IOException
-	{
-		this.server = server;
-		this.serverThread = serverThread;
+    /**
+     * If the client told us the size of the message, this is the value. If they
+     * didn't, the value will be 0.
+     */
+    private int declaredMessageSize = 0;
 
-		this.setSocket(socket);
-	}
+    /** Some more state information */
+    private boolean tlsStarted;
+    private Certificate[] tlsPeerCertificates;
 
-	/**
-	 * @return a reference to the master server object
-	 */
-	public SMTPServer getServer()
-	{
-		return this.server;
-	}
+    /**
+     * Creates the Runnable Session object.
+     *
+     * @param server
+     *            a link to our parent
+     * @param socket
+     *            is the socket to the client
+     * @throws IOException
+     */
+    public Session(SMTPServer server, ServerThread serverThread, Socket socket) throws IOException {
+        this.server = server;
+        this.serverThread = serverThread;
 
-	/**
-	 * The thread for each session runs on this and shuts down when the quitting
-	 * member goes true.
-	 */
-	@Override
-	public void run()
-	{
-		MDC.setContextMap(parentLoggingMdcContext);
-		sessionId = server.getSessionIdFactory().create();
-		MDC.put("SessionId", sessionId);
-		final String originalName = Thread.currentThread().getName();
-		Thread.currentThread().setName(
-				Session.class.getName() + "-" + socket.getInetAddress() + ":"
-						+ socket.getPort());
+        this.setSocket(socket);
+    }
 
-		if (log.isDebugEnabled())
-		{
-			InetAddress remoteInetAddress = this.getRemoteAddress().getAddress();
-			remoteInetAddress.getHostName();	// Causes future toString() to print the name too
+    /**
+     * @return a reference to the master server object
+     */
+    public SMTPServer getServer() {
+        return this.server;
+    }
 
-			log.debug("SMTP connection from {}, new connection count: {}", remoteInetAddress,
-					this.serverThread.getNumberOfConnections());
-		}
+    /**
+     * The thread for each session runs on this and shuts down when the quitting
+     * member goes true.
+     */
+    @Override
+    public void run() {
+        MDC.setContextMap(parentLoggingMdcContext);
+        sessionId = server.getSessionIdFactory().create();
+        MDC.put("SessionId", sessionId);
+        final String originalName = Thread.currentThread().getName();
+        Thread.currentThread().setName(
+                Session.class.getName() + "-" + socket.getInetAddress() + ":" + socket.getPort());
 
-		try
-		{
-			runCommandLoop();
-		}
-		catch (IOException e1)
-		{
-			if (!this.quitting)
-			{
-				try
-				{
-					// Send a temporary failure back so that the server will try to resend
-					// the message later.
-					this.sendResponse("421 4.4.0 Problem attempting to execute commands. Please try again later.");
-				}
-				catch (IOException e) {}
+        if (log.isDebugEnabled()) {
+            InetAddress remoteInetAddress = this.getRemoteAddress().getAddress();
+            remoteInetAddress.getHostName(); // Causes future toString() to
+                                             // print the name too
 
-				if (log.isWarnEnabled())
-					log.warn("Exception during SMTP transaction", e1);
-			}
-		}
-		catch (Throwable e)
-		{
-			log.error("Unexpected error in the SMTP handler thread", e);
-			try
-			{
-				this.sendResponse("421 4.3.0 Mail system failure, closing transmission channel");
-			}
-			catch (IOException e1)
-			{
-				// just swallow this, the outer exception is the real problem.
-			}
-			if (e instanceof RuntimeException)
-				throw (RuntimeException) e;
-			else if (e instanceof Error)
-				throw (Error) e;
-			else
-				throw new RuntimeException("Unexpected exception", e);
-		}
-		finally
-		{
-			this.closeConnection();
-			this.endMessageHandler();
-			serverThread.sessionEnded(this);
-			Thread.currentThread().setName(originalName);
-			MDC.clear();
-		}
-	}
+            log.debug("SMTP connection from {}, new connection count: {}", remoteInetAddress,
+                    this.serverThread.getNumberOfConnections());
+        }
 
-	/**
-	 * Sends the welcome message and starts receiving and processing client
-	 * commands. It quits when {@link #quitting} becomes true or when it can be
-	 * noticed or at least assumed that the client no longer sends valid
-	 * commands, for example on timeout.
-	 * 
-	 * @throws IOException
-	 *             if sending to or receiving from the client fails.
-	 */
-	private void runCommandLoop() throws IOException
-	{
-		if (this.serverThread.hasTooManyConnections())
-		{
-			log.debug("SMTP Too many connections!");
+        try {
+            runCommandLoop();
+        } catch (IOException e1) {
+            if (!this.quitting) {
+                try {
+                    // Send a temporary failure back so that the server will try
+                    // to resend
+                    // the message later.
+                    this.sendResponse(
+                            "421 4.4.0 Problem attempting to execute commands. Please try again later.");
+                } catch (IOException e) {
+                }
+                log.warn("Exception during SMTP transaction", e1);
+            }
+        } catch (Throwable e) {
+            log.error("Unexpected error in the SMTP handler thread", e);
+            try {
+                this.sendResponse("421 4.3.0 Mail system failure, closing transmission channel");
+            } catch (IOException e1) {
+                // just swallow this, the outer exception is the real problem.
+            }
+            if (e instanceof RuntimeException)
+                throw (RuntimeException) e;
+            else if (e instanceof Error)
+                throw (Error) e;
+            else
+                throw new RuntimeException("Unexpected exception", e);
+        } finally {
+            this.closeConnection();
+            this.endMessageHandler();
+            serverThread.sessionEnded(this);
+            Thread.currentThread().setName(originalName);
+            MDC.clear();
+        }
+    }
 
-			this.sendResponse("421 Too many connections, try again later");
-			return;
-		}
+    /**
+     * Sends the welcome message and starts receiving and processing client
+     * commands. It quits when {@link #quitting} becomes true or when it can be
+     * noticed or at least assumed that the client no longer sends valid
+     * commands, for example on timeout.
+     * 
+     * @throws IOException
+     *             if sending to or receiving from the client fails.
+     */
+    private void runCommandLoop() throws IOException {
+        if (this.serverThread.hasTooManyConnections()) {
+            log.debug("SMTP Too many connections!");
 
-		this.sendResponse("220 " + this.server.getHostName() + " ESMTP " + this.server.getSoftwareName());
+            this.sendResponse("421 Too many connections, try again later");
+            return;
+        }
 
-		while (!this.quitting)
-		{
-			try
-			{
-				String line = null;
-				try
-				{
-					line = this.reader.readLine();
-				}
-				catch (SocketException ex)
-				{
-					// Lots of clients just "hang up" rather than issuing QUIT,
-					// which would
-					// fill our logs with the warning in the outer catch.
-					if (log.isDebugEnabled())
-						log.debug("Error reading client command: " + ex.getMessage(), ex);
+        this.sendResponse(
+                "220 " + this.server.getHostName() + " ESMTP " + this.server.getSoftwareName());
 
-					return;
-				}
+        while (!this.quitting) {
+            try {
+                String line = null;
+                try {
+                    line = this.reader.readLine();
+                } catch (SocketException ex) {
+                    // Lots of clients just "hang up" rather than issuing QUIT,
+                    // which would
+                    // fill our logs with the warning in the outer catch.
+                    if (log.isDebugEnabled())
+                        log.debug("Error reading client command: " + ex.getMessage(), ex);
 
-				if (line == null)
-				{
-					log.debug("no more lines from client");
-					return;
-				}
+                    return;
+                }
 
-				if (log.isDebugEnabled())
-					log.debug("Client: " + line);
+                if (line == null) {
+                    log.debug("no more lines from client");
+                    return;
+                }
 
-				this.server.getCommandHandler().handleCommand(this, line);
-			}
-			catch (DropConnectionException ex)
-			{
-				this.sendResponse(ex.getErrorResponse());
-				return;
-			}
-			catch (SocketTimeoutException ex)
-			{
-				this.sendResponse("421 Timeout waiting for data from client.");
-				return;
-			}
-			catch (CRLFTerminatedReader.TerminationException te)
-			{
-				String msg = "501 Syntax error at character position " + te.position()
-						+ ". CR and LF must be CRLF paired.  See RFC 2821 #2.7.1.";
+                log.debug("Client: {}", line);
 
-				log.debug(msg);
-				this.sendResponse(msg);
+                this.server.getCommandHandler().handleCommand(this, line);
+            } catch (DropConnectionException ex) {
+                this.sendResponse(ex.getErrorResponse());
+                return;
+            } catch (SocketTimeoutException ex) {
+                this.sendResponse("421 Timeout waiting for data from client.");
+                return;
+            } catch (CRLFTerminatedReader.TerminationException te) {
+                String msg = "501 Syntax error at character position " + te.position()
+                        + ". CR and LF must be CRLF paired.  See RFC 2821 #2.7.1.";
 
-				// if people are screwing with things, close connection
-				return;
-			}
-			catch (CRLFTerminatedReader.MaxLineLengthException mlle)
-			{
-				String msg = "501 " + mlle.getMessage();
+                log.debug(msg);
+                this.sendResponse(msg);
 
-				log.debug(msg);
-				this.sendResponse(msg);
+                // if people are screwing with things, close connection
+                return;
+            } catch (CRLFTerminatedReader.MaxLineLengthException mlle) {
+                String msg = "501 " + mlle.getMessage();
 
-				// if people are screwing with things, close connection
-				return;
-			}
-		}
-	}
+                log.debug(msg);
+                this.sendResponse(msg);
 
-	/**
-	 * Close reader, writer, and socket, logging exceptions but otherwise ignoring them
-	 */
-	private void closeConnection()
-	{
-		try
-		{
-			try
-			{
-				this.writer.close();
-				this.input.close();
-			}
-			finally
-			{
-				this.closeSocket();
-			}
-		}
-		catch (IOException e)
-		{
-			log.info(e.toString());
-		}
-	}
+                // if people are screwing with things, close connection
+                return;
+            }
+        }
+    }
 
-	/**
-	 * Initializes our reader, writer, and the i/o filter chains based on
-	 * the specified socket.  This is called internally when we startup
-	 * and when (if) SSL is started.
-	 */
-	public void setSocket(Socket socket) throws IOException
-	{
-		this.socket = socket;
-		this.input = this.socket.getInputStream();
-		this.reader = new CRLFTerminatedReader(this.input);
-		this.writer = new PrintWriter(this.socket.getOutputStream());
+    /**
+     * Close reader, writer, and socket, logging exceptions but otherwise
+     * ignoring them
+     */
+    private void closeConnection() {
+        try {
+            try {
+                this.writer.close();
+                this.input.close();
+            } finally {
+                this.closeSocket();
+            }
+        } catch (IOException e) {
+            log.info(e.toString());
+        }
+    }
 
-		this.socket.setSoTimeout(this.server.getConnectionTimeout());
-	}
+    /**
+     * Initializes our reader, writer, and the i/o filter chains based on the
+     * specified socket. This is called internally when we startup and when (if)
+     * SSL is started.
+     */
+    public void setSocket(Socket socket) throws IOException {
+        this.socket = socket;
+        this.input = this.socket.getInputStream();
+        this.reader = new CRLFTerminatedReader(this.input);
+        this.writer = new PrintWriter(this.socket.getOutputStream());
 
-	/**
-	 * This method is only used by the start tls command
-	 * @return the current socket to the client
-	 */
-	public Socket getSocket()
-	{
-		return this.socket;
-	}
+        this.socket.setSoTimeout(this.server.getConnectionTimeout());
+    }
 
-	/** Close the client socket if it is open */
-	public void closeSocket() throws IOException
-	{
-		if ((this.socket != null) && this.socket.isBound() && !this.socket.isClosed())
-			this.socket.close();
-	}
+    /**
+     * This method is only used by the start tls command
+     * 
+     * @return the current socket to the client
+     */
+    public Socket getSocket() {
+        return this.socket;
+    }
 
-	/**
-	 * @return the raw input stream from the client
-	 */
-	public InputStream getRawInput()
-	{
-		return this.input;
-	}
+    /** Close the client socket if it is open */
+    public void closeSocket() throws IOException {
+        if ((this.socket != null) && this.socket.isBound() && !this.socket.isClosed())
+            this.socket.close();
+    }
 
-	/**
-	 * @return the cooked CRLF-terminated reader from the client
-	 */
-	public CRLFTerminatedReader getReader()
-	{
-		return this.reader;
-	}
+    /**
+     * @return the raw input stream from the client
+     */
+    public InputStream getRawInput() {
+        return this.input;
+    }
 
-	/** Sends the response to the client */
-	public void sendResponse(String response) throws IOException
-	{
-		if (log.isDebugEnabled())
-			log.debug("Server: " + response);
+    /**
+     * @return the cooked CRLF-terminated reader from the client
+     */
+    public CRLFTerminatedReader getReader() {
+        return this.reader;
+    }
 
-		this.writer.print(response + "\r\n");
-		this.writer.flush();
-	}
+    /** Sends the response to the client */
+    public void sendResponse(String response) throws IOException {
+            log.debug("Server: {}" , response);
 
-	/**
-	 * Returns an identifier of the session which is reasonably unique within
-	 * an extended time period.
-	 */
-	public String getSessionId() {
-		return sessionId;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.subethamail.smtp.MessageContext#getRemoteAddress()
-	 */
-	@Override
-	public InetSocketAddress getRemoteAddress()
-	{
-		return (InetSocketAddress)this.socket.getRemoteSocketAddress();
-	}
+        this.writer.print(response + "\r\n");
+        this.writer.flush();
+    }
 
-	/* (non-Javadoc)
-	 * @see org.subethamail.smtp.MessageContext#getSMTPServer()
-	 */
-	@Override
-	public SMTPServer getSMTPServer()
-	{
-		return this.server;
-	}
+    /**
+     * Returns an identifier of the session which is reasonably unique within an
+     * extended time period.
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
 
-	/**
-	 * @return the current message handler
-	 */
-	public MessageHandler getMessageHandler()
-	{
-		return this.messageHandler;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.subethamail.smtp.MessageContext#getRemoteAddress()
+     */
+    @Override
+    public InetSocketAddress getRemoteAddress() {
+        return (InetSocketAddress) this.socket.getRemoteSocketAddress();
+    }
 
-	/** Simple state */
-	@Override
-	public Optional<String> getHelo()
-	{
-		return this.helo;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.subethamail.smtp.MessageContext#getSMTPServer()
+     */
+    @Override
+    public SMTPServer getSMTPServer() {
+        return this.server;
+    }
 
-	/** */
-	public void setHelo(String value)
-	{
-		this.helo = Optional.of(value);
-	}
+    /**
+     * @return the current message handler
+     */
+    public MessageHandler getMessageHandler() {
+        return this.messageHandler;
+    }
 
-	/** */
-	public void addRecipient(String recipientAddress)
-	{
-		this.recipientCount++;
-		this.singleRecipient = this.recipientCount == 1 ? Optional.of(recipientAddress) : Optional.empty();
-	}
+    /** Simple state */
+    @Override
+    public Optional<String> getHelo() {
+        return this.helo;
+    }
 
-	/** */
-	public int getRecipientCount()
-	{
-		return this.recipientCount;
-	}
+    /** */
+    public void setHelo(String value) {
+        this.helo = Optional.of(value);
+    }
 
-	/**
-	 * Returns the first accepted recipient if there is exactly one accepted
-	 * recipient, otherwise it returns null.
-	 */
-	public Optional<String> getSingleRecipient()
-	{
-		return singleRecipient;
-	}
+    /** */
+    public void addRecipient(String recipientAddress) {
+        this.recipientCount++;
+        this.singleRecipient = this.recipientCount == 1 ? Optional.of(recipientAddress)
+                : Optional.empty();
+    }
 
-	/** */
-	public boolean isAuthenticated()
-	{
-		return this.authenticationHandler.isPresent();
-	}
+    /** */
+    public int getRecipientCount() {
+        return this.recipientCount;
+    }
 
-	/** */
-	@Override
-	public Optional<AuthenticationHandler> getAuthenticationHandler()
-	{
-		return this.authenticationHandler;
-	}
+    /**
+     * Returns the first accepted recipient if there is exactly one accepted
+     * recipient, otherwise it returns null.
+     */
+    public Optional<String> getSingleRecipient() {
+        return singleRecipient;
+    }
 
-	/**
-	 * This is called by the AuthCommand when a session is successfully authenticated.  The
-	 * handler will be an object created by the AuthenticationHandlerFactory.
-	 */
-	public void setAuthenticationHandler(AuthenticationHandler handler)
-	{
-		this.authenticationHandler = Optional.of(handler);
-	}
+    /** */
+    public boolean isAuthenticated() {
+        return this.authenticationHandler.isPresent();
+    }
 
-	/**
-	 * @return the maxMessageSize
-	 */
-	public int getDeclaredMessageSize()
-	{
-		return this.declaredMessageSize;
-	}
+    /** */
+    @Override
+    public Optional<AuthenticationHandler> getAuthenticationHandler() {
+        return this.authenticationHandler;
+    }
 
-	/**
-	 * @param declaredMessageSize the size that the client says the message will be
-	 */
-	public void setDeclaredMessageSize(int declaredMessageSize)
-	{
-		this.declaredMessageSize = declaredMessageSize;
-	}
+    /**
+     * This is called by the AuthCommand when a session is successfully
+     * authenticated. The handler will be an object created by the
+     * AuthenticationHandlerFactory.
+     */
+    public void setAuthenticationHandler(AuthenticationHandler handler) {
+        this.authenticationHandler = Optional.of(handler);
+    }
 
-	/**
-	 * Starts a mail transaction by creating a new message handler.
-	 * 
-	 * @throws IllegalStateException
-	 *             if a mail transaction is already in progress
-	 */
-	public void startMailTransaction() throws IllegalStateException {
-		if (this.messageHandler != null) 
-			throw new IllegalStateException(
-					"Mail transaction is already in progress");
-		this.messageHandler = this.server.getMessageHandlerFactory().create(
-				this);
-	}
+    /**
+     * @return the maxMessageSize
+     */
+    public int getDeclaredMessageSize() {
+        return this.declaredMessageSize;
+    }
 
-	/**
-	 * Returns true if a mail transaction is started, i.e. a MAIL command is
-	 * received, and the transaction is not yet completed or aborted. A
-	 * transaction is successfully completed after the message content is
-	 * received and accepted at the end of the DATA command.
-	 */
-	public boolean isMailTransactionInProgress() {
-		return this.messageHandler != null;
-	}
-	
-	/**
-	 * Stops the mail transaction if it in progress and resets all state related
-	 * to mail transactions.
-	 * <p>
-	 * Note: Some state is associated with each particular message (senders,
-	 * recipients, the message handler).<br>
-	 * Some state is not; seeing hello, TLS, authentication.
-	 */
-	public void resetMailTransaction()
-	{
-		this.endMessageHandler();
-		this.messageHandler = null;
-		this.recipientCount = 0;
-		this.singleRecipient = Optional.empty();
-		this.declaredMessageSize = 0;
-	}
-	
-	/** Safely calls done() on a message hander, if one exists */
-	private void endMessageHandler()
-	{
-		if (this.messageHandler != null)
-		{
-			try
-			{
-				this.messageHandler.done();
-			}
-			catch (Throwable ex)
-			{
-				log.error("done() threw exception", ex);
-			}
-		}
-	}
-	
-	/**
-	 * Reset the SMTP protocol to the initial state, which is the state after 
-	 * a server issues a 220 service ready greeting. 
-	 */
-	public void resetSmtpProtocol() {
-		resetMailTransaction();
-		this.helo = Optional.empty();
-	}
-	
-	/**
-	 * Triggers the shutdown of the thread and the closing of the connection.
-	 */
-	public void quit()
-	{
-		this.quitting = true;
-		this.closeConnection();
-	}
+    /**
+     * @param declaredMessageSize
+     *            the size that the client says the message will be
+     */
+    public void setDeclaredMessageSize(int declaredMessageSize) {
+        this.declaredMessageSize = declaredMessageSize;
+    }
 
-	/**
-	 * @return true when the TLS handshake was completed, false otherwise
-	 */
-	public boolean isTLSStarted()
-	{
-		return tlsStarted;
-	}
+    /**
+     * Starts a mail transaction by creating a new message handler.
+     * 
+     * @throws IllegalStateException
+     *             if a mail transaction is already in progress
+     */
+    public void startMailTransaction() throws IllegalStateException {
+        if (this.messageHandler != null)
+            throw new IllegalStateException("Mail transaction is already in progress");
+        this.messageHandler = this.server.getMessageHandlerFactory().create(this);
+    }
 
-	/**
-	 * @param tlsStarted true when the TLS handshake was completed, false otherwise
-	 */
-	public void setTlsStarted(boolean tlsStarted)
-	{
-		this.tlsStarted = tlsStarted;
-	}
+    /**
+     * Returns true if a mail transaction is started, i.e. a MAIL command is
+     * received, and the transaction is not yet completed or aborted. A
+     * transaction is successfully completed after the message content is
+     * received and accepted at the end of the DATA command.
+     */
+    public boolean isMailTransactionInProgress() {
+        return this.messageHandler != null;
+    }
 
-	public void setTlsPeerCertificates(Certificate[] tlsPeerCertificates)
-	{
-		this.tlsPeerCertificates = tlsPeerCertificates;
-	}
+    /**
+     * Stops the mail transaction if it in progress and resets all state related
+     * to mail transactions.
+     * <p>
+     * Note: Some state is associated with each particular message (senders,
+     * recipients, the message handler).<br>
+     * Some state is not; seeing hello, TLS, authentication.
+     */
+    public void resetMailTransaction() {
+        this.endMessageHandler();
+        this.messageHandler = null;
+        this.recipientCount = 0;
+        this.singleRecipient = Optional.empty();
+        this.declaredMessageSize = 0;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Certificate[] getTlsPeerCertificates()
-	{
-		return tlsPeerCertificates;
-	}
+    /** Safely calls done() on a message hander, if one exists */
+    private void endMessageHandler() {
+        if (this.messageHandler != null) {
+            try {
+                this.messageHandler.done();
+            } catch (Throwable ex) {
+                log.error("done() threw exception", ex);
+            }
+        }
+    }
+
+    /**
+     * Reset the SMTP protocol to the initial state, which is the state after a
+     * server issues a 220 service ready greeting.
+     */
+    public void resetSmtpProtocol() {
+        resetMailTransaction();
+        this.helo = Optional.empty();
+    }
+
+    /**
+     * Triggers the shutdown of the thread and the closing of the connection.
+     */
+    public void quit() {
+        this.quitting = true;
+        this.closeConnection();
+    }
+
+    /**
+     * @return true when the TLS handshake was completed, false otherwise
+     */
+    public boolean isTLSStarted() {
+        return tlsStarted;
+    }
+
+    /**
+     * @param tlsStarted
+     *            true when the TLS handshake was completed, false otherwise
+     */
+    public void setTlsStarted(boolean tlsStarted) {
+        this.tlsStarted = tlsStarted;
+    }
+
+    public void setTlsPeerCertificates(Certificate[] tlsPeerCertificates) {
+        this.tlsPeerCertificates = tlsPeerCertificates;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Certificate[] getTlsPeerCertificates() {
+        return tlsPeerCertificates;
+    }
 }

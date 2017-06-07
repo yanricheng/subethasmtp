@@ -137,8 +137,9 @@ public final class SMTPClient {
         this.bindpoint = bindpoint;
         this.hostPortName = hostPortName;
     }
-    
-    public static SMTPClient createAndConnect(String host, int port) throws UnknownHostException, IOException {
+
+    public static SMTPClient createAndConnect(String host, int port)
+            throws UnknownHostException, IOException {
         return createAndConnect(host, port, Optional.empty());
     }
 
@@ -160,8 +161,7 @@ public final class SMTPClient {
         if (connected)
             throw new IllegalStateException("Already connected");
 
-        if (log.isDebugEnabled())
-            log.debug("Connecting to " + this.hostPortName);
+        log.debug("Connecting to {}", this.hostPortName);
 
         this.socket = createSocket();
         this.socket.bind(this.bindpoint.orElse(null));
@@ -213,8 +213,7 @@ public final class SMTPClient {
      *            should not have any newlines
      */
     protected void send(String msg) throws IOException {
-        if (log.isDebugEnabled())
-            log.debug("Client: " + msg);
+        log.debug("Client: {}", msg);
         if (!connected)
             throw new IllegalStateException("Not connected");
 
@@ -243,8 +242,7 @@ public final class SMTPClient {
                     throw new IOException("Malformed SMTP reply: " + builder);
             }
 
-            if (log.isDebugEnabled())
-                log.debug("Server: " + line);
+            log.debug("Server: {}", line);
 
             if (line.length() < 4)
                 throw new IOException("Malformed SMTP reply: " + line);
@@ -302,8 +300,7 @@ public final class SMTPClient {
             try {
                 this.socket.close();
 
-                if (log.isDebugEnabled())
-                    log.debug("Closed connection to " + this.hostPortName);
+                log.debug("Closed connection to {}", this.hostPortName);
             } catch (IOException ex) {
                 log.error("Problem closing connection to " + this.hostPortName, ex);
             }
