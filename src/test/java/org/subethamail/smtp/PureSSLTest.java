@@ -43,9 +43,6 @@ public class PureSSLTest {
                 .messageHandlerFactory(mhf) //
                 .executorService(Executors.newSingleThreadExecutor()) //
                 .serverSocketFactory(sslContext) //
-                .backlog(10) //
-                .connectionTimeoutMs(30000) //
-                .maxConnections(20) //
                 .build();
         try {
             server.start();
