@@ -306,7 +306,7 @@ public final class Session implements Runnable, MessageContext {
 
     /** Sends the response to the client */
     public void sendResponse(String response) throws IOException {
-            log.debug("Server: {}" , response);
+        log.debug("Server: {}", response);
 
         this.writer.print(response + "\r\n");
         this.writer.flush();
@@ -320,21 +320,11 @@ public final class Session implements Runnable, MessageContext {
         return sessionId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.subethamail.smtp.MessageContext#getRemoteAddress()
-     */
     @Override
     public InetSocketAddress getRemoteAddress() {
         return (InetSocketAddress) this.socket.getRemoteSocketAddress();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.subethamail.smtp.MessageContext#getSMTPServer()
-     */
     @Override
     public SMTPServer getSMTPServer() {
         return this.server;
@@ -353,19 +343,16 @@ public final class Session implements Runnable, MessageContext {
         return this.helo;
     }
 
-    /** */
     public void setHelo(String value) {
         this.helo = Optional.of(value);
     }
 
-    /** */
     public void addRecipient(String recipientAddress) {
         this.recipientCount++;
         this.singleRecipient = this.recipientCount == 1 ? Optional.of(recipientAddress)
                 : Optional.empty();
     }
 
-    /** */
     public int getRecipientCount() {
         return this.recipientCount;
     }
@@ -378,12 +365,10 @@ public final class Session implements Runnable, MessageContext {
         return singleRecipient;
     }
 
-    /** */
     public boolean isAuthenticated() {
         return this.authenticationHandler.isPresent();
     }
 
-    /** */
     @Override
     public Optional<AuthenticationHandler> getAuthenticationHandler() {
         return this.authenticationHandler;
@@ -498,9 +483,6 @@ public final class Session implements Runnable, MessageContext {
         this.tlsPeerCertificates = tlsPeerCertificates;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Certificate[] getTlsPeerCertificates() {
         return tlsPeerCertificates;
