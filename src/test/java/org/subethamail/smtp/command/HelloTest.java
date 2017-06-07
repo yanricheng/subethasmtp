@@ -11,13 +11,11 @@ public class HelloTest extends ServerTestCase
 {
 	private static final int MAX_MESSAGE_SIZE = 1000;
 
-    /** */
 	public HelloTest(String name)
 	{
 		super(name, MAX_MESSAGE_SIZE);
 	}
 
-	/** */
 	public void testHelloCommand() throws Exception
 	{
 		this.expect("220");
@@ -37,7 +35,6 @@ public class HelloTest extends ServerTestCase
 		this.expect("250");
 	}
 
-	/** */
 	public void testHelloReset() throws Exception
 	{
 		this.expect("220");
@@ -55,7 +52,6 @@ public class HelloTest extends ServerTestCase
 		this.expect("250 Ok");
 	}
 
-	/** */
 	public void testEhloSize() throws Exception
 	{
 	    this.expect("220");

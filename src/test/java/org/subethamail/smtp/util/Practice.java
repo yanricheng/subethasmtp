@@ -20,14 +20,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 public class Practice
 {
-	/** */
+
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(Practice.class);
 
-	/** */
 	public static final int PORT = 2566;
 
-	/** */
 	@SuppressFBWarnings
 	public static void main(String[] args) throws Exception
 	{

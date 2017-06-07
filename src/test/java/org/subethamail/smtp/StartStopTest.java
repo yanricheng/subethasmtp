@@ -20,25 +20,21 @@ import org.subethamail.wiser.Wiser;
  */
 public class StartStopTest extends TestCase
 {
-	/** */
+
 	@SuppressWarnings("unused")
 	private static Logger log = LoggerFactory.getLogger(StartStopTest.class);
 
-	/** */
 	public static final int PORT = 2566;
 
-	/** */
 	protected Session session;
 
 	protected int counter = 0;
 
-	/** */
 	public StartStopTest(String name)
 	{
 		super(name);
 	}
 
-	/** */
 	@Override
 	protected void setUp() throws Exception
 	{
@@ -50,14 +46,12 @@ public class StartStopTest extends TestCase
 		this.session = Session.getDefaultInstance(props);
 	}
 
-	/** */
 	@Override
 	protected void tearDown() throws Exception
 	{
 		super.tearDown();
 	}
 
-	/** */
 	public void testMultipleStartStop() throws Exception
 	{
 		for (int i = 0; i < 10; i++)
@@ -67,7 +61,6 @@ public class StartStopTest extends TestCase
 		assertEquals(this.counter, 10);
 	}
 
-	/** */
 	private void startStop(boolean pause) throws Exception
 	{
 		Wiser wiser = Wiser.port(PORT);
@@ -82,7 +75,6 @@ public class StartStopTest extends TestCase
 		this.counter++;
 	}
 
-	/** */
 	public static Test suite()
 	{
 		return new TestSuite(StartStopTest.class);

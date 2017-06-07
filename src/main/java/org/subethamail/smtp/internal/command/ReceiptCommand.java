@@ -16,7 +16,7 @@ import org.subethamail.smtp.server.Session;
  */
 public final class ReceiptCommand extends BaseCommand
 {
-	/** */
+
 	public ReceiptCommand()
 	{
 		super("RCPT",
@@ -24,7 +24,6 @@ public final class ReceiptCommand extends BaseCommand
 				"TO: <recipient> [ <parameters> ]");
 	}
 
-	/** */
 	@Override
 	public void execute(String commandString, Session sess) 
 			throws IOException, DropConnectionException

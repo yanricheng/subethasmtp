@@ -106,18 +106,15 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
         String from;
         List<Delivery> deliveries = new ArrayList<Delivery>();
 
-        /** */
         public Handler(MessageContext ctx) {
             this.ctx = ctx;
         }
 
-        /** */
         @Override
         public void from(String from) throws RejectException {
             this.from = from;
         }
 
-        /** */
         @Override
         public void recipient(String recipient) throws RejectException {
             boolean addedListener = false;
@@ -133,7 +130,6 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
                 throw new RejectException(553, "<" + recipient + "> address unknown.");
         }
 
-        /** */
         @Override
         public void data(InputStream data) throws TooMuchDataException, IOException {
             if (this.deliveries.size() == 1) {
@@ -158,7 +154,6 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
             }
         }
 
-        /** */
         @Override
         public void done() {
         }

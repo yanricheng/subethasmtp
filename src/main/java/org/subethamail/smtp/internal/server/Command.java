@@ -13,11 +13,10 @@ import org.subethamail.smtp.server.Session;
  */
 public interface Command
 {
-	/** */
+
 	void execute(String commandString, Session sess) throws IOException, 
 			DropConnectionException;
 
-	/** */
 	HelpMessage getHelp() throws CommandException;
 
 	/**

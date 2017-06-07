@@ -15,13 +15,12 @@ import java.io.IOException;
 @SuppressWarnings("serial")
 public final class TooMuchDataException extends IOException
 {
-	/** */
+
 	public TooMuchDataException()
 	{
 		super();
 	}
 
-	/** */
 	public TooMuchDataException(String message)
 	{
 		super(message);

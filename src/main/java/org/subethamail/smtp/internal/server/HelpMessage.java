@@ -16,7 +16,6 @@ public final class HelpMessage
 
 	private final String outputString;
 
-	/** */
 	public HelpMessage(String commandName, String helpMessage, String argumentDescription)
 	{
 		this.commandName = commandName;
@@ -33,25 +32,21 @@ public final class HelpMessage
         this.outputString = b.toString();
 	}
 
-	/** */
 	public HelpMessage(String commandName, String helpMessage)
 	{
 		this(commandName, helpMessage, null);
 	}
 
-	/** */
 	public String getName()
 	{
 		return this.commandName;
 	}
 
-	/** */
 	public String toOutputString()
 	{
 		return this.outputString;
 	}
 
-	/** */
 	@Override
 	public boolean equals(Object o)
 	{
@@ -72,7 +67,6 @@ public final class HelpMessage
 		return true;
 	}
 
-	/** */
 	@Override
 	public int hashCode()
 	{

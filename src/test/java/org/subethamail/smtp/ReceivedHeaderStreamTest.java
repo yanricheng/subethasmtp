@@ -21,20 +21,17 @@ public class ReceivedHeaderStreamTest extends TestCase
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(ReceivedHeaderStreamTest.class);
 
-	/** */
 	public ReceivedHeaderStreamTest(String name)
 	{
 		super(name);
 	}
 
-	/** */
 	@Override
 	protected void setUp() throws Exception
 	{
 		super.setUp();
 	}
 
-	/** */
 	public void testReceivedHeader() throws Exception
 	{
 		int BUF_SIZE = 10000;

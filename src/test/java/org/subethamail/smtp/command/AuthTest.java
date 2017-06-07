@@ -31,7 +31,6 @@ public class AuthTest extends ServerTestCase {
         }
     }
 
-    /** */
     public AuthTest(String name) {
         super(name);
     }

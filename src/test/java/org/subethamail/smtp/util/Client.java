@@ -86,7 +86,6 @@ public class Client {
         return builder.toString();
     }
 
-    /** */
     public void close() throws Exception {
         if (!this.socket.isClosed())
             this.socket.close();

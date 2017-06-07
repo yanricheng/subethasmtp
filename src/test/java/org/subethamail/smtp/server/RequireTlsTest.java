@@ -13,7 +13,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class RequireTlsTest extends ServerTestCase
 {
 
-	/** */
 	public RequireTlsTest(String name)
 	{
 		super(name);
@@ -46,7 +45,6 @@ public class RequireTlsTest extends ServerTestCase
 		super.tearDown();
 	}
 
-	/** */
 	public void testNeedSTARTTLS() throws Exception
 	{
 		this.expect("220");

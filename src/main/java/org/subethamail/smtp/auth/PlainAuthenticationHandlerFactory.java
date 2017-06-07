@@ -31,20 +31,17 @@ public final class PlainAuthenticationHandlerFactory implements AuthenticationHa
 
 	private final UsernamePasswordValidator helper;
 
-	/** */
 	public PlainAuthenticationHandlerFactory(UsernamePasswordValidator helper)
 	{
 		this.helper = helper;
 	}
 
-	/** */
 	@Override
     public List<String> getAuthenticationMechanisms()
 	{
 		return MECHANISMS;
 	}
 
-	/** */
 	@Override
     public AuthenticationHandler create()
 	{

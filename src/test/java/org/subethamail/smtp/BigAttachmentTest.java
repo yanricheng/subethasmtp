@@ -56,7 +56,6 @@ public class BigAttachmentTest
 
 	private Wiser server;
 
-	/** */
 	@Before
 	protected void setUp() throws Exception
 	{
@@ -64,7 +63,6 @@ public class BigAttachmentTest
 		this.server.start();
 	}
 
-	/** */
 	@After
 	protected void tearDown() throws Exception
 	{
@@ -77,7 +75,6 @@ public class BigAttachmentTest
 		};
 	}
 
-	/** */
 	public void testAttachments() throws Exception
 	{
 		if (BIGFILE_PATH.equals(TO_CHANGE))
@@ -140,7 +137,6 @@ public class BigAttachmentTest
 		compareFile.delete();
 	}
 
-	/** */
 	private boolean checkIntegrity(File src, File dest) throws IOException, NoSuchAlgorithmException
 	{
 		BufferedInputStream ins = new BufferedInputStream(new FileInputStream(src));

@@ -17,13 +17,12 @@ import org.subethamail.smtp.server.Session;
  */
 public final class EhloCommand extends BaseCommand
 {
-	/** */
+
 	public EhloCommand()
 	{
 		super("EHLO", "Introduce yourself.", "<hostname>");
 	}
 
-	/** */
 	@Override
 	public void execute(String commandString, Session sess) throws IOException
 	{

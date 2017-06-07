@@ -39,13 +39,11 @@ import org.subethamail.smtp.server.SMTPServer.Builder;
  * @author Jeff Schnitzer
  */
 public final class Wiser implements SimpleMessageListener {
-    /** */
+
     private final static Logger log = LoggerFactory.getLogger(Wiser.class);
 
-    /** */
     private final SMTPServer server;
 
-    /** */
     private final List<WiserMessage> messages = Collections
             .synchronizedList(new ArrayList<WiserMessage>());
 

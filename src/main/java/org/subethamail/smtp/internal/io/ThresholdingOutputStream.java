@@ -16,7 +16,7 @@ import java.io.OutputStream;
  */
 abstract class ThresholdingOutputStream extends OutputStream
 {
-	/** */
+
 	protected OutputStream output;
 
 	/** When to trigger */

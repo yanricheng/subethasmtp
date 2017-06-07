@@ -11,13 +11,12 @@ import org.subethamail.smtp.server.Session;
  */
 public final class ExpandCommand extends BaseCommand 
 {
-	/** */
+
 	public ExpandCommand() 
 	{
 		super("EXPN", "The expn command.");
 	}
 
-	/** */
 	@Override
 	public void execute(String commandString, Session sess) throws IOException 
 	{

@@ -768,7 +768,6 @@ public final class SMTPServer implements SSLSocketCreator {
         return this.commandHandler;
     }
 
-    /** */
     public int getMaxConnections() {
         return this.maxConnections;
     }

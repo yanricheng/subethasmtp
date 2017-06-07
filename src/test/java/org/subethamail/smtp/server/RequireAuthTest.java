@@ -29,7 +29,6 @@ public class RequireAuthTest extends ServerTestCase {
         }
     }
 
-    /** */
     public RequireAuthTest(String name) {
         super(name);
     }
@@ -61,7 +60,6 @@ public class RequireAuthTest extends ServerTestCase {
         super.tearDown();
     }
 
-    /** */
     public void testAuthRequired() throws Exception {
         this.expect("220");
 
@@ -93,7 +91,6 @@ public class RequireAuthTest extends ServerTestCase {
         this.expect("221 Bye");
     }
 
-    /** */
     public void testAuthSuccess() throws Exception {
         this.expect("220");
 

@@ -33,7 +33,6 @@ public final class SMTPClient {
     /** 10 minutes */
     private static final int REPLY_TIMEOUT = 600 * 1000;
 
-    /** */
     private static Logger log = LoggerFactory.getLogger(SMTPClient.class);
 
     /** the local socket address */
@@ -53,7 +52,6 @@ public final class SMTPClient {
     /** The raw socket */
     Socket socket;
 
-    /** */
     BufferedReader reader;
 
     /** Output streams used for data */
@@ -307,7 +305,6 @@ public final class SMTPClient {
         }
     }
 
-    /** */
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + " { " + this.hostPortName + "}";

@@ -184,12 +184,10 @@ public class SmartClient {
         return response;
     }
 
-    /** */
     public void from(String from) throws IOException, SMTPException {
         client.sendAndCheck("MAIL FROM: <" + from + ">");
     }
 
-    /** */
     public void to(String to) throws IOException, SMTPException {
         client.sendAndCheck("RCPT TO: <" + to + ">");
         this.recipientCount++;

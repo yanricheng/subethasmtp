@@ -40,20 +40,17 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 
 	private final UsernamePasswordValidator helper;
 
-	/** */
 	public LoginAuthenticationHandlerFactory(UsernamePasswordValidator helper)
 	{
 		this.helper = helper;
 	}
 
-	/** */
 	@Override
     public List<String> getAuthenticationMechanisms()
 	{
 		return MECHANISMS;
 	}
 
-	/** */
 	@Override
     public AuthenticationHandler create()
 	{

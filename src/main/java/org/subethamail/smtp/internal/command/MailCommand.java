@@ -17,7 +17,7 @@ import org.subethamail.smtp.server.Session;
  */
 public final class MailCommand extends BaseCommand
 {
-	/** */
+
 	public MailCommand()
 	{
 		super("MAIL",
@@ -25,7 +25,6 @@ public final class MailCommand extends BaseCommand
 				"FROM: <sender> [ <parameters> ]");
 	}
 
-	/** */
 	/* (non-Javadoc)
 	 * @see org.subethamail.smtp.server.BaseCommand#execute(java.lang.String, org.subethamail.smtp.server.Session)
 	 */

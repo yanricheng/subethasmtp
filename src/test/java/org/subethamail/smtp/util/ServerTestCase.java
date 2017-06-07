@@ -16,21 +16,18 @@ import junit.framework.TestCase;
  */
 public abstract class ServerTestCase extends TestCase
 {
-	/** */
+
 	@SuppressWarnings("unused")
 	private final static Logger log = LoggerFactory.getLogger(ServerTestCase.class);
 
-	/** */
 	public static final int PORT = 2566;
 
-	/** */
 	protected Client c;
 
     private final int maxMessageSize;
 
     protected Wiser wiser;
 
-	/** */
 	public ServerTestCase(String name)
 	{
 	    this(name, 0);
@@ -42,7 +39,6 @@ public abstract class ServerTestCase extends TestCase
         this.maxMessageSize = maxMessageSize;
     }
 
-	/** */
 	@Override
 	protected void setUp() throws Exception
 	{
@@ -57,7 +53,6 @@ public abstract class ServerTestCase extends TestCase
 		this.c = new Client("localhost", PORT);
 	}
 
-	/** */
 	@Override
 	protected void tearDown() throws Exception
 	{
@@ -69,19 +64,16 @@ public abstract class ServerTestCase extends TestCase
 		super.tearDown();
 	}
 
-	/** */
 	public void send(String msg) throws Exception
 	{
 		this.c.send(msg);
 	}
 
-	/** */
 	public void expect(String msg) throws Exception
 	{
 		this.c.expect(msg);
 	}
 
-	/** */
 	public void expectContains(String msg) throws Exception
 	{
 		this.c.expectContains(msg);

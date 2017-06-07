@@ -26,14 +26,12 @@ public abstract class BaseCommand implements Command
 	/** The help message for this command*/
 	private final HelpMessage helpMsg;
 
-	/** */
 	protected BaseCommand(String name, String help)
 	{
 		this.name = name;
 		this.helpMsg = new HelpMessage(name, help);
 	}
 
-	/** */
 	protected BaseCommand(String name, String help, String argumentDescription)
 	{
 		this.name = name;
@@ -47,21 +45,18 @@ public abstract class BaseCommand implements Command
     abstract public void execute(String commandString, Session context)
 			throws IOException, DropConnectionException;
 
-	/** */
 	@Override
     public HelpMessage getHelp()
 	{
 		return this.helpMsg;
 	}
 
-	/** */
 	@Override
     public String getName()
 	{
 		return this.name;
 	}
 
-	/** */
 	protected String getArgPredicate(String commandString)
 	{
 		if (commandString == null || commandString.length() < 4)
@@ -70,7 +65,6 @@ public abstract class BaseCommand implements Command
 		return commandString.substring(4).trim();
 	}
 
-	/** */
 	protected String[] getArgs(String commandString)
 	{
 		List<String> strings = new ArrayList<String>();

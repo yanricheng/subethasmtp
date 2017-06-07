@@ -34,7 +34,6 @@ public final class AuthCommand extends BaseCommand
 						+ "\t an optional base64-encoded response");
 	}
 
-	/** */
 	@Override
 	public void execute(String commandString, Session sess)
 			throws IOException

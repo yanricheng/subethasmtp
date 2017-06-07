@@ -42,7 +42,6 @@ public enum CommandRegistry
 
 	private final Command command;
 
-	/** */
 	private CommandRegistry(Command cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired)
 	{
 		final Command c;
@@ -56,7 +55,6 @@ public enum CommandRegistry
             this.command = c;
 	}
 
-	/** */
 	public Command getCommand()
 	{
 		return this.command;
