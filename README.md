@@ -51,7 +51,7 @@ SMTPServer server = SMTPServer //
 server.start();
 ```
 
-The builder has a lot of options, explore them. This fragment sets a bunch of them:
+The builder has a lot of options. This fragment sets a bunch of them:
 
 ```java
 SMTPServer server = SMTPServer 
@@ -67,6 +67,8 @@ SMTPServer server = SMTPServer
   .maxConnections(20)
   .maxRecipients(20) 
   .messageHandlerFactory(mhf) 
+  .executorService(executor)
+  .startTlsSocketFactory(sslContext) //
   .build();
 ```
 
