@@ -62,7 +62,7 @@ Dave Moten came across this and
 * migrated mocking to use Mockito (with apologies but was the most time-efficient way for me to restore the broken tests!)
 * set up pom.xml for release under the `com.github.davidmoten:subethasmtp` artifact 
 * released to Maven Central
-* submitted the changes back to the Engine821.com fork (apart from the groupId change and release changes)
+* submitted the changes back to the Engine821.com fork (apart from the groupId change and release changes). Note that review/merge of changes does not seem to be forthcoming. 
 * added multi-JDK continuous integration using Travis
 * added code coverage using coverage.io
 * added round trip unit test of STARTTLS
