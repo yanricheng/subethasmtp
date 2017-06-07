@@ -44,32 +44,6 @@ public class BasicMessageHandlerFactoryTest {
         }
     }
     
-    @Test
-    public void test2() throws Exception {
-        AuthenticationHandlerFactory ahf = null;
-        InetAddress address = null;
-        MessageHandlerFactory mhf = null;
-        SMTPServer server = SMTPServer //
-                .port(PORT) //
-                .connectionTimeout(1, TimeUnit.MINUTES) //
-                .authenticationHandlerFactory(ahf) //
-                .backlog(100) //
-                .bindAddress(address) //
-                .requireTLS() //
-                .hostName("us") //
-                .hideTLS() //
-                .maxMessageSize(10000 )//
-                .maxConnections(20)//
-                .maxRecipients(20) //
-                .messageHandlerFactory(mhf) //
-                .build();
-        try {
-            server.start();
-            send();
-        } finally {
-            server.stop();
-        }
-    }
     static void send() throws Exception {
         String to = "someone@domain.com";
         String from = "me@here.com";
