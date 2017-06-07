@@ -3,6 +3,9 @@ package org.subethamail.smtp;
 import static org.subethamail.smtp.TestUtil.EMAIL_FROM;
 import static org.subethamail.smtp.TestUtil.EMAIL_TO;
 import static org.subethamail.smtp.TestUtil.PORT;
+import static org.subethamail.smtp.TestUtil.createTlsSslContext;
+import static org.subethamail.smtp.TestUtil.getKeyManagers;
+import static org.subethamail.smtp.TestUtil.getTrustManagers;
 import static org.subethamail.smtp.TestUtil.send;
 
 import java.io.InputStream;
@@ -21,11 +24,13 @@ import org.subethamail.smtp.server.SMTPServer;
 
 public class PureSSLTest {
 
+    private static final String SERVER_HOSTNAME = "email-server.me.com";
+
     @Test(timeout = 3000)
     public void testRunningSMTPServerOnSSLSocket() throws Exception {
-        KeyManager[] keyManagers = TestUtil.getKeyManagers();
-        TrustManager[] trustManagers = TestUtil.getTrustManagers();
-        SSLContext sslContext = TestUtil.createTlsSslContext(keyManagers, trustManagers);
+        KeyManager[] keyManagers = getKeyManagers();
+        TrustManager[] trustManagers = getTrustManagers();
+        SSLContext sslContext = createTlsSslContext(keyManagers, trustManagers);
 
         // mock a MessageHandlerFactory to check for delivery
         MessageHandlerFactory mhf = Mockito.mock(MessageHandlerFactory.class);
@@ -34,10 +39,13 @@ public class PureSSLTest {
 
         SMTPServer server = SMTPServer //
                 .port(PORT) //
-                .hostName("email-server.me.com") //
+                .hostName(SERVER_HOSTNAME) //
                 .messageHandlerFactory(mhf) //
                 .executorService(Executors.newSingleThreadExecutor()) //
                 .serverSocketFactory(sslContext) //
+                .backlog(10) //
+                .connectionTimeoutMs(30000) //
+                .maxConnections(20) //
                 .build();
         try {
             server.start();

@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.net.ssl.SSLContext;
@@ -96,7 +97,7 @@ public final class SMTPServer implements SSLSocketCreator {
      * The timeout for waiting for data on a connection is one minute: 1000 * 60
      * * 1
      */
-    private final int connectionTimeout;
+    private final int connectionTimeoutMs;
 
     /**
      * The maximal number of recipients that this server accepts per message
@@ -138,7 +139,7 @@ public final class SMTPServer implements SSLSocketCreator {
     private final ServerSocketCreator startTlsSocketFactory;
 
     public static final class Builder {
-        private String hostName;
+        private Optional<String> hostName = Optional.empty();
         private Optional<InetAddress> bindAddress = Optional.empty(); // default
                                                                       // to all
                                                                       // interfaces
@@ -147,7 +148,8 @@ public final class SMTPServer implements SSLSocketCreator {
         private String softwareName = "SubEthaSMTP " + Version.getSpecification();
 
         private MessageHandlerFactory messageHandlerFactory;
-        private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional.empty();
+        private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional
+                .empty();
         private Optional<ExecutorService> executorService = Optional.empty();
 
         /** If true, TLS is enabled */
@@ -176,7 +178,7 @@ public final class SMTPServer implements SSLSocketCreator {
          * The timeout for waiting for data on a connection is one minute: 1000
          * * 60 * 1
          */
-        private int connectionTimeout = 1000 * 60 * 1;
+        private int connectionTimeoutMs = 1000 * 60 * 1;
 
         /**
          * The maximal number of recipients that this server accepts per message
@@ -214,7 +216,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
         public Builder hostName(String hostName) {
             Preconditions.checkNotNull(hostName);
-            this.hostName = hostName;
+            this.hostName = Optional.of(hostName);
             return this;
         }
 
@@ -388,8 +390,12 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public Builder connectionTimeoutMs(int connectionTimeoutMs) {
-            this.connectionTimeout = connectionTimeoutMs;
+            this.connectionTimeoutMs = connectionTimeoutMs;
             return this;
+        }
+
+        public Builder connectionTimeout(int connectionTimeout, TimeUnit unit) {
+            return connectionTimeoutMs((int) unit.toMillis(connectionTimeout));
         }
 
         /**
@@ -454,17 +460,22 @@ public final class SMTPServer implements SSLSocketCreator {
         public Builder startTlsSocketFactory(SSLSocketCreator creator) {
             this.startTlsSocketCreator = creator;
             return this;
-        } 
-        
+        }
+
         public Builder startTlsSocketFactory(SSLContext context) {
+            return startTlsSocketFactory(context, false);
+        }
+
+        public Builder startTlsSocketFactory(SSLContext context, boolean requireClientCertificate) {
             return startTlsSocketFactory(new SSLSocketCreator() {
                 @Override
                 public SSLSocket createSSLSocket(Socket socket) throws IOException {
-                    InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+                    InetSocketAddress remoteAddress = (InetSocketAddress) socket
+                            .getRemoteSocketAddress();
 
                     SSLSocketFactory sf = context.getSocketFactory();
-                    SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
-                            true));
+                    SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
+                            socket.getPort(), true));
 
                     // we are a server
                     s.setUseClientMode(false);
@@ -474,7 +485,9 @@ public final class SMTPServer implements SSLSocketCreator {
                     s.setEnabledCipherSuites(s.getSupportedCipherSuites());
 
                     //// Client must authenticate
-                    // s.setNeedClientAuth(true);
+                    if (requireClientCertificate) {
+                        s.setNeedClientAuth(true);
+                    }
 
                     return s;
                 }
@@ -482,23 +495,32 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public SMTPServer build() {
-            return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
-                    authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
-                    disableReceivedHeaders, maxConnections, connectionTimeout, maxRecipients, maxMessageSize,
-                    sessionIdFactory, startTlsSocketCreator, serverSocketCreator);
+            return new SMTPServer(hostName, bindAddress, port, backlog, softwareName,
+                    messageHandlerFactory, authenticationHandlerFactory, executorService, enableTLS,
+                    hideTLS, requireTLS, requireAuth, disableReceivedHeaders, maxConnections,
+                    connectionTimeoutMs, maxRecipients, maxMessageSize, sessionIdFactory,
+                    startTlsSocketCreator, serverSocketCreator);
         }
 
     }
 
-    private SMTPServer(String hostName, Optional<InetAddress> bindAddress, int port, int backlog, String softwareName,
-            MessageHandlerFactory messageHandlerFactory,
+    private SMTPServer(Optional<String> hostName, Optional<InetAddress> bindAddress, int port,
+            int backlog, String softwareName, MessageHandlerFactory messageHandlerFactory,
             Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
-            Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
-            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeout,
-            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator,
+            Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS,
+            boolean requireTLS, boolean requireAuth, boolean disableReceivedHeaders,
+            int maxConnections, int connectionTimeoutMs, int maxRecipients, int maxMessageSize,
+            SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator,
             ServerSocketCreator startTlsSocketFactory) {
         Preconditions.checkNotNull(messageHandlerFactory);
-        Preconditions.checkArgument(!requireAuth || authenticationHandlerFactory != null,
+        Preconditions.checkNotNull(bindAddress);
+        Preconditions.checkNotNull(executorService);
+        Preconditions.checkNotNull(authenticationHandlerFactory);
+        Preconditions.checkNotNull(sessionIdFactory);
+        Preconditions.checkNotNull(sslSocketCreator);
+        Preconditions.checkNotNull(startTlsSocketFactory);
+        Preconditions.checkNotNull(hostName);
+        Preconditions.checkArgument(!requireAuth || authenticationHandlerFactory.isPresent(),
                 "if requireAuth is set to true then you must specify an authenticationHandlerFactory");
         Preconditions.checkNotNull(startTlsSocketFactory, "serverSocketCreator cannot be null");
         this.bindAddress = bindAddress;
@@ -513,7 +535,7 @@ public final class SMTPServer implements SSLSocketCreator {
         this.requireAuth = requireAuth;
         this.disableReceivedHeaders = disableReceivedHeaders;
         this.maxConnections = maxConnections;
-        this.connectionTimeout = connectionTimeout;
+        this.connectionTimeoutMs = connectionTimeoutMs;
         this.maxRecipients = maxRecipients;
         this.maxMessageSize = maxMessageSize;
         this.sessionIdFactory = sessionIdFactory;
@@ -526,7 +548,7 @@ public final class SMTPServer implements SSLSocketCreator {
         } else {
             this.executorService = Executors.newCachedThreadPool();
         }
-        if (hostName == null) {
+        if (!hostName.isPresent()) {
             String s;
             try {
                 s = InetAddress.getLocalHost().getCanonicalHostName();
@@ -535,7 +557,7 @@ public final class SMTPServer implements SSLSocketCreator {
             }
             this.hostName = s;
         } else {
-            this.hostName = hostName;
+            this.hostName = hostName.get();
         }
         this.allocatedPort = port;
     }
@@ -546,7 +568,8 @@ public final class SMTPServer implements SSLSocketCreator {
         public SSLSocket createSSLSocket(Socket socket) throws IOException {
             SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
             InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
+            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
+                    socket.getPort(), true));
 
             // we are a server
             s.setUseClientMode(false);
@@ -571,12 +594,11 @@ public final class SMTPServer implements SSLSocketCreator {
         return this.hostName;
     }
 
-    /** null means all interfaces */
+    /** empty means all interfaces */
     public Optional<InetAddress> getBindAddress() {
         return this.bindAddress;
     }
 
-    /** */
     public int getPort() {
         return this.port;
     }
@@ -629,8 +651,7 @@ public final class SMTPServer implements SSLSocketCreator {
      * An SMTPServer which has been shut down, must not be reused.
      */
     public synchronized void start() {
-        if (log.isInfoEnabled())
-            log.info("SMTP server {} starting", getDisplayableLocalSocketAddress());
+        log.info("SMTP server {} starting", getDisplayableLocalSocketAddress());
 
         if (this.started)
             throw new IllegalStateException("SMTPServer can only be started once. "
@@ -682,8 +703,8 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     /**
-     * Create a SSL socket that wraps the existing socket. This method is called
-     * after the client issued the STARTTLS command.
+     * Create an SSL socket that wraps the existing socket. This method is
+     * called after the client issued the STARTTLS command.
      * <p>
      * Subclasses may override this method to configure the key stores, enabled
      * protocols/ cipher suites, enforce client authentication, etc.
@@ -691,7 +712,7 @@ public final class SMTPServer implements SSLSocketCreator {
      * @param socket
      *            the existing socket as created by
      *            {@link #createServerSocket()} (not null)
-     * @return a SSLSocket
+     * @return an SSLSocket
      * @throws IOException
      *             when creating the socket failed
      */
@@ -704,9 +725,6 @@ public final class SMTPServer implements SSLSocketCreator {
         return this.bindAddress.map(x -> x.toString()).orElse("*") + ":" + this.port;
     }
 
-    /**
-     * @return the factory for message handlers, cannot be null
-     */
     public MessageHandlerFactory getMessageHandlerFactory() {
         return this.messageHandlerFactory;
     }
@@ -736,48 +754,38 @@ public final class SMTPServer implements SSLSocketCreator {
         return this.maxConnections;
     }
 
-    /** */
     public int getConnectionTimeout() {
-        return this.connectionTimeout;
+        return this.connectionTimeoutMs;
     }
 
     public int getMaxRecipients() {
         return this.maxRecipients;
     }
 
-    /** */
     public boolean getEnableTLS() {
         return enableTLS;
     }
 
-    /** */
     public boolean getHideTLS() {
         return this.hideTLS;
     }
 
-    /** */
     public boolean getRequireTLS() {
         return this.requireTLS;
     }
 
-    /** */
     public boolean getRequireAuth() {
         return requireAuth;
     }
 
-    /**
-     * @return the maxMessageSize
-     */
     public int getMaxMessageSize() {
         return maxMessageSize;
     }
 
-    /** */
     public boolean getDisableReceivedHeaders() {
         return disableReceivedHeaders;
     }
 
-    /** */
     public SessionIdFactory getSessionIdFactory() {
         return sessionIdFactory;
     }
