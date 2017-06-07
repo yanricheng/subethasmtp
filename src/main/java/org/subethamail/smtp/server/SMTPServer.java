@@ -154,10 +154,13 @@ public final class SMTPServer implements SSLSocketCreator {
 
         /** If true, TLS is enabled */
         private boolean enableTLS = false;
+
         /** If true, TLS is not announced; ignored if enableTLS=false */
         private boolean hideTLS = false;
+        
         /** If true, a TLS handshake is required; ignored if enableTLS=false */
         private boolean requireTLS = false;
+        
         /**
          * If true, this server will accept no mail until auth succeeded;
          * ignored if no AuthenticationHandlerFactory has been set
