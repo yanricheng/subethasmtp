@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.wiser.Wiser;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * A simple command-line tool that lets us practice with the smtp library.
  *
@@ -26,6 +28,7 @@ public class Practice
 	public static final int PORT = 2566;
 
 	/** */
+	@SuppressFBWarnings
 	public static void main(String[] args) throws Exception
 	{
 		Wiser wiser = Wiser.port(PORT);

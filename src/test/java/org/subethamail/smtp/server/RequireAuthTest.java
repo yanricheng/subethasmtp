@@ -11,6 +11,8 @@ import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.Testing;
 import org.subethamail.wiser.Wiser;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * @author Evgeny Naumenko
  */
@@ -38,6 +40,7 @@ public class RequireAuthTest extends ServerTestCase {
      * @see org.subethamail.smtp.ServerTestCase#setUp()
      */
     @Override
+    @SuppressFBWarnings
     protected void setUp() throws Exception {
         UsernamePasswordValidator validator = new RequiredUsernamePasswordValidator();
         EasyAuthenticationHandlerFactory fact = new EasyAuthenticationHandlerFactory(validator);

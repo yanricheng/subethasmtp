@@ -5,6 +5,8 @@ import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.Testing;
 import org.subethamail.wiser.Wiser;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * @author Erik van Oosten
  */
@@ -23,6 +25,7 @@ public class RequireTlsTest extends ServerTestCase
 	 * @see org.subethamail.smtp.ServerTestCase#setUp()
 	 */
 	@Override
+	@SuppressFBWarnings
 	protected void setUp() throws Exception
 	{
 		this.wiser = Wiser.accepter(Testing.ACCEPTER).server(SMTPServer.port(PORT).requireTLS());
