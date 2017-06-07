@@ -1,10 +1,8 @@
 package org.subethamail.smtp.server;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -20,8 +18,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.junit.Test;
-import org.subethamail.smtp.AuthenticationHandlerFactory;
-import org.subethamail.smtp.MessageHandlerFactory;
 
 public class BasicMessageHandlerFactoryTest {
 
