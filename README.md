@@ -63,7 +63,7 @@ SMTPServer server = SMTPServer
   .requireTLS() 
   .hideTLS() 
   .hostName("us") 
-  .maxMessageSize(10000 )
+  .maxMessageSize(10000)
   .maxConnections(20)
   .maxRecipients(20) 
   .messageHandlerFactory(mhf) 
