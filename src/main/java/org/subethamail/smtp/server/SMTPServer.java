@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.MessageHandlerFactory;
 import org.subethamail.smtp.Version;
+import org.subethamail.smtp.helper.BasicMessageHandlerFactory;
+import org.subethamail.smtp.helper.BasicMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
 import org.subethamail.smtp.internal.server.CommandHandler;
@@ -147,7 +150,8 @@ public final class SMTPServer implements SSLSocketCreator {
         private int backlog = 50;
         private String softwareName = "SubEthaSMTP " + Version.getSpecification();
 
-        private MessageHandlerFactory messageHandlerFactory;
+        private MessageHandlerFactory messageHandlerFactory = MESSAGE_HANDLER_FACTORY_DEFAULT;
+
         private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional
                 .empty();
         private Optional<ExecutorService> executorService = Optional.empty();
@@ -157,10 +161,10 @@ public final class SMTPServer implements SSLSocketCreator {
 
         /** If true, TLS is not announced; ignored if enableTLS=false */
         private boolean hideTLS = false;
-        
+
         /** If true, a TLS handshake is required; ignored if enableTLS=false */
         private boolean requireTLS = false;
-        
+
         /**
          * If true, this server will accept no mail until auth succeeded;
          * ignored if no AuthenticationHandlerFactory has been set
@@ -250,8 +254,15 @@ public final class SMTPServer implements SSLSocketCreator {
             return this;
         }
 
+        public Builder messageHandler(BasicMessageListener listener) {
+            return messageHandlerFactory(new BasicMessageHandlerFactory(listener));
+        }
+
         public Builder messageHandlerFactory(MessageHandlerFactory factory) {
             Preconditions.checkNotNull(factory);
+            Preconditions.checkArgument(
+                    this.messageHandlerFactory == MESSAGE_HANDLER_FACTORY_DEFAULT,
+                    "can only set message handler factory once");
             this.messageHandlerFactory = factory;
             return this;
         }
@@ -585,12 +596,17 @@ public final class SMTPServer implements SSLSocketCreator {
     };
 
     private static final ServerSocketCreator SERVER_SOCKET_CREATOR_DEFAULT = new ServerSocketCreator() {
-
         @Override
         public ServerSocket createServerSocket() throws IOException {
             return new ServerSocket();
         }
     };
+
+    private static final MessageHandlerFactory MESSAGE_HANDLER_FACTORY_DEFAULT = new BasicMessageHandlerFactory(
+            (from, to,
+                    data) -> log.info("From: " + from + ", To: " + to + "\n"
+                            + new String(data, StandardCharsets.UTF_8)
+                            + "\n--------END OF MESSAGE ------------"));
 
     /** @return the host name that will be reported to SMTP clients */
     public String getHostName() {

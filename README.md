@@ -15,9 +15,60 @@ This component can be used in almost any kind of email  processing application. 
   * SMTPseudo [A filtering forwarding server](http://code.google.com/p/smtpseudo/)
   * [Baton](http://code.google.com/p/baton/) SMTP proxy for one or more backends (rules based on sender/envelope)
   * [Mireka](http://code.google.com/p/mireka/) - Mail server and SMTP proxy with detailed logging, statistics and built-in, fail-fast filters
+  
+## Features
+* Supports required aspects of rfc2821 [specification](http://rfc.net/rfc2821.html#s4.5.1)
+* Supports STARTTLS 
+* Supports SMTP AUTH
+* Supports SMTP over SSL/TLS (via specification of server socket factories)
+* Uses builders for concise code and a discoverable API
 
 
-SubEthaSMTP's simple, low-level API is suitable for writing almost any kind of mail-receiving application.  Read more in [UsingSubEthaSMTP](UsingSubEthaSMTP.md) or join our MailingList.
+## Example
+
+The code below starts an SMTP server and logs messages to the console:
+```java
+SMTPServer server = SMTPServer 
+  .port(25000) 
+  .build();
+  
+ //start server asynchronously
+ server.start();
+ ```
+ 
+ Do your own thing with a message (from, to and a byte array of data):
+ ```java
+SMTPServer server = SMTPServer //
+  .port(PORT) //
+  .messageHandler(
+    (from, to, data) -> 
+       System.out.println(
+           "message from " + from 
+           + " to " + to
+           + ":\n" + new String(data, StandardCharsets.UTF_8)))
+  .build();
+  
+server.start();
+```
+
+The builder has a lot of options, explore them. This fragment sets a bunch of them:
+
+```java
+SMTPServer server = SMTPServer 
+  .port(port) 
+  .connectionTimeout(1, TimeUnit.MINUTES) 
+  .authenticationHandlerFactory(ahf) 
+  .backlog(100) 
+  .bindAddress(address) 
+  .requireTLS() 
+  .hideTLS() 
+  .hostName("us") 
+  .maxMessageSize(10000 )
+  .maxConnections(20)
+  .maxRecipients(20) 
+  .messageHandlerFactory(mhf) 
+  .build();
+```
 
 ## Getting started
 Use this maven dependency:
@@ -44,7 +95,7 @@ Since you're reading this page you probably already know what we found:  Seven d
 
 During the development of SubEtha's testing harness, we tried out the [Dumbster](http://quintanasoft.com/dumbster/) software  and found that not only was the API difficult to use, it did it not work properly, the developer has not done any development on it in about a year and it does not work reliably on Mac OS X. With two simple classes we re-implemented it as an included project called [Wiser](Wiser.md).
 
-We hate reinventing wheels.  This should be the LAST FREAKING JAVA SMTP IMPLEMENTATION.
+We hate reinventing wheels.  This should be the LAST FREAKING JAVA SMTP IMPLEMENTATION (Dave Moten: not including forks!).
 
 ## A New Fork ##
 This new fork by Engine821.com intends to tidy up some of the structure, while keeping the original (and excellent!) design and code. We are using this as a base for a production product, so intend on keeping the code fresh and well maintained.
