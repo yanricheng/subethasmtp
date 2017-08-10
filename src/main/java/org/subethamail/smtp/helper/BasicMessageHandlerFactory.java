@@ -10,8 +10,6 @@ import org.subethamail.smtp.MessageHandlerFactory;
 import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.TooMuchDataException;
 
-import com.github.davidmoten.guavamini.Preconditions;
-
 public class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
     private final BasicMessageListener listener;
@@ -31,7 +29,6 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
         private String from;
         private String recipient;
-        private byte[] bytes;
 
         public BasicMessageHandler(BasicMessageListener listener) {
             this.listener = listener;
@@ -50,20 +47,38 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
         @Override
         public void data(InputStream is) throws RejectException, TooMuchDataException, IOException {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] bytes = new byte[8192];
-            int n;
-            while ((n = is.read(bytes)) != -1) {
-                out.write(bytes, 0, n);
-            }
-            is.close();
-            this.bytes = out.toByteArray();
+            try {
+                byte[] bytes = readAndClose(is);
 
-            // must call listener here because if called from done() then
-            // a 250 ok response has already been sent
-            Preconditions.checkNotNull(from, "from not set");
-            Preconditions.checkNotNull(recipient, "recipient not set");
-            listener.messageArrived(from, recipient, bytes);
+                // must call listener here because if called from done() then
+                // a 250 ok response has already been sent
+                if (from == null) {
+                    throw new RejectException("from not set");
+                }
+                if (recipient == null) {
+                    throw new RejectException("recipient not set");
+                }
+                listener.messageArrived(from, recipient, bytes);
+            } catch (RuntimeException e) {
+                throw new RejectException("message could not be accepted: " + e.getMessage());
+            }
+        }
+
+        private static byte[] readAndClose(InputStream is) throws IOException {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int n;
+            try {
+                // TODO honour max message size by throwing a TooMuchDataException when 
+                // bytes.length() is too big
+                while ((n = is.read(buffer)) != -1) {
+                    bytes.write(buffer, 0, n);
+                }
+            } finally {
+                // TODO creator of stream should close it, not this method
+                is.close();
+            }
+            return bytes.toByteArray();
         }
 
         @Override
