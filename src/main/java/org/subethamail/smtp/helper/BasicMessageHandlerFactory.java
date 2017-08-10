@@ -19,7 +19,7 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
     public BasicMessageHandlerFactory(BasicMessageListener listener) {
         this.listener = listener;
     }
-    
+
     @Override
     public MessageHandler create(MessageContext ctx) {
         return new BasicMessageHandler(listener);
@@ -28,7 +28,7 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
     public static class BasicMessageHandler implements MessageHandler {
 
         private final BasicMessageListener listener;
-        
+
         private String from;
         private String recipient;
         private byte[] bytes;
@@ -58,14 +58,17 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
             }
             is.close();
             this.bytes = out.toByteArray();
+
+            // must call listener here because if called from done() then
+            // a 250 ok response has already been sent
+            Preconditions.checkNotNull(from, "from not set");
+            Preconditions.checkNotNull(recipient, "recipient not set");
+            listener.messageArrived(from, recipient, bytes);
         }
 
         @Override
         public void done() {
-            Preconditions.checkNotNull(from);
-            Preconditions.checkNotNull(recipient);
-            Preconditions.checkNotNull(bytes);
-            listener.messageArrived(from, recipient, bytes);
+            // do nothing
         }
 
     }
