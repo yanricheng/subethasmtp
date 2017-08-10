@@ -64,12 +64,12 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
             }
         }
 
-        private static byte[] readAndClose(InputStream is) throws IOException {
+        private static byte[] readAndClose(InputStream is) throws IOException, TooMuchDataException {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             byte[] buffer = new byte[8192];
             int n;
             try {
-                // TODO honour max message size by throwing a TooMuchDataException when 
+                // TODO honour max message size by throwing a TooMuchDataException when
                 // bytes.length() is too big
                 while ((n = is.read(buffer)) != -1) {
                     bytes.write(buffer, 0, n);
