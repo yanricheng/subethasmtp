@@ -57,7 +57,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
     /** Hostname used if we can't find one */
     private final static String UNKNOWN_HOSTNAME = "localhost";
-    
+
     private final static int MAX_MESSAGE_SIZE_UNLIMITED = 0;
 
     private final Optional<InetAddress> bindAddress; // default to all
@@ -597,9 +597,9 @@ public final class SMTPServer implements SSLSocketCreator {
     };
 
     private static final MessageHandlerFactory MESSAGE_HANDLER_FACTORY_DEFAULT = new BasicMessageHandlerFactory(
-            (from, to, data) -> log.info("From: " + from + ", To: " + to + "\n"
+            (context, from, to, data) -> log.info("From: " + from + ", To: " + to + "\n"
                     + new String(data, StandardCharsets.UTF_8) + "\n--------END OF MESSAGE ------------"),
-            0);
+            MAX_MESSAGE_SIZE_UNLIMITED);
 
     /** @return the host name that will be reported to SMTP clients */
     public String getHostName() {

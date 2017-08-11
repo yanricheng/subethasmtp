@@ -38,7 +38,7 @@ public class BasicMessageHandlerFactoryTest {
         SMTPServer server = SMTPServer //
                 .port(PORT) //
                 .messageHandler(
-                        (from, to,
+                        (context, from, to,
                                 data) -> System.out.println("message from " + from + " to " + to
                                         + ":\n" + new String(data, StandardCharsets.UTF_8)))
                 .build();

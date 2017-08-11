@@ -1,5 +1,6 @@
 package org.subethamail.smtp.helper;
 
+import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.RejectException;
 
 public interface BasicMessageListener {
@@ -17,6 +18,6 @@ public interface BasicMessageListener {
      * @throws RejectException
      *             when caller to be given an SMTP error response
      */
-    void messageArrived(String from, String to, byte[] data) throws RejectException;
+    void messageArrived(MessageContext context, String from, String to, byte[] data) throws RejectException;
 
 }

@@ -31,7 +31,7 @@ import org.subethamail.smtp.server.SMTPServer;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
 public class ErrorResponseTest {
-    
+
     static final String LOCALHOST = "127.0.0.1";
     static final String EMAIL_TO = "me@gmail.com";
     static final String EMAIL_FROM = "fred@gmail.com";
@@ -45,7 +45,8 @@ public class ErrorResponseTest {
             int count = 0;
 
             @Override
-            public void messageArrived(String from, String to, byte[] data) throws RejectException {
+            public void messageArrived(MessageContext context, String from, String to, byte[] data)
+                    throws RejectException {
                 count++;
                 if (count == 1) {
                     throw new RejectException("first request rejected");
@@ -128,5 +129,5 @@ public class ErrorResponseTest {
 
         Transport.send(message);
     }
-    
+
 }

@@ -21,8 +21,8 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
     }
 
     @Override
-    public MessageHandler create(MessageContext ctx) {
-        return new BasicMessageHandler(listener, maxMessageSize);
+    public MessageHandler create(MessageContext context) {
+        return new BasicMessageHandler(context, listener, maxMessageSize);
     }
 
     public static class BasicMessageHandler implements MessageHandler {
@@ -32,9 +32,12 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
         private String from;
         private String recipient;
 
+        private final MessageContext context;
         private final int maxMessageSize;
 
-        public BasicMessageHandler(BasicMessageListener listener, int maxMessageSize) {
+
+        public BasicMessageHandler(MessageContext context, BasicMessageListener listener, int maxMessageSize) {
+            this.context = context;
             this.listener = listener;
             this.maxMessageSize = maxMessageSize;
         }
@@ -63,7 +66,7 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
                 if (recipient == null) {
                     throw new RejectException("recipient not set");
                 }
-                listener.messageArrived(from, recipient, bytes);
+                listener.messageArrived(context, from, recipient, bytes);
             } catch (RuntimeException e) {
                 throw new RejectException("message could not be accepted: " + e.getMessage());
             }
