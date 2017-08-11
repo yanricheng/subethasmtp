@@ -1,6 +1,10 @@
 package org.subethamail.smtp.server;
 
+import static org.mockito.Mockito.mock;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -18,6 +22,12 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.junit.Test;
+import org.subethamail.smtp.MessageContext;
+import org.subethamail.smtp.MessageHandler;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.TooMuchDataException;
+import org.subethamail.smtp.helper.BasicMessageHandlerFactory;
+import org.subethamail.smtp.helper.BasicMessageListener;
 
 public class BasicMessageHandlerFactoryTest {
 
@@ -88,6 +98,30 @@ public class BasicMessageHandlerFactoryTest {
 
         Transport.send(message);
         System.out.println("Sent message successfully....");
+    }
+    
+    @Test(expected =TooMuchDataException.class)
+    public void testWhenTooMuchDataThatExceptionIsThrown() throws RejectException, TooMuchDataException, IOException {
+        BasicMessageListener listener = mock(BasicMessageListener.class);
+        int maxMessageSize = 5;
+        BasicMessageHandlerFactory f = new BasicMessageHandlerFactory(listener, maxMessageSize);
+        MessageContext context = mock(MessageContext.class);
+        MessageHandler mh = f.create(context);
+        mh.from("fred@thing.com");
+        mh.recipient("anne@place.com");
+        mh.data(new ByteArrayInputStream("abcdef".getBytes()));
+    }
+    
+    @Test
+    public void testWhenNotTooMuchData() throws RejectException, TooMuchDataException, IOException {
+        BasicMessageListener listener = mock(BasicMessageListener.class);
+        int maxMessageSize = 6;
+        BasicMessageHandlerFactory f = new BasicMessageHandlerFactory(listener, maxMessageSize);
+        MessageContext context = mock(MessageContext.class);
+        MessageHandler mh = f.create(context);
+        mh.from("fred@thing.com");
+        mh.recipient("anne@place.com");
+        mh.data(new ByteArrayInputStream("abcdef".getBytes()));
     }
 
 }
