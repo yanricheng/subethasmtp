@@ -57,6 +57,8 @@ public final class SMTPServer implements SSLSocketCreator {
 
     /** Hostname used if we can't find one */
     private final static String UNKNOWN_HOSTNAME = "localhost";
+    
+    private final static int MAX_MESSAGE_SIZE_UNLIMITED = 0;
 
     private final Optional<InetAddress> bindAddress; // default to all
                                                      // interfaces
@@ -81,8 +83,8 @@ public final class SMTPServer implements SSLSocketCreator {
     private final boolean requireTLS;
 
     /**
-     * If true, this server will accept no mail until auth succeeded; ignored if
-     * no AuthenticationHandlerFactory has been set
+     * If true, this server will accept no mail until auth succeeded; ignored if no
+     * AuthenticationHandlerFactory has been set
      */
     private final boolean requireAuth;
 
@@ -90,15 +92,14 @@ public final class SMTPServer implements SSLSocketCreator {
     private final boolean disableReceivedHeaders;
 
     /**
-     * set a hard limit on the maximum number of connections this server will
-     * accept once we reach this limit, the server will gracefully reject new
-     * connections. Default is 1000.
+     * set a hard limit on the maximum number of connections this server will accept
+     * once we reach this limit, the server will gracefully reject new connections.
+     * Default is 1000.
      */
     private final int maxConnections;
 
     /**
-     * The timeout for waiting for data on a connection is one minute: 1000 * 60
-     * * 1
+     * The timeout for waiting for data on a connection is one minute: 1000 * 60 * 1
      */
     private final int connectionTimeoutMs;
 
@@ -110,11 +111,11 @@ public final class SMTPServer implements SSLSocketCreator {
 
     /**
      * The maximum size of a message that the server will accept. This value is
-     * advertised during the EHLO phase if it is larger than 0. If the message
-     * size specified by the client during the MAIL phase, the message will be
-     * rejected at that time. (RFC 1870) Default is 0. Note this doesn't
-     * actually enforce any limits on the message being read; you must do that
-     * yourself when reading data.
+     * advertised during the EHLO phase if it is larger than 0. If the message size
+     * specified by the client during the MAIL phase, the message will be rejected
+     * at that time. (RFC 1870) Default is 0. Note this doesn't actually enforce any
+     * limits on the message being read; you must do that yourself when reading
+     * data.
      */
     private final int maxMessageSize;
 
@@ -127,10 +128,10 @@ public final class SMTPServer implements SSLSocketCreator {
     private ServerThread serverThread;
 
     /**
-     * True if this SMTPServer was started. It remains true even if the
-     * SMTPServer has been stopped since. It is used to prevent restarting this
-     * object. Even if it was shutdown properly, it cannot be restarted, because
-     * the contained thread pool object itself cannot be restarted.
+     * True if this SMTPServer was started. It remains true even if the SMTPServer
+     * has been stopped since. It is used to prevent restarting this object. Even if
+     * it was shutdown properly, it cannot be restarted, because the contained
+     * thread pool object itself cannot be restarted.
      **/
     @GuardedBy("this")
     private boolean started = false;
@@ -150,10 +151,10 @@ public final class SMTPServer implements SSLSocketCreator {
         private int backlog = 50;
         private String softwareName = "SubEthaSMTP " + Version.getSpecification();
 
+        private Optional<BasicMessageListener> listener = Optional.empty();
         private MessageHandlerFactory messageHandlerFactory = MESSAGE_HANDLER_FACTORY_DEFAULT;
 
-        private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional
-                .empty();
+        private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional.empty();
         private Optional<ExecutorService> executorService = Optional.empty();
 
         /** If true, TLS is enabled */
@@ -166,8 +167,8 @@ public final class SMTPServer implements SSLSocketCreator {
         private boolean requireTLS = false;
 
         /**
-         * If true, this server will accept no mail until auth succeeded;
-         * ignored if no AuthenticationHandlerFactory has been set
+         * If true, this server will accept no mail until auth succeeded; ignored if no
+         * AuthenticationHandlerFactory has been set
          */
         private boolean requireAuth = false;
 
@@ -175,15 +176,14 @@ public final class SMTPServer implements SSLSocketCreator {
         private boolean disableReceivedHeaders = false;
 
         /**
-         * set a hard limit on the maximum number of connections this server
-         * will accept once we reach this limit, the server will gracefully
-         * reject new connections. Default is 1000.
+         * set a hard limit on the maximum number of connections this server will accept
+         * once we reach this limit, the server will gracefully reject new connections.
+         * Default is 1000.
          */
         private int maxConnections = 1000;
 
         /**
-         * The timeout for waiting for data on a connection is one minute: 1000
-         * * 60 * 1
+         * The timeout for waiting for data on a connection is one minute: 1000 * 60 * 1
          */
         private int connectionTimeoutMs = 1000 * 60 * 1;
 
@@ -194,14 +194,14 @@ public final class SMTPServer implements SSLSocketCreator {
         private int maxRecipients = 1000;
 
         /**
-         * The maximum size of a message that the server will accept. This value
-         * is advertised during the EHLO phase if it is larger than 0. If the
-         * message size specified by the client during the MAIL phase, the
-         * message will be rejected at that time. (RFC 1870) Default is 0. Note
-         * this doesn't actually enforce any limits on the message being read;
-         * you must do that yourself when reading data.
+         * The maximum size of a message that the server will accept. This value is
+         * advertised during the EHLO phase if it is larger than 0. If the message size
+         * specified by the client during the MAIL phase, the message will be rejected
+         * at that time. (RFC 1870) Default is 0. Note this doesn't actually enforce any
+         * limits on the message being read; you must do that yourself when reading
+         * data.
          */
-        private int maxMessageSize = 0;
+        private int maxMessageSize = MAX_MESSAGE_SIZE_UNLIMITED;
 
         private SessionIdFactory sessionIdFactory = new TimeBasedSessionIdFactory();
 
@@ -233,12 +233,12 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
-         * Sets the Socket backlog (?).
+         * Sets the Socket backlog which is the requested maximum number of pending
+         * connections on the socket.
          *
          * @param backlogSize
-         *            The backlog argument must be a positive value greater than
-         *            0. If the value passed if equal or less than 0, then the
-         *            default value will be assumed.
+         *            The backlog argument must be a >= 0. If the value passed is 0,
+         *            then the default value (50) will be assumed.
          *
          * @return this
          */
@@ -255,13 +255,13 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public Builder messageHandler(BasicMessageListener listener) {
-            return messageHandlerFactory(new BasicMessageHandlerFactory(listener));
+            this.listener = Optional.of(listener);
+            return this;
         }
 
         public Builder messageHandlerFactory(MessageHandlerFactory factory) {
             Preconditions.checkNotNull(factory);
-            Preconditions.checkArgument(
-                    this.messageHandlerFactory == MESSAGE_HANDLER_FACTORY_DEFAULT,
+            Preconditions.checkArgument(this.messageHandlerFactory == MESSAGE_HANDLER_FACTORY_DEFAULT,
                     "can only set message handler factory once");
             this.messageHandlerFactory = factory;
             return this;
@@ -277,14 +277,13 @@ public final class SMTPServer implements SSLSocketCreator {
          * 
          * @param factory
          *            the {@link AuthenticationHandlerFactory} which performs
-         *            authentication in the SMTP AUTH command. If empty,
-         *            authentication is not supported. Note that setting an
-         *            authentication handler does not enforce authentication, it
-         *            only makes authentication possible. Enforcing
-         *            authentication is the responsibility of the client
-         *            application, which usually enforces it only selectively.
-         *            Use {@link Session#isAuthenticated} to check whether the
-         *            client was authenticated in the session.
+         *            authentication in the SMTP AUTH command. If empty, authentication
+         *            is not supported. Note that setting an authentication handler does
+         *            not enforce authentication, it only makes authentication possible.
+         *            Enforcing authentication is the responsibility of the client
+         *            application, which usually enforces it only selectively. Use
+         *            {@link Session#isAuthenticated} to check whether the client was
+         *            authenticated in the session.
          * @return this
          */
         public Builder authenticationHandlerFactory(AuthenticationHandlerFactory factory) {
@@ -297,11 +296,10 @@ public final class SMTPServer implements SSLSocketCreator {
          * Sets the executor service that will handle client connections.
          * 
          * @param executor
-         *            the ExecutorService that will handle client connections,
-         *            one task per connection. The SMTPServer will shut down
-         *            this ExecutorService when the SMTPServer itself stops. If
-         *            not specified, a default one is created by
-         *            {@link Executors#newCachedThreadPool()}.
+         *            the ExecutorService that will handle client connections, one task
+         *            per connection. The SMTPServer will shut down this ExecutorService
+         *            when the SMTPServer itself stops. If not specified, a default one
+         *            is created by {@link Executors#newCachedThreadPool()}.
          * @return this
          */
         public Builder executorService(ExecutorService executor) {
@@ -318,13 +316,13 @@ public final class SMTPServer implements SSLSocketCreator {
         /**
          * If set to true, TLS will be supported.
          * <p>
-         * The minimal JSSE configuration necessary for a working TLS support on
-         * Oracle JRE 6:
+         * The minimal JSSE configuration necessary for a working TLS support on Oracle
+         * JRE 6:
          * <ul>
-         * <li>javax.net.ssl.keyStore system property must refer to a file
-         * containing a JKS keystore with the private key.
-         * <li>javax.net.ssl.keyStorePassword system property must specify the
-         * keystore password.
+         * <li>javax.net.ssl.keyStore system property must refer to a file containing a
+         * JKS keystore with the private key.
+         * <li>javax.net.ssl.keyStorePassword system property must specify the keystore
+         * password.
          * </ul>
          * <p>
          * Up to SubEthaSMTP 3.1.5 the default was true, i.e. TLS was enabled.
@@ -338,8 +336,8 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
-         * If set to true, TLS will not be advertised in the EHLO string.
-         * Default is false; true implied when disableTLS=true.
+         * If set to true, TLS will not be advertised in the EHLO string. Default is
+         * false; true implied when disableTLS=true.
          */
         public Builder hideTLS(boolean value) {
             this.hideTLS = value;
@@ -347,8 +345,8 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
-         * If set to true, TLS will not be advertised in the EHLO string.
-         * Default is false; true implied when disableTLS=true.
+         * If set to true, TLS will not be advertised in the EHLO string. Default is
+         * false; true implied when disableTLS=true.
          */
         public Builder hideTLS() {
             return hideTLS(true);
@@ -356,9 +354,8 @@ public final class SMTPServer implements SSLSocketCreator {
 
         /**
          * @param requireTLS
-         *            true to require a TLS handshake, false to allow operation
-         *            with or without TLS. Default is false; ignored when
-         *            disableTLS=true.
+         *            true to require a TLS handshake, false to allow operation with or
+         *            without TLS. Default is false; ignored when disableTLS=true.
          */
         public Builder requireTLS(boolean value) {
             this.requireTLS = value;
@@ -370,13 +367,13 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
-         * Sets whether authentication is required. If set to true then no mail
-         * will be accepted till authentication succeeds.
+         * Sets whether authentication is required. If set to true then no mail will be
+         * accepted till authentication succeeds.
          * 
          * @param requireAuth
-         *            true for mandatory smtp authentication, i.e. no mail mail
-         *            be accepted until authentication succeeds. Don't forget to
-         *            set {@code authenticationHandlerFactory} to allow client
+         *            true for mandatory smtp authentication, i.e. no mail mail be
+         *            accepted until authentication succeeds. Don't forget to set
+         *            {@code authenticationHandlerFactory} to allow client
          *            authentication. Defaults to false.
          */
         public Builder requireAuth(boolean value) {
@@ -416,8 +413,8 @@ public final class SMTPServer implements SSLSocketCreator {
          * Sets the maximum number of recipients per message delivery request.
          * 
          * @param maxRecipients
-         *            The maximum number of recipients that this server accepts
-         *            per message delivery request.
+         *            The maximum number of recipients that this server accepts per
+         *            message delivery request.
          * @return this
          */
         public Builder maxRecipients(int maxRecipients) {
@@ -429,13 +426,12 @@ public final class SMTPServer implements SSLSocketCreator {
          * Sets the maximum messages size (does not enforce though!).
          * 
          * @param maxMessageSize
-         *            The maximum size of a message that the server will accept.
-         *            This value is advertised during the EHLO phase if it is
-         *            larger than 0. If the message size specified by the client
-         *            during the MAIL phase, the message will be rejected at
-         *            that time. (RFC 1870) Default is 0. Note this doesn't
-         *            actually enforce any limits on the message being read; you
-         *            must do that yourself when reading data.
+         *            The maximum size of a message that the server will accept. This
+         *            value is advertised during the EHLO phase if it is larger than 0.
+         *            If the message size specified by the client during the MAIL phase,
+         *            the message will be rejected at that time. (RFC 1870) Default is
+         *            0. Note this doesn't actually enforce any limits on the message
+         *            being read; you must do that yourself when reading data.
          * @return this
          */
         public Builder maxMessageSize(int maxMessageSize) {
@@ -444,9 +440,8 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
-         * Sets the {@link SessionIdFactory} which will allocate a unique
-         * identifier for each mail sessions. If not set, a reasonable default
-         * will be used.
+         * Sets the {@link SessionIdFactory} which will allocate a unique identifier for
+         * each mail sessions. If not set, a reasonable default will be used.
          */
         public Builder sessionIdFactory(SessionIdFactory factory) {
             this.sessionIdFactory = factory;
@@ -484,12 +479,11 @@ public final class SMTPServer implements SSLSocketCreator {
             return startTlsSocketFactory(new SSLSocketCreator() {
                 @Override
                 public SSLSocket createSSLSocket(Socket socket) throws IOException {
-                    InetSocketAddress remoteAddress = (InetSocketAddress) socket
-                            .getRemoteSocketAddress();
+                    InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
 
                     SSLSocketFactory sf = context.getSocketFactory();
-                    SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
-                            socket.getPort(), true));
+                    SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
+                            true));
 
                     // we are a server
                     s.setUseClientMode(false);
@@ -509,22 +503,23 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public SMTPServer build() {
-            return new SMTPServer(hostName, bindAddress, port, backlog, softwareName,
-                    messageHandlerFactory, authenticationHandlerFactory, executorService, enableTLS,
-                    hideTLS, requireTLS, requireAuth, disableReceivedHeaders, maxConnections,
-                    connectionTimeoutMs, maxRecipients, maxMessageSize, sessionIdFactory,
-                    startTlsSocketCreator, serverSocketCreator);
+            if (listener.isPresent()) {
+                messageHandlerFactory(new BasicMessageHandlerFactory(listener.get(), maxMessageSize));
+            }
+            return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
+                    authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
+                    disableReceivedHeaders, maxConnections, connectionTimeoutMs, maxRecipients, maxMessageSize,
+                    sessionIdFactory, startTlsSocketCreator, serverSocketCreator);
         }
 
     }
 
-    private SMTPServer(Optional<String> hostName, Optional<InetAddress> bindAddress, int port,
-            int backlog, String softwareName, MessageHandlerFactory messageHandlerFactory,
+    private SMTPServer(Optional<String> hostName, Optional<InetAddress> bindAddress, int port, int backlog,
+            String softwareName, MessageHandlerFactory messageHandlerFactory,
             Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
-            Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS,
-            boolean requireTLS, boolean requireAuth, boolean disableReceivedHeaders,
-            int maxConnections, int connectionTimeoutMs, int maxRecipients, int maxMessageSize,
-            SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator,
+            Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
+            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeoutMs,
+            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator,
             ServerSocketCreator startTlsSocketFactory) {
         Preconditions.checkNotNull(messageHandlerFactory);
         Preconditions.checkNotNull(bindAddress);
@@ -582,8 +577,7 @@ public final class SMTPServer implements SSLSocketCreator {
         public SSLSocket createSSLSocket(Socket socket) throws IOException {
             SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
             InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(),
-                    socket.getPort(), true));
+            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
 
             // we are a server
             s.setUseClientMode(false);
@@ -603,10 +597,9 @@ public final class SMTPServer implements SSLSocketCreator {
     };
 
     private static final MessageHandlerFactory MESSAGE_HANDLER_FACTORY_DEFAULT = new BasicMessageHandlerFactory(
-            (from, to,
-                    data) -> log.info("From: " + from + ", To: " + to + "\n"
-                            + new String(data, StandardCharsets.UTF_8)
-                            + "\n--------END OF MESSAGE ------------"));
+            (from, to, data) -> log.info("From: " + from + ", To: " + to + "\n"
+                    + new String(data, StandardCharsets.UTF_8) + "\n--------END OF MESSAGE ------------"),
+            0);
 
     /** @return the host name that will be reported to SMTP clients */
     public String getHostName() {
@@ -627,8 +620,8 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     /**
-     * The string reported to the public as the software running here. Defaults
-     * to SubEthaSTP and the version number.
+     * The string reported to the public as the software running here. Defaults to
+     * SubEthaSTP and the version number.
      */
     public String getSoftwareName() {
         return this.softwareName;
@@ -651,9 +644,8 @@ public final class SMTPServer implements SSLSocketCreator {
     /**
      * The backlog is the Socket backlog.
      *
-     * The backlog argument must be a positive value greater than 0. If the
-     * value passed if equal or less than 0, then the default value will be
-     * assumed.
+     * The backlog argument must be a positive value greater than 0. If the value
+     * passed if equal or less than 0, then the default value will be assumed.
      *
      * @return the backlog
      */
@@ -663,9 +655,9 @@ public final class SMTPServer implements SSLSocketCreator {
 
     /**
      * Starts the server listening for connections. When this method returns the
-     * server socket will have been established and will accept connections
-     * though the thread that processes accepted connections (queued) may not
-     * have started yet (it runs asynchronously).
+     * server socket will have been established and will accept connections though
+     * the thread that processes accepted connections (queued) may not have started
+     * yet (it runs asynchronously).
      * <p>
      * An SMTPServer which has been shut down, must not be reused.
      */
@@ -722,15 +714,15 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     /**
-     * Create an SSL socket that wraps the existing socket. This method is
-     * called after the client issued the STARTTLS command.
+     * Create an SSL socket that wraps the existing socket. This method is called
+     * after the client issued the STARTTLS command.
      * <p>
      * Subclasses may override this method to configure the key stores, enabled
      * protocols/ cipher suites, enforce client authentication, etc.
      *
      * @param socket
-     *            the existing socket as created by
-     *            {@link #createServerSocket()} (not null)
+     *            the existing socket as created by {@link #createServerSocket()}
+     *            (not null)
      * @return an SSLSocket
      * @throws IOException
      *             when creating the socket failed
@@ -751,8 +743,7 @@ public final class SMTPServer implements SSLSocketCreator {
     /**
      * Returns the factor for authentication handling.
      * 
-     * @return the factory for auth handlers, or empty if no factory has been
-     *         set.
+     * @return the factory for auth handlers, or empty if no factory has been set.
      */
     public Optional<AuthenticationHandlerFactory> getAuthenticationHandlerFactory() {
         return this.authenticationHandlerFactory;

@@ -13,14 +13,16 @@ import org.subethamail.smtp.TooMuchDataException;
 public class BasicMessageHandlerFactory implements MessageHandlerFactory {
 
     private final BasicMessageListener listener;
+    private final int maxMessageSize;
 
-    public BasicMessageHandlerFactory(BasicMessageListener listener) {
+    public BasicMessageHandlerFactory(BasicMessageListener listener, int maxMessageSize) {
         this.listener = listener;
+        this.maxMessageSize = maxMessageSize;
     }
 
     @Override
     public MessageHandler create(MessageContext ctx) {
-        return new BasicMessageHandler(listener);
+        return new BasicMessageHandler(listener, maxMessageSize);
     }
 
     public static class BasicMessageHandler implements MessageHandler {
@@ -30,8 +32,11 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
         private String from;
         private String recipient;
 
-        public BasicMessageHandler(BasicMessageListener listener) {
+        private final int maxMessageSize;
+
+        public BasicMessageHandler(BasicMessageListener listener, int maxMessageSize) {
             this.listener = listener;
+            this.maxMessageSize = maxMessageSize;
         }
 
         @Override
@@ -48,7 +53,7 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
         @Override
         public void data(InputStream is) throws RejectException, TooMuchDataException, IOException {
             try {
-                byte[] bytes = readAndClose(is);
+                byte[] bytes = readAndClose(is, maxMessageSize);
 
                 // must call listener here because if called from done() then
                 // a 250 ok response has already been sent
@@ -64,15 +69,17 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
             }
         }
 
-        private static byte[] readAndClose(InputStream is) throws IOException, TooMuchDataException {
+        private static byte[] readAndClose(InputStream is, int maxMessageSize)
+                throws IOException, TooMuchDataException {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             byte[] buffer = new byte[8192];
             int n;
             try {
-                // TODO honour max message size by throwing a TooMuchDataException when
-                // bytes.length() is too big
                 while ((n = is.read(buffer)) != -1) {
                     bytes.write(buffer, 0, n);
+                    if (maxMessageSize > 0 && bytes.size() > maxMessageSize) {
+                        throw new TooMuchDataException("message size exceeded maximum of " + maxMessageSize + "bytes");
+                    }
                 }
             } finally {
                 // TODO creator of stream should close it, not this method
