@@ -100,17 +100,15 @@ During the development of SubEtha's testing harness, we tried out the [Dumbster]
 We hate reinventing wheels.  This should be the LAST FREAKING JAVA SMTP IMPLEMENTATION (Dave Moten: not including forks!).
 
 ## A New Fork ##
-This new fork by Engine821.com intends to tidy up some of the structure, while keeping the original (and excellent!) design and code. We are using this as a base for a production product, so intend on keeping the code fresh and well maintained.
+Engine821.com too did a survey of existing Java SMTP implementations and were unsatisfied... until they found SubEthaSMTP! The code is clean and very well thought out. The changes they made were minor, including...
 
-We too did a survey of existing Java SMTP implementations and were unsatisfied... until we found SubEthaSMTP! The code is clean and very well thought out. So far the changes we've made are minor, including...
-
-* Eliminating the embedded `/lib` directory. Maven correctly handles pulling in all the dependencies and best practices discourage keeping binary artifacts inside version control.
-* Updating to the latest versions of some of the libraries used. 
-* Removing some of the IDE metadata files. Your IDE can rercreate whichever ones you need based on your preferences and the Maven POM.
-* Making the message handing exceptions be `checked`. This is possibly controversial, but we thought about it a lot and prefer to have these exceptions show up in the `throws` clause rather than have them potentially pop-up unexpectedly at run-time. 
+* Eliminate the embedded `/lib` directory. Maven correctly handles pulling in all the dependencies and best practices discourage keeping binary artifacts inside version control.
+* Update to the latest versions of some of the libraries used. 
+* Remove some of the IDE metadata files. Your IDE can rercreate whichever ones you need based on your preferences and the Maven POM.
+* Make the message handing exceptions be `checked`. This is possibly controversial, but we thought about it a lot and prefer to have these exceptions show up in the `throws` clause rather than have them potentially pop-up unexpectedly at run-time. 
 
 ### Fork of a Fork!
-Dave Moten came across this and 
+Dave Moten came across the Engine821 fork and 
 * fixed tests
 * migrated mocking to use Mockito (with apologies but was the most time-efficient way for me to restore the broken tests!)
 * set up pom.xml for release under the `com.github.davidmoten:subethasmtp` artifact 
@@ -122,7 +120,7 @@ Dave Moten came across this and
 * removed MigBase64 because is complex code without unit tests (even in original source) and Java 8 Base64 is faster
 * cleaned up code (made fields private and final where appropriate, remove public keyword from interface methods)
 * minor coverage improvements
-* required Java 8 (just because of Base64 class at the moment, Java 7 required now because of use in unit test of `X509TrustManager`)
+* required Java 8 (just because of `Base64` class at the moment, Java 7 required now because of use in unit test of `X509TrustManager`)
 * converted `SMTPServer` to be largely immutable and is created with a builder pattern
 * adjusted `Wiser` API to cope with an immutable `SMTPServer`
 * disallowed inheritance of `SMTPServer` (now final)
@@ -138,13 +136,13 @@ Dave Moten came across this and
 
 
 ## Project Authors ##
-Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions.
+Ian McFarland contributed the first codebase to SubEtha Mail. Then, Jon Stevens and Jeff Schnitzer re-wrote most of Ian's code into what we have today. Edouard De Oliveira and Scott Hernandez have also made significant contributions. Dave Moten made changes as mentioned above.
 
 ## Support ##
 If you have any bug reports, questions or comments about this SubEtha SMTP fork, it's best that you use the GitHub issue tracker to get in touch. Please do not email the authors directly.
 
 ## Spec Compliance ##
-For now, we have just focused on implementing just the minimal  required aspects of http://rfc.net/rfc2821.html#s4.5.1. We also return SMTP status responses that mimic what Postfix returns.
+For now, we have just focused on implementing just the minimal required aspects of http://rfc.net/rfc2821.html#s4.5.1. We also return SMTP status responses that mimic what Postfix returns.
 
 Thanks to a contribution from [Mike Wildpaner](mailto:mikeREMOVETHISPART@wildpaner.com), we support the [StartTLS specification](http://rfc.net/rfc2487.html).
 
