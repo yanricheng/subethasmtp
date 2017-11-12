@@ -79,7 +79,7 @@ Use this maven dependency:
 <dependency>
     <groupId>com.github.davidmoten</groupId>
     <artifactId>subethasmtp</artifactId>
-    <version>4.0-RC4</version>
+    <version>4.0-RC6</version>
 </dependency>
 ```
 
