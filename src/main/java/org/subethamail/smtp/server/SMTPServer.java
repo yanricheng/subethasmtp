@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -140,7 +141,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
     private final SSLSocketCreator sslSocketCreator;
 
-    private final ServerSocketCreator startTlsSocketFactory;
+    private final ServerSocketCreator serverSocketCreator;
 
     public static final class Builder {
         private Optional<String> hostName = Optional.empty();
@@ -491,7 +492,7 @@ public final class SMTPServer implements SSLSocketCreator {
                     // select protocols and cipher suites
                     s.setEnabledProtocols(s.getSupportedProtocols());
                     s.setEnabledCipherSuites(s.getSupportedCipherSuites());
-
+                    
                     //// Client must authenticate
                     if (requireClientCertificate) {
                         s.setNeedClientAuth(true);
@@ -519,14 +520,14 @@ public final class SMTPServer implements SSLSocketCreator {
             Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
             Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
             boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeoutMs,
-            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory, SSLSocketCreator sslSocketCreator,
-            ServerSocketCreator startTlsSocketFactory) {
+            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory, SSLSocketCreator startTlsSocketFactory,
+            ServerSocketCreator serverSocketCreator) {
         Preconditions.checkNotNull(messageHandlerFactory);
         Preconditions.checkNotNull(bindAddress);
         Preconditions.checkNotNull(executorService);
         Preconditions.checkNotNull(authenticationHandlerFactory);
         Preconditions.checkNotNull(sessionIdFactory);
-        Preconditions.checkNotNull(sslSocketCreator);
+        Preconditions.checkNotNull(startTlsSocketFactory);
         Preconditions.checkNotNull(startTlsSocketFactory);
         Preconditions.checkNotNull(hostName);
         Preconditions.checkArgument(!requireAuth || authenticationHandlerFactory.isPresent(),
@@ -549,8 +550,8 @@ public final class SMTPServer implements SSLSocketCreator {
         this.maxMessageSize = maxMessageSize;
         this.sessionIdFactory = sessionIdFactory;
         this.commandHandler = new CommandHandler();
-        this.sslSocketCreator = sslSocketCreator;
-        this.startTlsSocketFactory = startTlsSocketFactory;
+        this.serverSocketCreator = serverSocketCreator;
+        this.sslSocketCreator = startTlsSocketFactory;
 
         if (executorService.isPresent()) {
             this.executorService = executorService.get();
@@ -704,7 +705,7 @@ public final class SMTPServer implements SSLSocketCreator {
             isa = new InetSocketAddress(this.bindAddress.orElse(null), this.port);
         }
 
-        ServerSocket serverSocket = startTlsSocketFactory.createServerSocket();
+        ServerSocket serverSocket = serverSocketCreator.createServerSocket();
         serverSocket.bind(isa, backlog);
         if (this.port == 0) {
             this.allocatedPort = serverSocket.getLocalPort();
