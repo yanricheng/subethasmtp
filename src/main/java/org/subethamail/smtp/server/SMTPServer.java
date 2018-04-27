@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -139,7 +138,7 @@ public final class SMTPServer implements SSLSocketCreator {
 
     private volatile int allocatedPort;
 
-    private final SSLSocketCreator sslSocketCreator;
+    private final SSLSocketCreator startTlsSocketCreator;
 
     private final ServerSocketCreator serverSocketCreator;
 
@@ -527,12 +526,10 @@ public final class SMTPServer implements SSLSocketCreator {
         Preconditions.checkNotNull(executorService);
         Preconditions.checkNotNull(authenticationHandlerFactory);
         Preconditions.checkNotNull(sessionIdFactory);
-        Preconditions.checkNotNull(startTlsSocketFactory);
-        Preconditions.checkNotNull(startTlsSocketFactory);
         Preconditions.checkNotNull(hostName);
         Preconditions.checkArgument(!requireAuth || authenticationHandlerFactory.isPresent(),
                 "if requireAuth is set to true then you must specify an authenticationHandlerFactory");
-        Preconditions.checkNotNull(startTlsSocketFactory, "serverSocketCreator cannot be null");
+        Preconditions.checkNotNull(startTlsSocketFactory, "startTlsSocketFactory cannot be null");
         this.bindAddress = bindAddress;
         this.port = port;
         this.backlog = backlog;
@@ -551,7 +548,7 @@ public final class SMTPServer implements SSLSocketCreator {
         this.sessionIdFactory = sessionIdFactory;
         this.commandHandler = new CommandHandler();
         this.serverSocketCreator = serverSocketCreator;
-        this.sslSocketCreator = startTlsSocketFactory;
+        this.startTlsSocketCreator = startTlsSocketFactory;
 
         if (executorService.isPresent()) {
             this.executorService = executorService.get();
@@ -730,7 +727,7 @@ public final class SMTPServer implements SSLSocketCreator {
      */
     @Override
     public final SSLSocket createSSLSocket(Socket socket) throws IOException {
-        return sslSocketCreator.createSSLSocket(socket);
+        return startTlsSocketCreator.createSSLSocket(socket);
     }
 
     public String getDisplayableLocalSocketAddress() {
