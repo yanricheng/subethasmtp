@@ -359,6 +359,9 @@ public final class SMTPServer implements SSLSocketCreator {
          */
         public Builder requireTLS(boolean value) {
             this.requireTLS = value;
+            if (value) {
+                enableTLS = true;
+            }
             return this;
         }
 
