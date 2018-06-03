@@ -20,6 +20,7 @@ public interface AuthenticationHandlerFactory
 
 	/**
 	 * Create a fresh instance of your handler.
+	 * @return a new authentication handler
 	 */
 	AuthenticationHandler create();
 

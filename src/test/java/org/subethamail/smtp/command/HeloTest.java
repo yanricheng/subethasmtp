@@ -7,11 +7,11 @@ import org.subethamail.smtp.util.ServerTestCase;
 /**
  * @author Jeff Schnitzer
  */
-public class HelloTest extends ServerTestCase
+public class HeloTest extends ServerTestCase
 {
 	private static final int MAX_MESSAGE_SIZE = 1000;
 
-	public HelloTest(String name)
+	public HeloTest(String name)
 	{
 		super(name, MAX_MESSAGE_SIZE);
 	}
@@ -59,4 +59,5 @@ public class HelloTest extends ServerTestCase
 	    this.send("EHLO foo.com");
 	    this.expectContains("250-SIZE 1000");
 	}
+	
 }

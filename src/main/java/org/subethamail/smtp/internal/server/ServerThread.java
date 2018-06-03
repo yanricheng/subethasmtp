@@ -1,4 +1,4 @@
-package org.subethamail.smtp.server;
+package org.subethamail.smtp.internal.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,13 +16,15 @@ import javax.annotation.concurrent.GuardedBy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.subethamail.smtp.server.SMTPServer;
+import org.subethamail.smtp.server.Session;
 
 /**
  * ServerThread accepts TCP connections to the server socket and starts a new
  * {@link Session} thread for each connection which will handle the connection.
  * On shutdown it terminates not only this thread, but the session threads too.
  */
-final class ServerThread extends Thread
+public final class ServerThread extends Thread
 {
 	private final Logger log = LoggerFactory.getLogger(ServerThread.class);
 	private final SMTPServer server;
@@ -44,7 +46,7 @@ final class ServerThread extends Thread
 	 */
 	private volatile boolean shuttingDown;
 
-	ServerThread(SMTPServer server, ServerSocket serverSocket)
+	public ServerThread(SMTPServer server, ServerSocket serverSocket)
 	{
 		super(ServerThread.class.getName() + " " + server.getDisplayableLocalSocketAddress());
 		this.server = server;
@@ -183,7 +185,7 @@ final class ServerThread extends Thread
 	/**
 	 * Closes the server socket and all client sockets.
 	 */
-	void shutdown()
+	public void shutdown()
 	{
 		// First make sure we aren't accepting any new connections
 		shutdownServerThread();
@@ -246,12 +248,12 @@ final class ServerThread extends Thread
 		}
 	}
 
-	synchronized boolean hasTooManyConnections()
+	public synchronized boolean hasTooManyConnections()
 	{
 		return sessionThreads.size() > server.getMaxConnections();
 	}
 
-	synchronized int getNumberOfConnections()
+	public synchronized int getNumberOfConnections()
 	{
 		return sessionThreads.size();
 	}
@@ -260,7 +262,7 @@ final class ServerThread extends Thread
 	 * Registers that the specified {@link Session} thread ended. Session
 	 * threads must call this function.
 	 */
-	void sessionEnded(Session session)
+	public void sessionEnded(Session session)
 	{
 		synchronized (this)
 		{

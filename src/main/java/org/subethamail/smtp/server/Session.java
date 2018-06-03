@@ -20,6 +20,7 @@ import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.internal.io.CRLFTerminatedReader;
+import org.subethamail.smtp.internal.server.ServerThread;
 
 /**
  * The thread that handles a connection. This class passes most of it's

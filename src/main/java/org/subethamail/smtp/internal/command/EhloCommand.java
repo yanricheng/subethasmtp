@@ -69,7 +69,13 @@ public final class EhloCommand extends BaseCommand
 
 		// Check to see if we support authentication
 		Optional<AuthenticationHandlerFactory> authFact = sess.getServer().getAuthenticationHandlerFactory();
-		if (authFact.isPresent())
+        final boolean displayAuth;
+		if (sess.isTLSStarted()) {
+		    displayAuth = authFact.isPresent();
+		} else {
+		    displayAuth = authFact.isPresent() && !sess.getServer().getRequireTLS();
+		}
+		if (displayAuth)
 		{
 			List<String> supportedMechanisms = authFact.get().getAuthenticationMechanisms();
 			if (!supportedMechanisms.isEmpty())
@@ -80,7 +86,6 @@ public final class EhloCommand extends BaseCommand
 		}
 
 		response.append("\r\n" + "250 Ok");
-
 		sess.sendResponse(response.toString());
 	}
 }
