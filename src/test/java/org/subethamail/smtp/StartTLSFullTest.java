@@ -52,7 +52,6 @@ public class StartTLSFullTest {
                 .port(PORT) //
                 .hostName("email-server.me.com") //
                 .requireTLS() //
-                .enableTLS() //
                 .messageHandlerFactory(mhf) //
                 .executorService(Executors.newSingleThreadExecutor()) //
                 .startTlsSocketFactory(sslContext) //
@@ -99,7 +98,6 @@ public class StartTLSFullTest {
                 .port(PORT) //
                 .hostName("email-server.me.com") //
                 .requireTLS() //
-                .enableTLS() //
                 .messageHandlerFactory(mhf) //
                 .requireAuth() //
                 .authenticationHandlerFactory(createAuthenticationHandlerFactory())
