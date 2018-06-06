@@ -26,17 +26,17 @@ import org.subethamail.smtp.server.SMTPServer;
 
 public class StartTLSFullTest {
 
+    // the server is started using keyStore.jks and trustStore.jks on the
+    // classpath
+
+    // the trustStore contains the keyStore certificate (the server trusts
+    // itself)
+
+    // the send method uses the same trustStore (and the default keyStore?)
+    // to send
+
     @Test
     public void testStartTLS() throws Exception {
-        // the server is started using keyStore.jks and trustStore.jks on the
-        // classpath
-
-        // the trustStore contains the keyStore certificate (the server trusts
-        // itself)
-
-        // the send method uses the same trustStore (and the default keyStore?)
-        // to send
-
         // System.setProperty("javax.net.debug", "all");
         System.out.println("======= testStartTLS ==========");
         KeyManager[] keyManagers = getKeyManagers();
@@ -73,15 +73,6 @@ public class StartTLSFullTest {
 
     @Test
     public void testStartTLSAuthenticated() throws Exception {
-        // the server is started using keyStore.jks and trustStore.jks on the
-        // classpath
-
-        // the trustStore contains the keyStore certificate (the server trusts
-        // itself)
-
-        // the send method uses the same trustStore (and the default keyStore?)
-        // to send
-
         // System.setProperty("javax.net.debug", "all");
         System.out.println("======= testStartTLSAuthenticated ==========");
 
