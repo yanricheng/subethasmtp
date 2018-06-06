@@ -17,6 +17,7 @@ import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -71,6 +72,11 @@ class TestUtil {
     }
 
     static void send(TrustManager[] trustManagers, ConnectionType connectionType) throws Exception {
+        send(trustManagers, connectionType, null, null);
+    }
+
+    static void send(TrustManager[] trustManagers, ConnectionType connectionType, String username, String password)
+            throws Exception {
         String to = EMAIL_TO;
         String from = EMAIL_FROM;
         String host = LOCALHOST;
@@ -83,6 +89,10 @@ class TestUtil {
         } else {
             props.put("mail.smtp.ssl.enable", "true");
         }
+        if (username != null) {
+            props.setProperty("mail.smtp.submitter", username);
+            props.setProperty("mail.smtp.auth", "true");
+        }
         // props.put("mail.transport.protocol", "smtp");
         // props.put("mail.smtp.starttls.required", "true");
         // props.put("mail.smtp.ssl.protocols", "TLSv1.2");
@@ -91,7 +101,16 @@ class TestUtil {
         sslSocketFactory.setTrustManagers(trustManagers);
         props.put("mail.smtp.ssl.socketFactory", sslSocketFactory);
 
-        Session session = Session.getInstance(props);
+        final Session session;
+        if (username == null) {
+            session = Session.getInstance(props);
+        } else {
+            session = Session.getInstance(props, new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                }
+            });
+        }
         // Create a default MimeMessage object.
         Message message = new MimeMessage(session);
 
