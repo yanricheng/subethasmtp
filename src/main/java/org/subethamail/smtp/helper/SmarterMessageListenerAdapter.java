@@ -110,7 +110,7 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
         }
 
         @Override
-        public void data(InputStream data) throws TooMuchDataException, IOException {
+        public String data(InputStream data) throws TooMuchDataException, IOException {
             if (this.deliveries.size() == 1) {
                 this.deliveries.get(0).deliver(data);
             } else {
@@ -130,6 +130,7 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
                     dfos.close();
                 }
             }
+            return null;
         }
 
         @Override
