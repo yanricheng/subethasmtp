@@ -8,6 +8,7 @@ import java.util.StringTokenizer;
 
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
+import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.internal.util.TextUtils;
 
@@ -64,7 +65,7 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 		private String username;
 
 		@Override
-		public Optional<String> auth(String clientInput) throws RejectException
+		public Optional<String> auth(String clientInput, MessageContext context) throws RejectException
 		{
 			StringTokenizer stk = new StringTokenizer(clientInput);
 			String token = stk.nextToken();
@@ -124,7 +125,7 @@ public final class LoginAuthenticationHandlerFactory implements AuthenticationHa
 			String password = TextUtils.getStringUtf8(decoded);
 			try
 			{
-				LoginAuthenticationHandlerFactory.this.helper.login(this.username, password);
+				LoginAuthenticationHandlerFactory.this.helper.login(this.username, password, context);
 			}
 			catch (LoginFailedException lfe)
 			{

@@ -75,7 +75,7 @@ public final class AuthCommand extends BaseCommand
 			// The authentication process may require a series of challenge-responses
 			CRLFTerminatedReader reader = sess.getReader();
 
-			Optional<String> response = authHandler.auth(commandString);
+			Optional<String> response = authHandler.auth(commandString, sess);
 			if (response.isPresent())
 			{
 				// challenge-response iteration
@@ -85,7 +85,8 @@ public final class AuthCommand extends BaseCommand
 			while (response.isPresent())
 			{
 				String clientInput = reader.readLine();
-				if (clientInput.trim().equals(AUTH_CANCEL_COMMAND))
+				// clientInput == null -> reached EOF, client abruptly closed?
+				if (clientInput == null || clientInput.trim().equals(AUTH_CANCEL_COMMAND))
 				{
 					// RFC 2554 explicitly states this:
 					sess.sendResponse("501 Authentication canceled by client.");
@@ -93,7 +94,7 @@ public final class AuthCommand extends BaseCommand
 				}
 				else
 				{
-					response = authHandler.auth(clientInput);
+					response = authHandler.auth(clientInput, sess);
 					if (response.isPresent())
 					{
 						// challenge-response iteration

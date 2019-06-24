@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
+import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.RejectException;
 
 /**
@@ -76,7 +77,7 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 
 		/* */
 		@Override
-        public Optional<String> auth(String clientInput) throws RejectException
+        public Optional<String> auth(String clientInput, MessageContext context) throws RejectException
 		{
 			if (this.active == null)
 			{
@@ -95,7 +96,7 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 				this.active = fact.create();
 			}
 
-			return this.active.auth(clientInput);
+			return this.active.auth(clientInput, context);
 		}
 
 		/* */
