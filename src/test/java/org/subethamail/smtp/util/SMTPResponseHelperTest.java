@@ -8,6 +8,18 @@ import org.subethamail.smtp.internal.util.SMTPResponseHelper;
 
 public class SMTPResponseHelperTest {
 
+    @Test(expected = IllegalArgumentException.class)
+    public void tooShortCode() {
+        SMTPResponseHelper.buildResponse("25", "short");
+        SMTPResponseHelper.buildResponse(25, "short");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void tooLongCode() {
+        SMTPResponseHelper.buildResponse("2525", "long");
+        SMTPResponseHelper.buildResponse(2525, "long");
+    }
+
     @Test
     public void shortReponse() {
         assertEquals("250 short", SMTPResponseHelper.buildResponse("250", "short"));
