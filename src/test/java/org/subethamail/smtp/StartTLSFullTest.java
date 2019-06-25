@@ -111,7 +111,7 @@ public class StartTLSFullTest {
     }
 
     private static AuthenticationHandlerFactory createAuthenticationHandlerFactory() {
-        return new PlainAuthenticationHandlerFactory((username, password) -> {
+        return new PlainAuthenticationHandlerFactory((username, password, context) -> {
             if (!username.equals("me"))
                 throw new LoginFailedException();
         });

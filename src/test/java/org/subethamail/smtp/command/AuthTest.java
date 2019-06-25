@@ -2,7 +2,7 @@ package org.subethamail.smtp.command;
 
 import java.util.Base64;
 
-import org.subethamail.smtp.MessageContext
+import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
 import org.subethamail.smtp.auth.UsernamePasswordValidator;
