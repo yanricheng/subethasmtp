@@ -74,7 +74,7 @@ public final class DataCommand extends BaseCommand {
         if (dataMessage!= null) {
             sess.sendResponse(SMTPResponseHelper.buildResponse("250", dataMessage));
         } else {
-            sess.sendResponse("250 OK");
+            sess.sendResponse("250 Ok");
         }
         sess.resetMailTransaction();
     }

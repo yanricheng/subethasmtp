@@ -1,5 +1,6 @@
 package org.subethamail.smtp.internal.util;
 
+import com.github.davidmoten.guavamini.Preconditions;
 import org.subethamail.smtp.internal.Constants;
 
 /**
@@ -17,10 +18,8 @@ public class SMTPResponseHelper {
      */
     public static String buildResponse(String code, CharSequence response) {
 
-        /* No a real code check, here we just need to verify that is a 3 digit code */
-        if (code.length() != 3) {
-            throw new IllegalArgumentException("Invalid SMTP response code " + code);
-        }
+        /* Not a real code check, here we just need to verify that is a 3 digit code */
+        Preconditions.checkArgument(code.length() == 3, "Invalid SMTP response code " + code);
 
         final int len = response.length();
 
@@ -108,9 +107,7 @@ public class SMTPResponseHelper {
     public static String buildResponse(int code, CharSequence response) {
 
         /* No a real code check, here we just need to verify that is a 3 digit code */
-        if (code < 100 || code > 999) {
-            throw new IllegalArgumentException("Invalid SMTP response code " + code);
-        }
+        Preconditions.checkArgument(code > 99 && code < 1000, "Invalid SMTP response code " + code);
 
         return buildResponse(Integer.toString(code), response);
 

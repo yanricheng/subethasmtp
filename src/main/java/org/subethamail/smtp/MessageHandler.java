@@ -65,7 +65,7 @@ public interface MessageHandler
 	 * 			data stream will be valid only for the duration of the call.
 	 * @return custom success message withou response code like
 	 * 			'OK message received' or {@code null} if return
-	 * 			message shouldm't be customized.
+	 * 			message shouldn't be customized.
 	 *
 	 * @throws RejectException if at any point the data should be rejected.
 	 * @throws DropConnectionException if the connection should be dropped
