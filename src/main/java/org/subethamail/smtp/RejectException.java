@@ -12,21 +12,24 @@ package org.subethamail.smtp;
 @SuppressWarnings("serial")
 public class RejectException extends Exception
 {
-	int code;
+	public static final int DEFAULT_CODE = 554;
+	public static final String DEFAULT_MESSAGE = "Transaction failed";
+
+	final int code;
 
 	public RejectException()
 	{
-		this("Transaction failed");
+		this(DEFAULT_MESSAGE);
 	}
 
 	public RejectException(String message)
 	{
-		this(554, message);
+		this(DEFAULT_CODE, message);
 	}
 
 	public RejectException(int code, String message)
 	{
-		super(message);
+		super(message, null, true, false);
 
 		this.code = code;
 	}
