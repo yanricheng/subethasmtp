@@ -32,9 +32,10 @@ public interface AuthenticationHandler
 	 *
 	 * @return <code>empty</code> if the authentication process is finished, otherwise a string to hand back to the client.
 	 * @param clientInput The client's input, eg "AUTH PLAIN dGVzdAB0ZXN0ADEyMzQ="
+	 * @param context The current message context
 	 * @throws org.subethamail.smtp.RejectException if authentication fails.
 	 */
-	Optional<String> auth(String clientInput) throws RejectException;
+	Optional<String> auth(String clientInput, MessageContext context) throws RejectException;
 
 	/**
 	 * If the authentication process was successful, this returns the identity

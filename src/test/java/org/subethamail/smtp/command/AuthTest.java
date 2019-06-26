@@ -2,6 +2,7 @@ package org.subethamail.smtp.command;
 
 import java.util.Base64;
 
+import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
 import org.subethamail.smtp.auth.UsernamePasswordValidator;
@@ -24,7 +25,7 @@ public class AuthTest extends ServerTestCase {
 
     class RequiredUsernamePasswordValidator implements UsernamePasswordValidator {
         @Override
-        public void login(String username, String password) throws LoginFailedException {
+        public void login(String username, String password, MessageContext context) throws LoginFailedException {
             if (!username.equals(REQUIRED_USERNAME) || !password.equals(REQUIRED_PASSWORD)) {
                 throw new LoginFailedException();
             }
