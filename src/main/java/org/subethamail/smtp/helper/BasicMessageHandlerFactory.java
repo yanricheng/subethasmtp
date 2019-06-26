@@ -54,7 +54,7 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
         }
 
         @Override
-        public void data(InputStream is) throws RejectException, TooMuchDataException, IOException {
+        public String data(InputStream is) throws RejectException, TooMuchDataException, IOException {
             try {
                 byte[] bytes = readAndClose(is, maxMessageSize);
 
@@ -67,6 +67,8 @@ public class BasicMessageHandlerFactory implements MessageHandlerFactory {
                     throw new RejectException("recipient not set");
                 }
                 listener.messageArrived(context, from, recipient, bytes);
+
+                return null;
             } catch (RuntimeException e) {
                 throw new RejectException("message could not be accepted: " + e.getMessage());
             }

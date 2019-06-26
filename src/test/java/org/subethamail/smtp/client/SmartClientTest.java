@@ -49,7 +49,8 @@ public class SmartClientTest {
                     }
 
                     @Override
-                    public void data(InputStream data) throws RejectException, TooMuchDataException, IOException {
+                    public String data(InputStream data) throws RejectException, TooMuchDataException, IOException {
+                        return null;
                     }
 
                     @Override

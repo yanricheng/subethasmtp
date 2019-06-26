@@ -61,8 +61,11 @@ public interface MessageHandler
 	 * Note: If you do not read all the data, it will be read for you
 	 * after this method completes.
 	 *
-	 * @param data will be the smtp data stream, stripped of any extra '.' chars.  The
+	 * @param data will be the smtp data stream, stripped of any extra '.' chars. The
 	 * 			data stream will be valid only for the duration of the call.
+	 * @return custom success message without response code like
+	 * 			'OK message received' or {@code null} if return
+	 * 			message shouldn't be customized.
 	 *
 	 * @throws RejectException if at any point the data should be rejected.
 	 * @throws DropConnectionException if the connection should be dropped
@@ -70,7 +73,7 @@ public interface MessageHandler
 	 *         An error will be reported to the client.
 	 * @throws IOException if there is an IO error reading the input data.
 	 */
-	void data(InputStream data) throws RejectException, TooMuchDataException, IOException;
+	String data(InputStream data) throws RejectException, TooMuchDataException, IOException;
 
 	/**
 	 * Called after all other methods are completed.  Note that this method

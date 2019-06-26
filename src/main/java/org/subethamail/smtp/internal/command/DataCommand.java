@@ -10,6 +10,7 @@ import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.internal.io.DotTerminatedInputStream;
 import org.subethamail.smtp.internal.io.DotUnstuffingInputStream;
 import org.subethamail.smtp.internal.io.ReceivedHeaderStream;
+import org.subethamail.smtp.internal.util.SMTPResponseHelper;
 import org.subethamail.smtp.internal.server.BaseCommand;
 import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.server.Session;
@@ -52,8 +53,9 @@ public final class DataCommand extends BaseCommand {
                     sess.getSingleRecipient());
         }
 
+        String dataMessage = null;
         try {
-            sess.getMessageHandler().data(stream);
+            dataMessage = sess.getMessageHandler().data(stream);
 
             // Just in case the handler didn't consume all the data, we might as
             // well suck it up so it doesn't pollute further exchanges. This
@@ -61,6 +63,7 @@ public final class DataCommand extends BaseCommand {
             // of the contract that we might as well relax.
             while (stream.read() != -1)
                 ;
+
         } catch (DropConnectionException ex) {
             throw ex; // Propagate this
         } catch (RejectException ex) {
@@ -68,7 +71,11 @@ public final class DataCommand extends BaseCommand {
             return;
         }
 
-        sess.sendResponse("250 Ok");
+        if (dataMessage!= null) {
+            sess.sendResponse(SMTPResponseHelper.buildResponse("250", dataMessage));
+        } else {
+            sess.sendResponse("250 Ok");
+        }
         sess.resetMailTransaction();
     }
 }

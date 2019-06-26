@@ -131,7 +131,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
         }
 
         @Override
-        public void data(InputStream data) throws TooMuchDataException, IOException {
+        public String data(InputStream data) throws TooMuchDataException, IOException {
             if (this.deliveries.size() == 1) {
                 Delivery delivery = this.deliveries.get(0);
                 delivery.getListener().deliver(this.from, delivery.getRecipient(), data);
@@ -152,6 +152,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
                     dfos.close();
                 }
             }
+            return null;
         }
 
         @Override

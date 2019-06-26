@@ -47,11 +47,12 @@ public final class BasicSMTPServer {
             }
 
             @Override
-            public void data(InputStream data) throws IOException {
+            public String data(InputStream data) throws IOException {
                 System.out.println("MAIL DATA");
                 System.out.println("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =");
                 System.out.println(this.convertStreamToString(data));
                 System.out.println("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =");
+                return null;
             }
 
             @Override
