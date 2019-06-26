@@ -2,11 +2,17 @@ package org.subethamail.smtp.util;
 
 import static org.junit.Assert.assertEquals;
 
+import com.github.davidmoten.junit.Asserts;
 import org.junit.Test;
 import org.subethamail.smtp.internal.Constants;
 import org.subethamail.smtp.internal.util.SMTPResponseHelper;
 
 public class SMTPResponseHelperTest {
+
+    @Test
+    public void isUtilityClass() {
+        Asserts.assertIsUtilityClass(SMTPResponseHelper.class);
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void tooShortCode() {

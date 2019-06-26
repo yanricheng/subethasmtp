@@ -6,7 +6,7 @@ import org.subethamail.smtp.internal.Constants;
 /**
  * @author Diego Salvi
  */
-public class SMTPResponseHelper {
+public final class SMTPResponseHelper {
 
     private SMTPResponseHelper() {
         // prevent instantiation

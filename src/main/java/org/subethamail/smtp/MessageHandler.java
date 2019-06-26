@@ -63,7 +63,7 @@ public interface MessageHandler
 	 *
 	 * @param data will be the smtp data stream, stripped of any extra '.' chars. The
 	 * 			data stream will be valid only for the duration of the call.
-	 * @return custom success message withou response code like
+	 * @return custom success message without response code like
 	 * 			'OK message received' or {@code null} if return
 	 * 			message shouldn't be customized.
 	 *
