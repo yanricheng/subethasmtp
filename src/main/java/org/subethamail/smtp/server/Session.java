@@ -123,7 +123,11 @@ public final class Session implements Runnable, MessageContext {
      */
     @Override
     public void run() {
-        MDC.setContextMap(parentLoggingMdcContext);
+        // be defensive about setting with null because issue #13
+        // https://jira.qos.ch/browse/SLF4J-414
+        if (parentLoggingMdcContext != null) {
+            MDC.setContextMap(parentLoggingMdcContext);
+        }
         sessionId = server.getSessionIdFactory().create();
         MDC.put("SessionId", sessionId);
         final String originalName = Thread.currentThread().getName();
