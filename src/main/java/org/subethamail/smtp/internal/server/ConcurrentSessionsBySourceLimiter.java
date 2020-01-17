@@ -1,8 +1,11 @@
-package org.subethamail.smtp.server;
+package org.subethamail.smtp.internal.server;
 
 import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import org.subethamail.smtp.server.Session;
+import org.subethamail.smtp.server.SessionHandler;
 
 /**
  * A {@link SessionHandler} to track and limit connection counts by remote addresses.

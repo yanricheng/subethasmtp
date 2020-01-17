@@ -1,5 +1,7 @@
 package org.subethamail.smtp.server;
 
+import org.subethamail.smtp.internal.server.ConcurrentSessionsBySourceLimiter;
+
 import com.github.davidmoten.guavamini.Preconditions;
 
 /**
@@ -27,6 +29,11 @@ public interface SessionHandler {
      * @param session closing session
      */
     void onSessionEnd(Session session);
+    
+    
+    public static SessionHandler limitConcurrentSessionsBySource(int maxConnectionsPerSource) {
+        return new ConcurrentSessionsBySourceLimiter(maxConnectionsPerSource);
+    }
 
     /**
      * Result object for {@link SessionHandler#accept(Session)}
