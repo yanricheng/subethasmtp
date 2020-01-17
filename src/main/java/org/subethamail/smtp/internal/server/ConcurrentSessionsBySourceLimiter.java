@@ -37,12 +37,8 @@ public final class ConcurrentSessionsBySourceLimiter implements SessionHandler {
      * @param message SMTP message
      */
     public ConcurrentSessionsBySourceLimiter(int maxConnectionsPerSource, int code, String message) {
-        super();
-
         this.maxConnectionsPerSource = maxConnectionsPerSource;
         this.drop = SessionAcceptance.failure(code, message);
-
-
         this.counts = new ConcurrentHashMap<>();
     }
 

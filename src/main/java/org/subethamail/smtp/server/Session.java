@@ -197,9 +197,9 @@ public final class Session implements Runnable, MessageContext {
         }
 
         final SessionAcceptance sresult = this.server.getSessionHandler().accept(this);
-        if (!sresult.isAccepted()) {
-            log.debug("SMTP " + sresult.getErrorMessage());
-            this.sendResponse(sresult.getErrorCode() + " " + sresult.getErrorMessage());
+        if (!sresult.accepted()) {
+            log.debug("SMTP " + sresult.errorMessage());
+            this.sendResponse(sresult.errorCode() + " " + sresult.errorMessage());
             return;
         }
 

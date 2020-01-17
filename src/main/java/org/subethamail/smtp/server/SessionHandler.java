@@ -42,8 +42,8 @@ public interface SessionHandler {
      */
     public static final class SessionAcceptance {
 
-        /** Singleton success result */
-        private static final SessionAcceptance SUCCESS = new SessionAcceptance(true, -1, null);
+        // Singleton success result
+        private static final SessionAcceptance SUCCESS = new SessionAcceptance(true, 0, null);
 
         /**
          * Returns a success {@link SessionHandler#accept(Session)} result.
@@ -63,30 +63,45 @@ public interface SessionHandler {
          */
         public static SessionAcceptance failure(int code, String message) {
             /* Check that code is a failure response! */
-            Preconditions.checkArgument(code > 199 && code < 600, "Invalid SMTP response code " + code);
             return new SessionAcceptance(false, code, message);
         }
 
         private final boolean accepted;
+        
+        // only used if not accepted
         private final int errorCode;
         private final String errorMessage;
 
-        private SessionAcceptance(boolean accepted, int errorCode, String errorMessage) {
-            super();
+        SessionAcceptance(boolean accepted, int errorCode, String errorMessage) {
+            Preconditions.checkArgument(accepted || (errorCode > 199 && errorCode < 600),
+                    "Invalid SMTP response code " + errorCode);
+            Preconditions.checkArgument(!accepted || (errorCode == 0 && errorMessage == null));
             this.accepted = accepted;
             this.errorCode = errorCode;
             this.errorMessage = errorMessage;
         }
-
-        public boolean isAccepted() {
+        
+        public boolean accepted() {
             return accepted;
         }
 
-        public int getErrorCode() {
+        /**
+         * If session was accepted then returns 0 else returns the SMTP response code
+         * representing the reason for the session not being accepted.
+         * 
+         * @return error code for a session that was not accepted
+         */
+        public int errorCode() {
             return errorCode;
         }
 
-        public String getErrorMessage() {
+        /**
+         * If session was accepted then returns null else returns the message
+         * representing the reason for the session not being accepted.
+         * 
+         * @return error message for a session that was not accepted
+         */
+        public String errorMessage() {
             return errorMessage;
         }
     }
