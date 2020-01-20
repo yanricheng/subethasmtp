@@ -19,7 +19,7 @@ public interface SessionHandler {
      * Rejected session will be closed and no method {@link #onSessionEnd(Session)} will be invoked.
      * </p>
      *
-     * @param session newly created session
+     * @param session newly created session (should never be null)
      * @return starting session result event, can allow or reject the newly created session
      */
     SessionAcceptance accept(Session session) ;
