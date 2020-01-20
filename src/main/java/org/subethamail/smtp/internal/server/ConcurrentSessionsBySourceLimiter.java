@@ -1,8 +1,11 @@
-package org.subethamail.smtp.server;
+package org.subethamail.smtp.internal.server;
 
 import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import org.subethamail.smtp.server.Session;
+import org.subethamail.smtp.server.SessionHandler;
 
 /**
  * A {@link SessionHandler} to track and limit connection counts by remote addresses.
@@ -34,12 +37,8 @@ public final class ConcurrentSessionsBySourceLimiter implements SessionHandler {
      * @param message SMTP message
      */
     public ConcurrentSessionsBySourceLimiter(int maxConnectionsPerSource, int code, String message) {
-        super();
-
         this.maxConnectionsPerSource = maxConnectionsPerSource;
         this.drop = SessionAcceptance.failure(code, message);
-
-
         this.counts = new ConcurrentHashMap<>();
     }
 

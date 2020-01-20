@@ -28,6 +28,7 @@ import org.subethamail.smtp.helper.BasicMessageHandlerFactory;
 import org.subethamail.smtp.helper.BasicMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
+import org.subethamail.smtp.internal.server.AcceptAllSessionHandler;
 import org.subethamail.smtp.internal.server.CommandHandler;
 import org.subethamail.smtp.internal.server.ServerThread;
 

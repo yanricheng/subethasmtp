@@ -1,4 +1,7 @@
-package org.subethamail.smtp.server;
+package org.subethamail.smtp.internal.server;
+
+import org.subethamail.smtp.server.Session;
+import org.subethamail.smtp.server.SessionHandler;
 
 /**
  * A {@link SessionHandler} that doesn't perform any real work
