@@ -365,7 +365,7 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
-         * @param requireTLS
+         * @param value
          *            true to require a TLS handshake, false to allow operation with or
          *            without TLS. Default is false; ignored when disableTLS=true.
          */
@@ -385,7 +385,7 @@ public final class SMTPServer implements SSLSocketCreator {
          * Sets whether authentication is required. If set to true then no mail will be
          * accepted till authentication succeeds.
          * 
-         * @param requireAuth
+         * @param value
          *            true for mandatory smtp authentication, i.e. no mail mail be
          *            accepted until authentication succeeds. Don't forget to set
          *            {@code authenticationHandlerFactory} to allow client
