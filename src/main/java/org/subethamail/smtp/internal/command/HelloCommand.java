@@ -22,7 +22,7 @@ public final class HelloCommand extends BaseCommand
 	@Override
 	public void execute(String commandString, Session sess) throws IOException
 	{
-		String[] args = this.getArgs(commandString);
+		String[] args = getArgs(commandString);
 		if (args.length < 2)
 		{
 			sess.sendResponse("501 Syntax: HELO <hostname>");

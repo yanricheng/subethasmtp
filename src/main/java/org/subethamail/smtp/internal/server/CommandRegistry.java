@@ -6,6 +6,7 @@
 package org.subethamail.smtp.internal.server;
 
 import org.subethamail.smtp.internal.command.AuthCommand;
+import org.subethamail.smtp.internal.command.BdatCommand;
 import org.subethamail.smtp.internal.command.DataCommand;
 import org.subethamail.smtp.internal.command.EhloCommand;
 import org.subethamail.smtp.internal.command.ExpandCommand;
@@ -38,7 +39,8 @@ public enum CommandRegistry
 	RSET(new ResetCommand(), true, false),
 	STARTTLS(new StartTLSCommand(), false, false),
 	VRFY(new VerifyCommand(), true, true),
-	EXPN(new ExpandCommand(), true, true);
+	EXPN(new ExpandCommand(), true, true),
+	BDAT(new BdatCommand(), true, true);
 
 	private final Command command;
 
