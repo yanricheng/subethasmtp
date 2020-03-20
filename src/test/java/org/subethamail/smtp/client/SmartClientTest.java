@@ -1,10 +1,12 @@
 package org.subethamail.smtp.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,7 +28,11 @@ public class SmartClientTest {
             assertEquals("clientHeloHost", client.getHeloHost());
             assertEquals(0, client.getRecipientCount());
             Assert.assertFalse(client.getAuthenticator().isPresent());
-            assertEquals(2, client.getExtensions().size());
+            assertEquals(3, client.getExtensions().size());
+            Set<String> set = client.getExtensions().keySet();
+            assertTrue(set.contains("8BITMIME"));
+            assertTrue(set.contains("CHUNKING"));
+            //TODO why is OK in client.getExtensions?
         } finally {
             server.stop();
         }

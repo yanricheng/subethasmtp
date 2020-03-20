@@ -54,7 +54,7 @@ public final class AuthCommand extends BaseCommand
 
 		AuthenticationHandler authHandler = authFactory.get().create();
 
-		String[] args = this.getArgs(commandString);
+		String[] args = getArgs(commandString);
 		// Let's check the command syntax
 		if (args.length < 2)
 		{

@@ -26,7 +26,7 @@ public final class EhloCommand extends BaseCommand
 	@Override
 	public void execute(String commandString, Session sess) throws IOException
 	{
-		String[] args = this.getArgs(commandString);
+		String[] args = getArgs(commandString);
 		if (args.length < 2)
 		{
 			sess.sendResponse("501 Syntax: EHLO hostname");
@@ -66,6 +66,9 @@ public final class EhloCommand extends BaseCommand
 		{
 			response.append("\r\n" + "250-STARTTLS");
 		}
+		
+		// Chunking (BDAT) support
+		response.append("\r\n250-CHUNKING");
 
 		// Check to see if we support authentication
 		Optional<AuthenticationHandlerFactory> authFact = sess.getServer().getAuthenticationHandlerFactory();

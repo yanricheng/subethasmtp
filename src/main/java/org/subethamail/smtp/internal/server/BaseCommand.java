@@ -65,7 +65,7 @@ public abstract class BaseCommand implements Command
 		return commandString.substring(4).trim();
 	}
 
-	protected String[] getArgs(String commandString)
+	public static String[] getArgs(String commandString)
 	{
 		List<String> strings = new ArrayList<String>();
 		StringTokenizer stringTokenizer = new StringTokenizer(commandString);

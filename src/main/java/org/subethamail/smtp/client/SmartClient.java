@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -199,12 +200,31 @@ public class SmartClient {
     public void dataStart() throws IOException, SMTPException {
         client.sendAndCheck("DATA");
     }
+    
+    public void bdat(String text, boolean isLast) throws IOException {
+        client.send("BDAT " + text.length() + (isLast? " LAST": ""));
+        dataWrite(text.getBytes(StandardCharsets.UTF_8));
+        client.dataOutput.flush();
+        client.receiveAndCheck();
+    }
+    
+    public void bdat(String text) throws IOException {
+        bdat(text, false);
+    }
+    
+    public void bdatLast(String text) throws IOException {
+        bdat(text, true);
+    }
 
     /**
      * Actually write some data
      */
     public void dataWrite(byte[] data, int numBytes) throws IOException {
         client.dataOutput.write(data, 0, numBytes);
+    }
+    
+    public void dataWrite(byte[] data) throws IOException {
+        client.dataOutput.write(data, 0, data.length);
     }
 
     /**
