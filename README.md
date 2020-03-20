@@ -133,6 +133,7 @@ Dave Moten came across the Engine821 fork and
 * added `EmailUtils` tests
 * moved classes that are not part of the public API to internal packages
 * added pure SSL support to `SMTPServer` builder and a roundtrip unit test
+* added BDAT support
 
 
 ## Project Authors ##
