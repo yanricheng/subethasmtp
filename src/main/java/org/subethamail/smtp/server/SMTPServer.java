@@ -90,6 +90,16 @@ public final class SMTPServer implements SSLSocketCreator {
      * AuthenticationHandlerFactory has been set
      */
     private final boolean requireAuth;
+    
+    /**
+     * Normally you would not want to advertise AUTH related capabilities before a 
+     * STARTTLS is sent so that credentials do not go in the clear. However, the use 
+     * of implicit STARTTLS (the property `mail.smtp.starttls.enable` is not set) by
+     * a javax.mail client (e.g. 1.6.4) prevents AUTH happening. See issue #21. To resolve
+     * this issue with javax.mail and implicit STARTTLS we provide explicit control 
+     * over if AUTH capabilities are shown before STARTTLS. 
+     */
+    private final boolean showAuthCapabilitiesBeforeSTARTTLS;
 
     /** If true, no Received headers will be inserted */
     private final boolean disableReceivedHeaders;
@@ -178,6 +188,16 @@ public final class SMTPServer implements SSLSocketCreator {
          * AuthenticationHandlerFactory has been set
          */
         private boolean requireAuth = false;
+        
+        /**
+         * Normally you would not want to advertise AUTH related capabilities before a 
+         * STARTTLS is sent so that credentials do not go in the clear. However, the use 
+         * of implicit STARTTLS (the property `mail.smtp.starttls.enable` is not set) by
+         * a javax.mail client (e.g. 1.6.4) prevents AUTH happening. See issue #21. To resolve
+         * this issue with javax.mail and implicit STARTTLS we provide explicit control 
+         * over if AUTH capabilities are shown before STARTTLS. 
+         */
+        private boolean showAuthCapabilitiesBeforeSTARTTLS = false;
 
         /** If true, no Received headers will be inserted */
         private boolean disableReceivedHeaders = false;
@@ -399,6 +419,25 @@ public final class SMTPServer implements SSLSocketCreator {
         public Builder requireAuth() {
             return requireAuth(true);
         }
+        
+        /**
+         * Sets whether AUTH capabilities are shown before STARTTLS is received. Default 
+         * value is {@code false}.
+         * 
+         * <p>Normally you would not want to advertise AUTH related capabilities before a 
+         * STARTTLS is sent so that credentials do not go in the clear. However, the use 
+         * of implicit STARTTLS (the property `mail.smtp.starttls.enable` is not set) by
+         * a javax.mail client (e.g. 1.6.4) prevents AUTH happening. See issue #21. To resolve
+         * this issue with javax.mail and implicit STARTTLS we provide explicit control 
+         * over if AUTH capabilities are shown before STARTTLS. 
+         * 
+         * @param value boolean value, default is false
+         * @return this
+         */
+        public Builder showAuthCapabilitiesBeforeSTARTTLS(boolean value) {
+            this.showAuthCapabilitiesBeforeSTARTTLS = value;
+            return this;
+        }
 
         public Builder insertReceivedHeaders(boolean value) {
             this.disableReceivedHeaders = !value;
@@ -548,8 +587,8 @@ public final class SMTPServer implements SSLSocketCreator {
             }
             return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
                     authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
-                    disableReceivedHeaders, maxConnections, connectionTimeoutMs, maxRecipients, maxMessageSize,
-                    sessionIdFactory, sessionHandler, startTlsSocketCreator, serverSocketCreator,
+                    showAuthCapabilitiesBeforeSTARTTLS, disableReceivedHeaders, maxConnections, connectionTimeoutMs, 
+                    maxRecipients, maxMessageSize, sessionIdFactory, sessionHandler, startTlsSocketCreator, serverSocketCreator,
                     serverThreadNameProvider);
         }
 
@@ -559,7 +598,7 @@ public final class SMTPServer implements SSLSocketCreator {
             String softwareName, MessageHandlerFactory messageHandlerFactory,
             Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
             Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
-            boolean requireAuth, boolean disableReceivedHeaders, int maxConnections, int connectionTimeoutMs,
+            boolean requireAuth, boolean showAuthCapabilitiesBeforeSTARTTLS, boolean disableReceivedHeaders, int maxConnections, int connectionTimeoutMs,
             int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory,
             SessionHandler sessionHandler, SSLSocketCreator startTlsSocketFactory,
             ServerSocketCreator serverSocketCreator, Function<SMTPServer, String> serverThreadNameProvider) {
@@ -584,6 +623,7 @@ public final class SMTPServer implements SSLSocketCreator {
         this.hideTLS = hideTLS;
         this.requireTLS = requireTLS;
         this.requireAuth = requireAuth;
+        this.showAuthCapabilitiesBeforeSTARTTLS = showAuthCapabilitiesBeforeSTARTTLS;
         this.disableReceivedHeaders = disableReceivedHeaders;
         this.maxConnections = maxConnections;
         this.connectionTimeoutMs = connectionTimeoutMs;
@@ -829,6 +869,10 @@ public final class SMTPServer implements SSLSocketCreator {
 
     public boolean getRequireAuth() {
         return requireAuth;
+    }
+    
+    public boolean getShowAuthCapabilitiesBeforeSTARTTLS() {
+        return showAuthCapabilitiesBeforeSTARTTLS;
     }
 
     public int getMaxMessageSize() {

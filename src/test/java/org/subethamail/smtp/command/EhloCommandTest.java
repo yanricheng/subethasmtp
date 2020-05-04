@@ -23,22 +23,39 @@ import org.subethamail.smtp.server.Session;
 public class EhloCommandTest {
 
     @Test
-    public void testEhloWhenTlsRequiredAuthShouldNotAdvertiseBeforeTlsStarted() throws IOException {
-        String output = getOutput(false);
+    public void testEhloWhenTlsRequiredAuthShouldNotAdvertisedBeforeTlsStarted() throws IOException {
+        String output = getOutput(false, false);
         System.out.println(output);
         assertTrue(output.contains("250-STARTTLS"));
         assertFalse(output.contains("250-AUTH PLAIN"));
     }
     
     @Test
-    public void testEhloWhenTlsRequiredAuthShouldBeAdvertiseAfterTlsStarted() throws IOException {
-        String output = getOutput(true);
+    public void testEhloWhenTlsRequiredAuthShouldBeAdvertisedAfterTlsStarted() throws IOException {
+        String output = getOutput(true, false);
+        System.out.println(output);
+        assertTrue(output.contains("250-STARTTLS"));
+        assertTrue(output.contains("250-AUTH PLAIN"));
+    }
+    
+    @Test
+    public void testEhloWhenTlsRequiredAuthCanBeAdvertisedBeforeTlsStarted() throws IOException {
+        String output = getOutput(false, true);
+        System.out.println(output);
+        assertTrue(output.contains("250-STARTTLS"));
+        assertTrue(output.contains("250-AUTH PLAIN"));
+    }
+    
+    @Test
+    public void testEhloWhenTlsRequiredAuthShouldBeAdvertisedAfterTlsStartedWhenShowingAuthBeforeSTARTLSIsTrue() throws IOException {
+        String output = getOutput(true, true);
         System.out.println(output);
         assertTrue(output.contains("250-STARTTLS"));
         assertTrue(output.contains("250-AUTH PLAIN"));
     }
 
-    private String getOutput(boolean isTlsStarted) throws IOException {
+
+    private String getOutput(boolean isTlsStarted, boolean showAuthBeforeSTARTTLS) throws IOException {
         EhloCommand ec = new EhloCommand();
         try (ServerSocket ss = new ServerSocket(0)) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -49,6 +66,7 @@ public class EhloCommandTest {
                     .serverSocketFactory(() -> ss) //
                     .enableTLS() //
                     .requireTLS() //
+                    .showAuthCapabilitiesBeforeSTARTTLS(showAuthBeforeSTARTTLS) //
                     .authenticationHandlerFactory(new AuthenticationHandlerFactory() {
 
                         @Override

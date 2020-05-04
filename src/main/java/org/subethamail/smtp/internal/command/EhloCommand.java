@@ -76,7 +76,7 @@ public final class EhloCommand extends BaseCommand
 		if (sess.isTLSStarted()) {
 		    displayAuth = authFact.isPresent();
 		} else {
-		    displayAuth = authFact.isPresent() && !sess.getServer().getRequireTLS();
+		    displayAuth = authFact.isPresent() && (!sess.getServer().getRequireTLS() || sess.getServer().getShowAuthCapabilitiesBeforeSTARTTLS());
 		}
 		if (displayAuth)
 		{
