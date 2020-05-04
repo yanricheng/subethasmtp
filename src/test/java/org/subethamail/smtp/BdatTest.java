@@ -148,6 +148,7 @@ public class BdatTest {
             this.to = to;
             this.data = data;
             count++;
+            System.out.println("count="+ count + ", data=" + dataAsText());
         }
 
         String dataAsText() {

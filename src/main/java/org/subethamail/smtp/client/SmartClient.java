@@ -27,7 +27,7 @@ import com.github.davidmoten.guavamini.Preconditions;
 public class SmartClient {
 
     private static final Logger log = LoggerFactory.getLogger(SmartClient.class);
-
+    
     /** The host name which is sent in the HELO and EHLO commands */
     private final String heloHost;
     
@@ -205,7 +205,9 @@ public class SmartClient {
         client.send("BDAT " + text.length() + (isLast? " LAST": ""));
         dataWrite(text.getBytes(StandardCharsets.UTF_8));
         client.dataOutput.flush();
+        log.debug("receiving bdat response");
         client.receiveAndCheck();
+        log.debug("received bdat response");
     }
     
     public void bdat(String text) throws IOException {

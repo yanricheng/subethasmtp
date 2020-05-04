@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,12 @@ public final class SMTPClient {
 
     /** 10 minutes */
     private static final int REPLY_TIMEOUT = 600 * 1000;
+    
+    // TODO make this option in SMTPClient, SmartClient, use builder in SmartClient
+    /**
+     * This field is temporary only till SmartClient builder is created.
+     */
+    public static final long RECEIVE_AND_CHECK_PAUSE_MS = 50;
 
     private static Logger log = LoggerFactory.getLogger(SMTPClient.class);
 
@@ -278,6 +285,14 @@ public final class SMTPClient {
 
     /** If response is not success, throw an exception */
     public Response receiveAndCheck() throws IOException, SMTPException {
+        // without a pause here there is a race with operating system IO
+        // that can mean nothing is received. This was noticed by putting 
+        // a loop on BdatTest.testOneBdatCommand.
+        try {
+            Thread.sleep(RECEIVE_AND_CHECK_PAUSE_MS);
+        } catch (InterruptedException e) {
+            // do nothing
+        }
         Response resp = this.receive();
         if (!resp.isSuccess())
             throw new SMTPException(resp);
