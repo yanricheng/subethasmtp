@@ -10,10 +10,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -44,8 +44,7 @@ public final class Wiser implements SimpleMessageListener {
 
     private final SMTPServer server;
 
-    private final List<WiserMessage> messages = Collections
-            .synchronizedList(new ArrayList<WiserMessage>());
+    private final List<WiserMessage> messages = new CopyOnWriteArrayList<WiserMessage>();
 
     private final Accepter accepter;
 
