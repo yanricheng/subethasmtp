@@ -4,6 +4,7 @@
  */
 package org.subethamail.smtp;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.cert.Certificate;
 import java.util.Optional;
@@ -24,8 +25,16 @@ public interface MessageContext
 
 	/**
 	 * @return the IP address of the remote server.
+	 * 
+	 * <p>Note that the returned object is always an instance of {@link InetSocketAddress} so you 
+	 * can cast the returned object to that class for more information. In subethasmtp 6.x the 
+	 * method return type will be changed to InetSocketAddress. 
 	 */
 	SocketAddress getRemoteAddress();
+	
+	// TODO to properly associate information gathered and set at session creation
+	// we should be able to unequivocally associate each message with the session. 
+	// To that end we should add a `String getSessionId()` method to this interface.
 
 	/**
 	 * @return the handler instance that was used to authenticate.
