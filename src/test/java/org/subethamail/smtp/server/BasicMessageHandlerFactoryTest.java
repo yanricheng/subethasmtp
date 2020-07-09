@@ -43,7 +43,7 @@ public class BasicMessageHandlerFactoryTest {
                 .port(PORT) //
                 .messageHandler(
                         (context, from, to,
-                                data) -> System.out.println("message from " + from + " to " + to
+                                data) -> System.out.println("message from " + from + " to " + to  + ", sessionId=" + context.getSessionId()
                                         + ":\n" + new String(data, StandardCharsets.UTF_8)))
                 .build();
         try {
