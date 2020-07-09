@@ -32,10 +32,14 @@ public interface MessageContext
 	 */
 	SocketAddress getRemoteAddress();
 	
-	// TODO to properly associate information gathered and set at session creation
-	// we should be able to unequivocally associate each message with the session. 
-	// To that end we should add a `String getSessionId()` method to this interface.
-
+	/**
+	 * Returns the unique id of the session associated with this message. 
+	 */
+	default String getSessionId() {
+		// this added as a default method to 5.x to preserve api compatibility
+		throw new UnsupportedOperationException();
+	}
+	
 	/**
 	 * @return the handler instance that was used to authenticate.
 	 */
