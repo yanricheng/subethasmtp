@@ -1,12 +1,16 @@
 package org.subethamail.smtp.server;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -45,6 +49,25 @@ public class BasicMessageHandlerFactoryTest {
         try {
             server.start();
             send();
+        } finally {
+            server.stop();
+        }
+    }
+    
+    @Test
+    public void testHasIp() throws Exception {
+    	AtomicReference<String> ip = new AtomicReference<String>();
+        SMTPServer server = SMTPServer //
+                .port(PORT) //
+                .messageHandler(
+                        (context, from, to,
+                                data) -> ip.set(((InetSocketAddress) context.getRemoteAddress()).getAddress().getHostAddress()))
+                .build();
+        try {
+            server.start();
+            send();
+            System.out.println("source = " + ip.get());
+            assertEquals("127.0.0.1", ip.get());
         } finally {
             server.stop();
         }
