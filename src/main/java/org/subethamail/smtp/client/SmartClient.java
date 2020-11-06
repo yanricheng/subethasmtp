@@ -70,7 +70,7 @@ public class SmartClient {
      * @throws IOException
      *             if problem communicating with host
      */
-    private SmartClient(String myHost) throws UnknownHostException, IOException, SMTPException {
+    protected SmartClient(String myHost) throws UnknownHostException, IOException, SMTPException {
         this(Optional.empty(), myHost, Optional.empty());
     }
 
@@ -90,12 +90,36 @@ public class SmartClient {
      * @throws SMTPException
      *             if problem reported by the server
      */
-    private SmartClient(Optional<SocketAddress> bindpoint, String clientHeloHost, Optional<Authenticator> authenticator)
+    protected SmartClient(Optional<SocketAddress> bindpoint, String clientHeloHost, Optional<Authenticator> authenticator)
             throws UnknownHostException, IOException, SMTPException {
         Preconditions.checkNotNull(bindpoint, "bindpoint cannot be null");
         Preconditions.checkNotNull(clientHeloHost, "clientHeloHost cannot be null");
         Preconditions.checkNotNull(authenticator, "authenticator cannot be null");
         this.client = new SMTPClient(bindpoint, Optional.empty());
+        this.heloHost = clientHeloHost;
+        this.authenticator = authenticator;
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param client
+     * @param clientHeloHost
+     * @param authenticator
+     *            the Authenticator object which will be called after the EHLO
+     *            command to authenticate this client to the server. If is null
+     *            then no authentication will happen.
+     * @throws IOException
+     *             if problem communicating with host
+     * @throws SMTPException
+     *             if problem reported by the server
+     */
+    protected SmartClient(SMTPClient client, String clientHeloHost, Optional<Authenticator> authenticator)
+            throws IOException, SMTPException {
+        Preconditions.checkNotNull(client, "client cannot be null");
+        Preconditions.checkNotNull(clientHeloHost, "clientHeloHost cannot be null");
+        Preconditions.checkNotNull(authenticator, "authenticator cannot be null");
+        this.client = client;
         this.heloHost = clientHeloHost;
         this.authenticator = authenticator;
     }

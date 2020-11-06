@@ -33,6 +33,7 @@ import org.subethamail.smtp.internal.server.CommandHandler;
 import org.subethamail.smtp.internal.server.ServerThread;
 
 import com.github.davidmoten.guavamini.Preconditions;
+import org.subethamail.smtp.internal.proxy.ProxyHandler;
 
 /**
  * Main SMTPServer class. Construct this object, set the hostName, port, and
@@ -136,6 +137,8 @@ public final class SMTPServer implements SSLSocketCreator {
 
     private final SessionHandler sessionHandler;
 
+    private final ProxyHandler proxyHandler;
+
     // mutable state
 
     /** The thread listening on the server socket. */
@@ -233,6 +236,9 @@ public final class SMTPServer implements SSLSocketCreator {
         private SessionIdFactory sessionIdFactory = new TimeBasedSessionIdFactory();
 
         private SessionHandler sessionHandler = AcceptAllSessionHandler.INSTANCE;
+
+        /* No proxy handling attempt by default */
+        private ProxyHandler proxyHandler = ProxyHandler.NOP;
 
         private SSLSocketCreator startTlsSocketCreator = SSL_SOCKET_CREATOR_DEFAULT;
 
@@ -510,6 +516,14 @@ public final class SMTPServer implements SSLSocketCreator {
             return this;
         }
 
+        /**
+         * Sets the {@link ProxyHandler} which will handle proxy packets before SMTP protocol.
+         */
+        public Builder proxyHandler(ProxyHandler proxyHandler) {
+            this.proxyHandler = proxyHandler;
+            return this;
+        }
+
         public Builder serverSocketFactory(ServerSocketCreator serverSocketCreator) {
             this.serverSocketCreator = serverSocketCreator;
             return this;
@@ -587,9 +601,9 @@ public final class SMTPServer implements SSLSocketCreator {
             }
             return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
                     authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
-                    showAuthCapabilitiesBeforeSTARTTLS, disableReceivedHeaders, maxConnections, connectionTimeoutMs, 
-                    maxRecipients, maxMessageSize, sessionIdFactory, sessionHandler, startTlsSocketCreator, serverSocketCreator,
-                    serverThreadNameProvider);
+                    showAuthCapabilitiesBeforeSTARTTLS, disableReceivedHeaders, maxConnections, connectionTimeoutMs,
+                    maxRecipients, maxMessageSize, sessionIdFactory, sessionHandler, proxyHandler, startTlsSocketCreator,
+                    serverSocketCreator, serverThreadNameProvider);
         }
 
     }
@@ -598,10 +612,11 @@ public final class SMTPServer implements SSLSocketCreator {
             String softwareName, MessageHandlerFactory messageHandlerFactory,
             Optional<AuthenticationHandlerFactory> authenticationHandlerFactory,
             Optional<ExecutorService> executorService, boolean enableTLS, boolean hideTLS, boolean requireTLS,
-            boolean requireAuth, boolean showAuthCapabilitiesBeforeSTARTTLS, boolean disableReceivedHeaders, int maxConnections, int connectionTimeoutMs,
-            int maxRecipients, int maxMessageSize, SessionIdFactory sessionIdFactory,
-            SessionHandler sessionHandler, SSLSocketCreator startTlsSocketFactory,
-            ServerSocketCreator serverSocketCreator, Function<SMTPServer, String> serverThreadNameProvider) {
+            boolean requireAuth, boolean showAuthCapabilitiesBeforeSTARTTLS, boolean disableReceivedHeaders,
+            int maxConnections, int connectionTimeoutMs, int maxRecipients, int maxMessageSize,
+            SessionIdFactory sessionIdFactory, SessionHandler sessionHandler, ProxyHandler proxyHandler,
+            SSLSocketCreator startTlsSocketFactory, ServerSocketCreator serverSocketCreator,
+            Function<SMTPServer, String> serverThreadNameProvider) {
         Preconditions.checkNotNull(messageHandlerFactory);
         Preconditions.checkNotNull(bindAddress);
         Preconditions.checkNotNull(executorService);
@@ -631,6 +646,7 @@ public final class SMTPServer implements SSLSocketCreator {
         this.maxMessageSize = maxMessageSize;
         this.sessionIdFactory = sessionIdFactory;
         this.sessionHandler = sessionHandler;
+        this.proxyHandler = proxyHandler;
         this.commandHandler = new CommandHandler();
         this.serverSocketCreator = serverSocketCreator;
         this.startTlsSocketCreator = startTlsSocketFactory;
@@ -760,7 +776,7 @@ public final class SMTPServer implements SSLSocketCreator {
             throw new RuntimeException(e);
         }
 
-        this.serverThread = new ServerThread(this, serverSocket);
+        this.serverThread = new ServerThread(this, serverSocket, proxyHandler);
         this.serverThread.start();
         this.started = true;
     }

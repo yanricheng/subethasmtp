@@ -2,6 +2,7 @@ package org.subethamail.smtp.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -19,6 +20,8 @@ import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.internal.io.CRLFTerminatedReader;
+import org.subethamail.smtp.internal.proxy.ProxyHandler;
+import org.subethamail.smtp.internal.proxy.ProxyHandler.ProxyResult;
 import org.subethamail.smtp.internal.server.ServerThread;
 import org.subethamail.smtp.server.SessionHandler.SessionAcceptance;
 
@@ -61,7 +64,12 @@ public final class Session implements Runnable, MessageContext {
     private Socket socket;
     private InputStream input;
     private CRLFTerminatedReader reader;
+    private OutputStream output;
     private PrintWriter writer;
+    private final ProxyHandler proxyHandler;
+
+    /* Advertised remote address, defaults to socket remote address */
+    private InetSocketAddress remoteAddress;
 
     /** Might exist if the client has successfully authenticated */
     private Optional<AuthenticationHandler> authenticationHandler = Optional.empty();
@@ -103,11 +111,12 @@ public final class Session implements Runnable, MessageContext {
      *            is the socket to the client
      * @throws IOException
      */
-    public Session(SMTPServer server, ServerThread serverThread, Socket socket) throws IOException {
+    public Session(SMTPServer server, ServerThread serverThread, Socket socket, ProxyHandler proxyHandler) throws IOException {
         this.server = server;
         this.serverThread = serverThread;
-
+        this.remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
         this.setSocket(socket);
+        this.proxyHandler = proxyHandler;
     }
 
     /**
@@ -134,16 +143,26 @@ public final class Session implements Runnable, MessageContext {
         Thread.currentThread().setName(
                 Session.class.getName() + "-" + socket.getInetAddress() + ":" + socket.getPort());
 
-        if (log.isDebugEnabled()) {
-            InetAddress remoteInetAddress = this.getRemoteAddress().getAddress();
-            remoteInetAddress.getHostName(); // Causes future toString() to
-                                             // print the name too
-
-            log.debug("SMTP connection from {}, new connection count: {}", remoteInetAddress,
-                    this.serverThread.getNumberOfConnections());
-        }
-
         try {
+            /* Handle opening proxy packets now before accessing remote address */
+            ProxyResult proxy = proxyHandler.handle(input, output, this);
+            if (!proxy.isSuccess()) {
+                 sendResponse(proxy.errorCode() + " " + proxy.errorMessage());
+                 return;
+            }
+            if (!proxy.isNOP()) {
+                remoteAddress = proxy.getProxiedAddress();
+            }
+
+            if (log.isDebugEnabled()) {
+                InetAddress remoteInetAddress = this.getRemoteAddress().getAddress();
+                remoteInetAddress.getHostName(); // Causes future toString() to
+                                                 // print the name too
+
+                log.debug("SMTP connection from {}, new connection count: {}", remoteInetAddress,
+                        this.serverThread.getNumberOfConnections());
+            }
+
             runCommandLoop();
         } catch (IOException e1) {
             if (!this.quitting) {
@@ -287,7 +306,8 @@ public final class Session implements Runnable, MessageContext {
         this.socket = socket;
         this.input = this.socket.getInputStream();
         this.reader = new CRLFTerminatedReader(this.input);
-        this.writer = new PrintWriter(this.socket.getOutputStream());
+        this.output = this.socket.getOutputStream();
+        this.writer = new PrintWriter(this.output);
 
         this.socket.setSoTimeout(this.server.getConnectionTimeout());
     }
@@ -337,9 +357,19 @@ public final class Session implements Runnable, MessageContext {
         return sessionId;
     }
 
+    /**
+     * Returns the real connection remote address as seen by socket. It can differ from {@link #getRemoteAddress()} if
+     * some proxy mechanism is in use.
+     *
+     * @return socket remote address
+     */
+    public InetSocketAddress getRealRemoteAddress() {
+        return (InetSocketAddress) this.socket.getRemoteSocketAddress();
+    }
+
     @Override
     public InetSocketAddress getRemoteAddress() {
-        return (InetSocketAddress) this.socket.getRemoteSocketAddress();
+        return remoteAddress;
     }
 
     @Override

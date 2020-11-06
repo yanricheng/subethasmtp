@@ -16,6 +16,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.subethamail.smtp.internal.proxy.ProxyHandler;
 import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.server.Session;
 
@@ -29,6 +30,7 @@ public final class ServerThread extends Thread
 	private final Logger log = LoggerFactory.getLogger(ServerThread.class);
 	private final SMTPServer server;
 	private final ServerSocket serverSocket;
+        private final ProxyHandler proxyHandler;
 	/**
 	 * A semaphore which is used to prevent accepting new connections by
 	 * blocking this thread if the allowed count of open connections is already
@@ -46,11 +48,12 @@ public final class ServerThread extends Thread
 	 */
 	private volatile boolean shuttingDown;
 
-	public ServerThread(SMTPServer server, ServerSocket serverSocket)
+	public ServerThread(SMTPServer server, ServerSocket serverSocket, ProxyHandler proxyHandler)
 	{
 		super(server.getServerThreadName());
 		this.server = server;
 		this.serverSocket = serverSocket;
+                this.proxyHandler = proxyHandler;
 		// reserve a few places for graceful disconnects with informative
 		// messages
 		int countOfConnectionPermits = server.getMaxConnections() + 10;
@@ -135,7 +138,7 @@ public final class ServerThread extends Thread
 			Session session = null;
 			try
 			{
-				session = new Session(server, this, socket);
+				session = new Session(server, this, socket, proxyHandler);
 			}
 			catch (IOException e)
 			{

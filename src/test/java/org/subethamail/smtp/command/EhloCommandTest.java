@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.internal.command.EhloCommand;
+import org.subethamail.smtp.internal.proxy.ProxyHandler;
 import org.subethamail.smtp.internal.server.ServerThread;
 import org.subethamail.smtp.server.SMTPServer;
 import org.subethamail.smtp.server.Session;
@@ -80,7 +81,7 @@ public class EhloCommandTest {
                         }
                     }) //
                     .build();
-            Session session = new Session(server, new ServerThread(server, ss), socket);
+            Session session = new Session(server, new ServerThread(server, ss, ProxyHandler.NOP), socket, ProxyHandler.NOP);
             session.setTlsStarted(isTlsStarted);
             ec.execute("EHLO me.com", session);
             String output = new String(out.toByteArray(), StandardCharsets.UTF_8);
