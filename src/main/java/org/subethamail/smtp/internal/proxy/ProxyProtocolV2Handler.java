@@ -8,9 +8,9 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.internal.util.ArrayUtils;
 import org.subethamail.smtp.server.Session;
 
 /**
@@ -105,7 +105,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
      */
     boolean isValidPrefix(byte[] prefix) {
         return prefix.length >= PROXY_MAGIC.length // Must accomodate every prefix byte
-                && Arrays.equals(PROXY_MAGIC, 0, PROXY_MAGIC.length, prefix, 0, PROXY_MAGIC.length);
+                && ArrayUtils.equals(PROXY_MAGIC, 0, PROXY_MAGIC.length, prefix, 0, PROXY_MAGIC.length);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
         final String headerHex = toHex(header);
         LOG.debug("(session {}) Read header {}", session.getSessionId(), headerHex);
         
-        if (!Arrays.equals(PROXY_MAGIC, 0, PROXY_MAGIC.length, header, 0, PROXY_MAGIC.length)) { 
+        if (!ArrayUtils.equals(PROXY_MAGIC, 0, PROXY_MAGIC.length, header, 0, PROXY_MAGIC.length)) { 
             final String receivedMagic = toHex(header, 0, PROXY_MAGIC.length);
             LOG.error("(session {}) Invalid PROXY protocol v2 magic {} (header: {})",
                     session.getSessionId(), receivedMagic, headerHex);

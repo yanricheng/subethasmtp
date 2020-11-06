@@ -10,11 +10,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.internal.util.ArrayUtils;
 import org.subethamail.smtp.server.Session;
 
 /**
@@ -84,7 +84,7 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
      */
     boolean isValidPrefix(byte[] prefix) {
         return prefix.length >= PREFIX.length // Must accomodate every prefix byte
-                && Arrays.equals(PREFIX, 0, PREFIX.length, prefix, 0, PREFIX.length);
+                && ArrayUtils.equals(PREFIX, 0, PREFIX.length, prefix, 0, PREFIX.length);
     }
 
     @Override
@@ -154,7 +154,7 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
             return ProxyResult.FAIL;
         }
 
-        if (!Arrays.equals(PREFIX, 0, PREFIX.length, header, 0, PREFIX.length)) {
+        if (!ArrayUtils.equals(PREFIX, 0, PREFIX.length, header, 0, PREFIX.length)) {
             final String receivedHeader = toHex(header, 0, len);
             LOG.error("(session {}) Invalid PROXY protocol v1 header prefix {}", session.getSessionId(), receivedHeader);
             return ProxyResult.FAIL;
