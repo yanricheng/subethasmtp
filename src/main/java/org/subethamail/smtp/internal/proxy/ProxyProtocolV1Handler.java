@@ -1,7 +1,6 @@
 package org.subethamail.smtp.internal.proxy;
 
 import static org.subethamail.smtp.internal.util.HexUtils.toHex;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

@@ -1,6 +1,7 @@
 package org.subethamail.smtp.internal.proxy;
 
 import static org.subethamail.smtp.internal.util.HexUtils.toHex;
+import com.github.davidmoten.guavamini.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -221,9 +222,10 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
             return ProxyResult.FAIL;
         }
 
-        byte[] data = in.readNBytes(len);
-        if (data.length != len) {
-            final String dataHex = toHex(data);
+        byte[] data = new byte[len];
+        read = readNBytes(in, data, 0, len);
+        if (read != len) {
+            final String dataHex = toHex(data, 0, read);
             LOG.error("(session {}) Failed to fully read PROXY v2 data, EOF reached. Read {}",
                     session.getSessionId(), dataHex);
             return ProxyResult.FAIL;
@@ -331,5 +333,20 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
                 session.getRealRemoteAddress().getHostString());
 
         return new ProxyResult(clientAddress);
+    }
+
+    private static int readNBytes(InputStream is, byte[] data, int offset, int len) throws IOException {
+        Preconditions.checkArgument(len >= 0);
+        Preconditions.checkArgument(offset >= 0);
+        Preconditions.checkArgument(offset + len <= data.length);
+
+        final int start = offset;
+        int read;
+        while (len > 0 && (read = is.read(data, offset, len)) > 0) {
+            offset += read;
+            len -= read;
+        }
+
+        return offset - start;
     }
 }
