@@ -29,20 +29,6 @@ public final class HexUtils {
         // prevent instantiation
     }
 
-    public static final void main(String[] args) {
-        System.out.println(toHex(new byte[]{-1, 127, 1}));
-        System.out.println(toHex(new byte[]{-1, 127, 1}));
-
-        System.out.println(toHex(new byte[]{-1, 127, 1}, 0, 1));
-        System.out.println(toHex(new byte[]{-1, 127, 1}, 1, 1));
-        System.out.println(toHex(new byte[]{-1, 127, 1}, 2, 1));
-        System.out.println("PP" + toHex(new byte[]{-1, 127, 1}, 2, 0) + "RR");
-        System.out.println("PP" + toHex(new byte[]{-1, 127, 1}, 1, 2, ':') + "RR");
-        System.out.println("PP" + toHex(new byte[]{-1, 127, 1}, 2, 0, ':') + "RR");
-
-        System.out.println((char) -1);
-    }
-
     /**
      * Convert a byte array into his hex representation.
      *
