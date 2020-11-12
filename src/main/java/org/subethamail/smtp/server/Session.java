@@ -346,6 +346,13 @@ public final class Session implements Runnable, MessageContext {
         log.debug("Server: {}", response);
 
         this.writer.print(response + "\r\n");
+
+        /*
+         * Flush the response to the nework. We must flush every written data because:
+         * 1) depending from underlying implementations partial or no data could be received on the remote side
+         * 2) underlying OutPutStream can be used in a independent way without flush partial mixed data could be written
+         * on it.
+         */
         this.writer.flush();
     }
 

@@ -27,7 +27,7 @@ import org.subethamail.smtp.server.Session;
  */
 public final class ServerThread extends Thread
 {
-	private final Logger log = LoggerFactory.getLogger(ServerThread.class);
+	private static final Logger log = LoggerFactory.getLogger(ServerThread.class);
 	private final SMTPServer server;
 	private final ServerSocket serverSocket;
         private final ProxyHandler proxyHandler;
@@ -53,7 +53,7 @@ public final class ServerThread extends Thread
 		super(server.getServerThreadName());
 		this.server = server;
 		this.serverSocket = serverSocket;
-                this.proxyHandler = proxyHandler;
+		this.proxyHandler = proxyHandler;
 		// reserve a few places for graceful disconnects with informative
 		// messages
 		int countOfConnectionPermits = server.getMaxConnections() + 10;
