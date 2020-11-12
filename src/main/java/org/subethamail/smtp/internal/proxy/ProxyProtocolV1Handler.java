@@ -25,7 +25,7 @@ import org.subethamail.smtp.server.Session;
  */
 public class ProxyProtocolV1Handler implements ProxyHandler {
 
-    private final static Logger LOG = LoggerFactory.getLogger(ProxyProtocolV1Handler.class);
+    private final static Logger log = LoggerFactory.getLogger(ProxyProtocolV1Handler.class);
 
     public static final ProxyProtocolV1Handler INSTANCE = new ProxyProtocolV1Handler();
 
@@ -42,7 +42,7 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
     private static final Pattern PATTERN = Pattern.compile("PROXY (?<family>UNKNOWN|TCP4|TCP6)"
             + "( (?<asrc>[0-9a-fA-F.:]+) (?<adst>[0-9a-fA-F.:]+) (?<psrc>[0-9]{1,5}) (?<pdst>[0-9]{1,5}))?\r\n");
 
-    public static enum Family {
+    public enum Family {
         UNKNOWN,
         TCP4,
         TCP6
@@ -143,20 +143,20 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
          * - the CRLF sequence ( \x0D \x0A )
          *
          */
-        LOG.debug("(session {}) Starting PROXY protocol v1 handling", session.getSessionId());
+        log.debug("(session {}) Starting PROXY protocol v1 handling", session.getSessionId());
 
         byte[] header = new byte[MAX_PROXY_HEADER_LENGTH];
         int len = in.read(header, 0, PREFIX.length);
         if (len != PREFIX.length) {
             final String headerHex = toHex(header, 0, len);
-            LOG.error("(session {}) Failed to fully read PROXY v1 header prefix. Read {}",
+            log.error("(session {}) Failed to fully read PROXY v1 header prefix. Read {}",
                     session.getSessionId(), headerHex);
             return ProxyResult.FAIL;
         }
 
         if (!ArrayUtils.equals(PREFIX, 0, PREFIX.length, header, 0, PREFIX.length)) {
             final String receivedHeader = toHex(header, 0, len);
-            LOG.error("(session {}) Invalid PROXY protocol v1 header prefix {}", session.getSessionId(), receivedHeader);
+            log.error("(session {}) Invalid PROXY protocol v1 header prefix {}", session.getSessionId(), receivedHeader);
             return ProxyResult.FAIL;
         }
 
@@ -165,7 +165,7 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
             int read = in.read();
             if (read < 0) {
                 final String headerHex = toHex(header, 0, len);
-                LOG.error("(session {}) Failed to fully read PROXY v1 header. Read {}",
+                log.error("(session {}) Failed to fully read PROXY v1 header. Read {}",
                         session.getSessionId(), headerHex);
                 return ProxyResult.FAIL;
             }
@@ -196,17 +196,17 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
         }
 
         final String headerHex = toHex(header, 0, len);
-        LOG.debug("(session {}) Read header {}", session.getSessionId(), headerHex);
+        log.debug("(session {}) Read header {}", session.getSessionId(), headerHex);
 
         // Check if header read terminated due to max length reached without find a wellformed termination
         if (state != STATE_READ_END) {
-            LOG.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
+            log.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
             return ProxyResult.FAIL;
         }
 
         Matcher matcher = PATTERN.matcher(new String(header, 0, len, StandardCharsets.US_ASCII));
         if (!matcher.matches()) {
-            LOG.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
+            log.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
             return ProxyResult.FAIL;
         }
 
@@ -224,7 +224,7 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
                      * We need to isValidPrefix only for one group between asrc, adst, psrc or pdst. Ther are all or
                      * noting by regex definition.
                      */
-                    LOG.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
+                    log.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
                     return ProxyResult.FAIL;
                 }
 
@@ -232,19 +232,19 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
                 try {
                     src = InetAddress.getByName(asrc);
                 } catch (UnknownHostException ex) {
-                    LOG.error("(session {}) wrong PROXY protocol v1 source IPv4 {}", session.getSessionId(), asrc);
+                    log.error("(session {}) wrong PROXY protocol v1 source IPv4 {}", session.getSessionId(), asrc);
                     return ProxyResult.FAIL;
                 }
 
                 if (!(src instanceof Inet4Address)) {
-                    LOG.error("(session {}) wrong PROXY protocol v1 source IPv4 {}", session.getSessionId(), asrc);
+                    log.error("(session {}) wrong PROXY protocol v1 source IPv4 {}", session.getSessionId(), asrc);
                     return ProxyResult.FAIL;
                 }
 
                 // Group psrc cannot be null here
                 int psrc = Integer.parseInt(matcher.group("psrc"));
                 if (psrc < 1 || psrc > 65535) {
-                    LOG.error("(session {}) wrong PROXY protocol v1 source IPv4 port {}", session.getSessionId(), psrc);
+                    log.error("(session {}) wrong PROXY protocol v1 source IPv4 port {}", session.getSessionId(), psrc);
                     return ProxyResult.FAIL;
                 }
                 clientAddress = new InetSocketAddress(src, psrc);
@@ -258,7 +258,7 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
                      * We need to isValidPrefix only for one group between asrc, adst, psrc or pdst. Ther are all or
                      * noting by regex definition.
                      */
-                    LOG.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
+                    log.error("(session {}) Invalid PROXY protocol v1 header {}", session.getSessionId(), headerHex);
                     return ProxyResult.FAIL;
                 }
 
@@ -266,19 +266,19 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
                 try {
                     src = InetAddress.getByName(asrc);
                 } catch (UnknownHostException ex) {
-                    LOG.error("(session {}) wrong PROXY protocol v1 source IPv6 {}", session.getSessionId(), asrc);
+                    log.error("(session {}) wrong PROXY protocol v1 source IPv6 {}", session.getSessionId(), asrc);
                     return ProxyResult.FAIL;
                 }
 
                 if (!(src instanceof Inet6Address)) {
-                    LOG.error("(session {}) wrong PROXY protocol v1 source IPv6 {}", session.getSessionId(), asrc);
+                    log.error("(session {}) wrong PROXY protocol v1 source IPv6 {}", session.getSessionId(), asrc);
                     return ProxyResult.FAIL;
                 }
 
                 // Group psrc cannot be null here
                 int psrc = Integer.parseInt(matcher.group("psrc"));
                 if (psrc < 1 || psrc > 65535) {
-                    LOG.error("(session {}) wrong PROXY protocol v1 source IPv6 port {}", session.getSessionId(), psrc);
+                    log.error("(session {}) wrong PROXY protocol v1 source IPv6 port {}", session.getSessionId(), psrc);
                     return ProxyResult.FAIL;
                 }
                 clientAddress = new InetSocketAddress(src, psrc);
@@ -286,11 +286,11 @@ public class ProxyProtocolV1Handler implements ProxyHandler {
             }
             default:
                 // Due to regex we should never end here
-                LOG.error("(session {}) Unknown PROXY protocol v1 address family {}", session.getSessionId(), family);
+                log.error("(session {}) Unknown PROXY protocol v1 address family {}", session.getSessionId(), family);
                 return ProxyResult.FAIL;
         }
 
-        LOG.debug("(session {}) Accepted PROXY connection: family {} client {} original {}",
+        log.debug("(session {}) Accepted PROXY connection: family {} client {} original {}",
                 session.getSessionId(), family, clientAddress.getHostString(),
                 session.getRealRemoteAddress().getHostString());
 

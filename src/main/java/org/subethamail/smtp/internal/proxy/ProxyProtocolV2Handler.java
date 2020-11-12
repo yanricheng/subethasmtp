@@ -21,15 +21,16 @@ import org.subethamail.smtp.server.Session;
  */
 public class ProxyProtocolV2Handler implements ProxyHandler {
     
-    private final static Logger LOG = LoggerFactory.getLogger(ProxyProtocolV2Handler.class);
+    private final static Logger log = LoggerFactory.getLogger(ProxyProtocolV2Handler.class);
     
     /**
      * Default maximum data length. Standard max data size in 216 for unix socket (two unix address, 108 bytes each).
      * 2048 is reasonable default to host data plus some optional informations.
      */
-    public static final int DEFAULT_MAX_DATA_LENGTH = 2048;
+    private static final int DEFAULT_MAX_DATA_LENGTH = 2048;
 
-    public static final ProxyProtocolV2Handler INSTANCE = new ProxyProtocolV2Handler(DEFAULT_MAX_DATA_LENGTH);
+    /** Default thread safe instance with maximum data length size 2048. */
+    public static final ProxyProtocolV2Handler INSTANCE = new ProxyProtocolV2Handler();
 
     private static final byte[] PROXY_MAGIC =
             new byte[]{0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A};
@@ -46,7 +47,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
      */
     private final int maxDataLength;
 
-    public static enum Command {
+    public enum Command {
         LOCAL(0),
         PROXY(1);
 
@@ -57,7 +58,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
         }
     }
 
-    public static enum Family {
+    public enum Family {
         UNSPEC(0),
         INET(1),
         INET6(2),
@@ -70,7 +71,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
         }
     }
 
-    public static enum Transport {
+    public enum Transport {
         UNSPEC(0),
         STREAM(1),
         DGRAM(2);
@@ -80,6 +81,14 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
         private Transport(int value) {
             this.value = value;
         }
+    }
+
+    /**
+     * Creates a new handler with maximum data length 2048. Standard max data size in 216 for unix socket (two unix
+     * address, 108 bytes each). 2048 is reasonable default to host data plus some optional informations.
+     */
+    private ProxyProtocolV2Handler() {
+        this(DEFAULT_MAX_DATA_LENGTH);
     }
 
     public ProxyProtocolV2Handler(int maxDataLength) {
@@ -121,23 +130,23 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
          * };
          */
         
-        LOG.debug("(session {}) Starting PROXY protocol v2 handling", session.getSessionId());
+        log.debug("(session {}) Starting PROXY protocol v2 handling", session.getSessionId());
         
         byte[] header = new byte[PROXY_HEADER_SIZE];
         int read = in.read(header);
         if (read != PROXY_HEADER_SIZE) {
             final String headerHex = toHex(header, 0, read);
-            LOG.error("(session {}) Failed to fully read PROXY v2 header. Read {}",
+            log.error("(session {}) Failed to fully read PROXY v2 header. Read {}",
                     session.getSessionId(), headerHex);
             return ProxyResult.FAIL;
         }
 
         final String headerHex = toHex(header);
-        LOG.debug("(session {}) Read header {}", session.getSessionId(), headerHex);
+        log.debug("(session {}) Read header {}", session.getSessionId(), headerHex);
         
         if (!ArrayUtils.equals(PROXY_MAGIC, 0, PROXY_MAGIC.length, header, 0, PROXY_MAGIC.length)) { 
             final String receivedMagic = toHex(header, 0, PROXY_MAGIC.length);
-            LOG.error("(session {}) Invalid PROXY protocol v2 magic {} (header: {})",
+            log.error("(session {}) Invalid PROXY protocol v2 magic {} (header: {})",
                     session.getSessionId(), receivedMagic, headerHex);
             return ProxyResult.FAIL;
         }
@@ -147,7 +156,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
 
         int versionbin = versionAndCommand >> BYTE_HIGH_4_BITS_SHIFT;
         if (versionbin != 0x2) {
-            LOG.error("(session {}) Usupported PROXY protocol version {} (header: {})",
+            log.error("(session {}) Usupported PROXY protocol version {} (header: {})",
                     session.getSessionId(), versionbin, headerHex);
             return ProxyResult.FAIL;
         }
@@ -163,7 +172,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
                 command = Command.PROXY;
                 break;
             default:
-                LOG.error("(session {}) Invalid PROXY protocol v2 command {} (header: {})",
+                log.error("(session {}) Invalid PROXY protocol v2 command {} (header: {})",
                         session.getSessionId(), commandbin, headerHex);
                 return ProxyResult.FAIL;
         }
@@ -187,7 +196,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
                 family = Family.UNIX;
                 break;
             default:
-                LOG.error("(session {}) Invalid PROXY protocol v2 family {} (header: {})",
+                log.error("(session {}) Invalid PROXY protocol v2 family {} (header: {})",
                         session.getSessionId(), familybin, headerHex);
                 return ProxyResult.FAIL;
         }
@@ -206,7 +215,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
                 transport = Transport.DGRAM;
                 break;
             default:
-                LOG.error("(session {}) Invalid PROXY protocol v2 transport {} (header: {})",
+                log.error("(session {}) Invalid PROXY protocol v2 transport {} (header: {})",
                         session.getSessionId(), transportbin, headerHex);
                 return ProxyResult.FAIL;
         }
@@ -216,7 +225,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
         int len = ((int) header[idx++] << Byte.SIZE | (int) header[idx++]) & 0xffff;
 
         if (len > maxDataLength) {
-            LOG.error("(session {}) Invalid PROXY protocol v2 length {} "
+            log.error("(session {}) Invalid PROXY protocol v2 length {} "
                     + "greater than configured maximum length {} (header: {})",
                     session.getSessionId(), len, maxDataLength, headerHex);
             return ProxyResult.FAIL;
@@ -226,7 +235,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
         read = readNBytes(in, data, 0, len);
         if (read != len) {
             final String dataHex = toHex(data, 0, read);
-            LOG.error("(session {}) Failed to fully read PROXY v2 data, EOF reached. Read {}",
+            log.error("(session {}) Failed to fully read PROXY v2 data, EOF reached. Read {}",
                     session.getSessionId(), dataHex);
             return ProxyResult.FAIL;
         }
@@ -269,7 +278,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
                  * Doesn't handle unix socket proxy, fallback to unspec as requested by specifications for unsupported
                  * families.
                  */
-                LOG.warn("(session {}) unsupported PROXY protocol v2 family UNIX, falling back to UNSPEC",
+                log.warn("(session {}) unsupported PROXY protocol v2 family UNIX, falling back to UNSPEC",
                         session.getSessionId());
                 // SF_SWITCH_FALLTHROUGH Fallthrough
 
@@ -285,7 +294,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
                     ip = InetAddress.getByAddress(raw);
                 } catch (UnknownHostException ex) {
                     final String rawHex = toHex(raw, ':');
-                    LOG.error("(session {}) wrong PROXY protocol v2 source IPv4 {}", session.getSessionId(), rawHex);
+                    log.error("(session {}) wrong PROXY protocol v2 source IPv4 {}", session.getSessionId(), rawHex);
                     return ProxyResult.FAIL;
                 }
 
@@ -308,7 +317,7 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
                     ip = InetAddress.getByAddress(raw);
                 } catch (UnknownHostException ex) {
                     final String rawHex = toHex(raw, ':');
-                    LOG.error("(session {}) wrong PROXY protocol v2 source IPv6 {}", session.getSessionId(), rawHex);
+                    log.error("(session {}) wrong PROXY protocol v2 source IPv6 {}", session.getSessionId(), rawHex);
                     return ProxyResult.FAIL;
                 }
 
@@ -324,11 +333,11 @@ public class ProxyProtocolV2Handler implements ProxyHandler {
             }
 
             default:
-                LOG.error("(session {}) Unknown PROXY protocol v2 address family {}", session.getSessionId(), family);
+                log.error("(session {}) Unknown PROXY protocol v2 address family {}", session.getSessionId(), family);
                 return ProxyResult.FAIL;
         }
 
-        LOG.debug("(session {}) Accepted PROXY connection: command {} family {} transport {} client {} original {}",
+        log.debug("(session {}) Accepted PROXY connection: command {} family {} transport {} client {} original {}",
                 session.getSessionId(), command, family, transport, clientAddress.getHostString(),
                 session.getRealRemoteAddress().getHostString());
 

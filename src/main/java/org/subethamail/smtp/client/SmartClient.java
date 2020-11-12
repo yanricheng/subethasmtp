@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.client.SMTPClient.Response;
 
 import com.github.davidmoten.guavamini.Preconditions;
+import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 /**
  * A somewhat smarter abstraction of an SMTP client which doesn't require
@@ -59,21 +60,6 @@ public class SmartClient {
      */
     private boolean serverClosingTransmissionChannel = false;
 
-    
-    /**
-     * Connects to the specified server and issues the initial HELO command.
-     * 
-     * @throws UnknownHostException
-     *             if problem looking up hostname
-     * @throws SMTPException
-     *             if problem reported by the server
-     * @throws IOException
-     *             if problem communicating with host
-     */
-    protected SmartClient(String myHost) throws UnknownHostException, IOException, SMTPException {
-        this(Optional.empty(), myHost, Optional.empty());
-    }
-
     /**
      * Constructor.
      * 
@@ -83,21 +69,10 @@ public class SmartClient {
      *            the Authenticator object which will be called after the EHLO
      *            command to authenticate this client to the server. If is null
      *            then no authentication will happen.
-     * @throws UnknownHostException
-     *             if problem looking up hostname
-     * @throws IOException
-     *             if problem communicating with host
-     * @throws SMTPException
-     *             if problem reported by the server
      */
-    protected SmartClient(Optional<SocketAddress> bindpoint, String clientHeloHost, Optional<Authenticator> authenticator)
-            throws UnknownHostException, IOException, SMTPException {
-        Preconditions.checkNotNull(bindpoint, "bindpoint cannot be null");
-        Preconditions.checkNotNull(clientHeloHost, "clientHeloHost cannot be null");
-        Preconditions.checkNotNull(authenticator, "authenticator cannot be null");
-        this.client = new SMTPClient(bindpoint, Optional.empty());
-        this.heloHost = clientHeloHost;
-        this.authenticator = authenticator;
+    private SmartClient(Optional<SocketAddress> bindpoint, String clientHeloHost, Optional<Authenticator> authenticator) {
+        this(new SMTPClient(Preconditions.checkNotNull(bindpoint, "bindpoint cannot be null"), Optional.empty()),
+                clientHeloHost, authenticator);
     }
 
     /**
@@ -109,13 +84,9 @@ public class SmartClient {
      *            the Authenticator object which will be called after the EHLO
      *            command to authenticate this client to the server. If is null
      *            then no authentication will happen.
-     * @throws IOException
-     *             if problem communicating with host
-     * @throws SMTPException
-     *             if problem reported by the server
      */
-    protected SmartClient(SMTPClient client, String clientHeloHost, Optional<Authenticator> authenticator)
-            throws IOException, SMTPException {
+    @VisibleForTesting
+    protected SmartClient(SMTPClient client, String clientHeloHost, Optional<Authenticator> authenticator) {
         Preconditions.checkNotNull(client, "client cannot be null");
         Preconditions.checkNotNull(clientHeloHost, "clientHeloHost cannot be null");
         Preconditions.checkNotNull(authenticator, "authenticator cannot be null");
