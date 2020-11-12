@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.subethamail.smtp.internal.util.HexUtils;
 import org.subethamail.smtp.server.Session;
 
 /**
@@ -23,7 +22,7 @@ public class ProxyProtocolV1V2Handler implements ProxyHandler {
     /** Standard instance */
     public static final ProxyProtocolV1V2Handler INSTANCE =
             new ProxyProtocolV1V2Handler(ProxyProtocolV1Handler.INSTANCE, ProxyProtocolV2Handler.INSTANCE);
-    
+
     ProxyProtocolV1Handler v1;
     ProxyProtocolV2Handler v2;
 
@@ -31,7 +30,7 @@ public class ProxyProtocolV1V2Handler implements ProxyHandler {
         this.v1 = v1;
         this.v2 = v2;
     }
-    
+
     @Override
     public ProxyResult handle(InputStream in, OutputStream out, Session session) throws IOException {
 
@@ -47,7 +46,7 @@ public class ProxyProtocolV1V2Handler implements ProxyHandler {
         byte[] prefix = new byte[maxPrefixSize];
         int read = buffered.read(prefix, 0, maxPrefixSize);
 
-        
+
         if (v1.isValidPrefix(prefix)) {
             log.debug("(session {}) Detected PROXY protocol v1 prefix", session.getSessionId());
             buffered.reset();
@@ -65,5 +64,5 @@ public class ProxyProtocolV1V2Handler implements ProxyHandler {
         throw new IOException("Invalid PROXY protocol v1 or v2 prefix " + prefixHex);
 
     }
-    
+
 }

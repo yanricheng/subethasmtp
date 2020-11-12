@@ -1,4 +1,4 @@
-package org.subethamail.smtp.server;
+package org.subethamail.smtp.internal.proxy;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -20,9 +20,7 @@ import org.subethamail.smtp.client.SMTPClient;
 import org.subethamail.smtp.client.SMTPException;
 import org.subethamail.smtp.client.SmartClient;
 import org.subethamail.smtp.helper.BasicMessageListener;
-import org.subethamail.smtp.internal.proxy.ProxyProtocolV1Handler;
-import org.subethamail.smtp.internal.proxy.ProxyProtocolV2Handler;
-import org.subethamail.smtp.internal.proxy.ProxyProtocolV1V2Handler;
+import org.subethamail.smtp.server.SMTPServer;
 
 /**
  * Tests for {@link ProxyProtocolV2Handler}

@@ -48,6 +48,12 @@ public class ArrayUtilsTest {
 
         assertTrue(ArrayUtils.equals(s2a, 0, 2, s3b, 0, 2));
         assertTrue(ArrayUtils.equals(s3b, 0, 2, s2a, 0, 2));
+        
+        assertFalse(ArrayUtils.equals(s1a, 0, 1, s2a, 0, 2));
+        assertFalse(ArrayUtils.equals(s2a, 0, 2, s1a, 0, 1));
+        
+        assertFalse(ArrayUtils.equals(s2a, 0, 1, s2a, 0, 2));
+        assertFalse(ArrayUtils.equals(s2a, 0, 2, s2a, 0, 1));
 
     }
 
