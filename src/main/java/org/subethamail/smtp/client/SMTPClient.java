@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ import com.github.davidmoten.guavamini.Preconditions;
  *
  * @author Jeff Schnitzer
  */
-public final class SMTPClient {
+public class SMTPClient implements AutoCloseable {
     /** 5 minutes */
     private static final int CONNECT_TIMEOUT = 300 * 1000;
 
@@ -63,6 +62,7 @@ public final class SMTPClient {
 
     /** Output streams used for data */
     OutputStream rawOutput;
+
     /**
      * A stream which wraps {@link #rawOutput} and is used to write out the DOT
      * CR LF terminating sequence in the DATA command, if necessary
@@ -110,13 +110,8 @@ public final class SMTPClient {
 
     /**
      * Establishes a connection to host and port.
-     * 
-     * @throws UnknownHostException
-     *             if the hostname cannot be resolved
-     * @throws IOException
-     *             if there is a problem connecting to the port
      */
-    public SMTPClient() throws UnknownHostException, IOException {
+    public SMTPClient() {
         this(Optional.empty(), Optional.empty());
     }
 
@@ -131,13 +126,8 @@ public final class SMTPClient {
      *            Default is host:port, where host and port are the values which
      *            were used to open the TCP connection to the server, as they
      *            were passed to the connect method.
-     * @throws UnknownHostException
-     *             if the hostname cannot be resolved
-     * @throws IOException
-     *             if there is a problem connecting to the port
      */
-    public SMTPClient(Optional<SocketAddress> bindpoint, Optional<String> hostPortName)
-            throws UnknownHostException, IOException {
+    public SMTPClient(Optional<SocketAddress> bindpoint, Optional<String> hostPortName) {
         Preconditions.checkNotNull(bindpoint, "bindpoint cannot be null");
         this.bindpoint = bindpoint;
         this.hostPortName = hostPortName;
@@ -306,6 +296,7 @@ public final class SMTPClient {
     }
 
     /** Logs but otherwise ignores errors */
+    @Override
     public void close() {
         connected = false;
 
