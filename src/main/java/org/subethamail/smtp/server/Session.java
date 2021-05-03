@@ -12,6 +12,7 @@ import java.net.SocketTimeoutException;
 import java.security.cert.Certificate;
 import java.util.Map;
 import java.util.Optional;
+import javax.net.ssl.SSLSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -116,6 +117,7 @@ public final class Session implements Runnable, MessageContext {
         this.serverThread = serverThread;
         this.remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
         this.setSocket(socket);
+        this.tlsStarted = socket instanceof SSLSocket;
         this.proxyHandler = proxyHandler;
     }
 
