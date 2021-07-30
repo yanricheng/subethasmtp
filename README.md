@@ -1,5 +1,5 @@
 # subethasmtp
-<a href="https://travis-ci.org/davidmoten/subethasmtp"><img src="https://travis-ci.org/davidmoten/subethasmtp.svg"/></a><br/>
+<a href="https://github.com/davidmoten/subethasmtp/actions/workflows/ci.yml"><img src="https://github.com/davidmoten/subethasmtp/actions/workflows/ci.yml/badge.svg"/></a><br/>
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/subethasmtp/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/subethasmtp)<br/>
 [![codecov](https://codecov.io/gh/davidmoten/subethasmtp/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/subethasmtp)<br/>
 
