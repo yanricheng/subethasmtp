@@ -86,7 +86,7 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
      */
     class Handler implements MessageHandler {
         String from;
-        List<Receiver> deliveries = new ArrayList<Receiver>();
+        List<Receiver> deliveries = new ArrayList<>();
 
         Handler() {
         }
@@ -114,10 +114,9 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
             if (this.deliveries.size() == 1) {
                 this.deliveries.get(0).deliver(data);
             } else {
-                DeferredFileOutputStream dfos = new DeferredFileOutputStream(
-                        SmarterMessageListenerAdapter.this.dataDeferredSize);
 
-                try {
+                try (DeferredFileOutputStream dfos = new DeferredFileOutputStream(
+                        SmarterMessageListenerAdapter.this.dataDeferredSize)) {
                     int value;
                     while ((value = data.read()) >= 0) {
                         dfos.write(value);
@@ -126,8 +125,6 @@ public class SmarterMessageListenerAdapter implements MessageHandlerFactory {
                     for (Receiver rec : this.deliveries) {
                         rec.deliver(dfos.getInputStream());
                     }
-                } finally {
-                    dfos.close();
                 }
             }
             return null;

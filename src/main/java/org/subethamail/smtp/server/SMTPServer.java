@@ -215,7 +215,7 @@ public final class SMTPServer implements SSLSocketCreator {
         /**
          * The timeout for waiting for data on a connection is one minute: 1000 * 60 * 1
          */
-        private int connectionTimeoutMs = 1000 * 60 * 1;
+        private int connectionTimeoutMs = 1000 * 60;
 
         /**
          * The maximal number of recipients that this server accepts per message
@@ -530,12 +530,7 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public Builder serverSocketFactory(SSLServerSocketFactory factory) {
-            return serverSocketFactory(new ServerSocketCreator() {
-                @Override
-                public ServerSocket createServerSocket() throws IOException {
-                    return factory.createServerSocket();
-                }
-            });
+            return serverSocketFactory(() -> factory.createServerSocket());
         }
 
         public Builder serverSocketFactory(SSLContext context) {
@@ -552,29 +547,26 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public Builder startTlsSocketFactory(SSLContext context, boolean requireClientCertificate) {
-            return startTlsSocketFactory(new SSLSocketCreator() {
-                @Override
-                public SSLSocket createSSLSocket(Socket socket) throws IOException {
-                    InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+            return startTlsSocketFactory(socket -> {
+                InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
 
-                    SSLSocketFactory sf = context.getSocketFactory();
-                    SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
-                            true));
+                SSLSocketFactory sf = context.getSocketFactory();
+                SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(),
+                        true));
 
-                    // we are a server
-                    s.setUseClientMode(false);
+                // we are a server
+                s.setUseClientMode(false);
 
-                    // select protocols and cipher suites
-                    s.setEnabledProtocols(s.getSupportedProtocols());
-                    s.setEnabledCipherSuites(s.getSupportedCipherSuites());
-                    
-                    //// Client must authenticate
-                    if (requireClientCertificate) {
-                        s.setNeedClientAuth(true);
-                    }
+                // select protocols and cipher suites
+                s.setEnabledProtocols(s.getSupportedProtocols());
+                s.setEnabledCipherSuites(s.getSupportedCipherSuites());
 
-                    return s;
+                //// Client must authenticate
+                if (requireClientCertificate) {
+                    s.setNeedClientAuth(true);
                 }
+
+                return s;
             });
         }
 
@@ -671,30 +663,21 @@ public final class SMTPServer implements SSLSocketCreator {
         this.serverThreadName = serverThreadNameProvider;
     }
 
-    private static final SSLSocketCreator SSL_SOCKET_CREATOR_DEFAULT = new SSLSocketCreator() {
+    private static final SSLSocketCreator SSL_SOCKET_CREATOR_DEFAULT = socket -> {
+        SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
+        InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+        SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
 
-        @Override
-        public SSLSocket createSSLSocket(Socket socket) throws IOException {
-            SSLSocketFactory sf = ((SSLSocketFactory) SSLSocketFactory.getDefault());
-            InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-            SSLSocket s = (SSLSocket) (sf.createSocket(socket, remoteAddress.getHostName(), socket.getPort(), true));
+        // we are a server
+        s.setUseClientMode(false);
 
-            // we are a server
-            s.setUseClientMode(false);
+        // allow all supported cipher suites
+        s.setEnabledCipherSuites(s.getSupportedCipherSuites());
 
-            // allow all supported cipher suites
-            s.setEnabledCipherSuites(s.getSupportedCipherSuites());
-
-            return s;
-        }
+        return s;
     };
 
-    private static final ServerSocketCreator SERVER_SOCKET_CREATOR_DEFAULT = new ServerSocketCreator() {
-        @Override
-        public ServerSocket createServerSocket() throws IOException {
-            return new ServerSocket();
-        }
-    };
+    private static final ServerSocketCreator SERVER_SOCKET_CREATOR_DEFAULT = () -> new ServerSocket();
 
     private static final MessageHandlerFactory MESSAGE_HANDLER_FACTORY_DEFAULT = new BasicMessageHandlerFactory(
             (context, from, to, data) -> log.info("From: " + from + ", To: " + to + "\n"
@@ -833,7 +816,7 @@ public final class SMTPServer implements SSLSocketCreator {
     }
 
     public String getDisplayableLocalSocketAddress() {
-        return this.bindAddress.map(x -> x.toString()).orElse("*") + ":" + this.port;
+        return this.bindAddress.map(InetAddress::toString).orElse("*") + ":" + this.port;
     }
 
     public MessageHandlerFactory getMessageHandlerFactory() {

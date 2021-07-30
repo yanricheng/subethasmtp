@@ -34,7 +34,7 @@ import org.subethamail.smtp.internal.util.TextUtils;
  */
 public final class LoginAuthenticationHandlerFactory implements AuthenticationHandlerFactory
 {
-	private static final List<String> MECHANISMS = new ArrayList<String>(1);
+	private static final List<String> MECHANISMS = new ArrayList<>(1);
 	static {
 		MECHANISMS.add("LOGIN");
 	}

@@ -1,5 +1,6 @@
 package org.subethamail.smtp.internal.server;
 
+import java.util.Objects;
 import java.util.StringTokenizer;
 
 /**
@@ -55,14 +56,11 @@ public final class HelpMessage
 		if (o == null || this.getClass() != o.getClass())
 			return false;
 		final HelpMessage that = (HelpMessage) o;
-		if (this.argumentDescription != null ? !this.argumentDescription.equals(that.argumentDescription)
-				: that.argumentDescription != null)
+		if (!Objects.equals(this.argumentDescription, that.argumentDescription))
 			return false;
-		if (this.commandName != null ? !this.commandName.equals(that.commandName)
-				: that.commandName != null)
+		if (!Objects.equals(this.commandName, that.commandName))
 			return false;
-		if (this.helpMessage != null ? !this.helpMessage.equals(that.helpMessage)
-				: that.helpMessage != null)
+		if (!Objects.equals(this.helpMessage, that.helpMessage))
 			return false;
 		return true;
 	}

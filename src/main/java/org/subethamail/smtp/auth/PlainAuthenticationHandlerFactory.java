@@ -25,7 +25,7 @@ import org.subethamail.smtp.RejectException;
 public final class PlainAuthenticationHandlerFactory implements AuthenticationHandlerFactory
 {
     private static final Charset AUTHORIZATION_CHARSET = StandardCharsets.UTF_8;
-	private static final List<String> MECHANISMS = new ArrayList<String>(1);
+	private static final List<String> MECHANISMS = new ArrayList<>(1);
 	static {
 		MECHANISMS.add("PLAIN");
 	}

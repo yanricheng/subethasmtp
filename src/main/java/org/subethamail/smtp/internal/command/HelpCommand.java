@@ -62,7 +62,7 @@ public final class HelpCommand extends BaseCommand
 		StringBuilder sb = new StringBuilder();
 		for (String key : server.getCommandHandler().getVerbs())
 	    {
-	    	sb.append("214-     " + key + "\r\n");
+	    	sb.append("214-     ").append(key).append("\r\n");
 	    }
 		return sb.toString();
 	}

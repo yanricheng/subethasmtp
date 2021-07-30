@@ -44,7 +44,7 @@ public final class Wiser implements SimpleMessageListener {
 
     private final SMTPServer server;
 
-    private final List<WiserMessage> messages = new CopyOnWriteArrayList<WiserMessage>();
+    private final List<WiserMessage> messages = new CopyOnWriteArrayList<>();
 
     private final Accepter accepter;
 

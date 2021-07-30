@@ -67,13 +67,13 @@ public abstract class BaseCommand implements Command
 
 	public static String[] getArgs(String commandString)
 	{
-		List<String> strings = new ArrayList<String>();
+		List<String> strings = new ArrayList<>();
 		StringTokenizer stringTokenizer = new StringTokenizer(commandString);
 		while (stringTokenizer.hasMoreTokens())
 		{
 			strings.add(stringTokenizer.nextToken());
 		}
 
-		return strings.toArray(new String[strings.size()]);
+		return strings.toArray(new String[0]);
 	}
 }

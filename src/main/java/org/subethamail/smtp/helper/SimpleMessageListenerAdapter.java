@@ -54,7 +54,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
 
     /**
      * Initializes this factory with the listeners.
-     * 
+     *
      * @param dataDeferredSize
      *            The server will buffer incoming messages to disk when they hit
      *            this limit in the DATA received.
@@ -66,7 +66,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.
      * MessageContext)
@@ -104,7 +104,7 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
     class Handler implements MessageHandler {
         final MessageContext ctx;
         String from;
-        List<Delivery> deliveries = new ArrayList<Delivery>();
+        List<Delivery> deliveries = new ArrayList<>();
 
         public Handler(MessageContext ctx) {
             this.ctx = ctx;
@@ -136,10 +136,9 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
                 Delivery delivery = this.deliveries.get(0);
                 delivery.getListener().deliver(this.from, delivery.getRecipient(), data);
             } else {
-                DeferredFileOutputStream dfos = new DeferredFileOutputStream(
-                        SimpleMessageListenerAdapter.this.dataDeferredSize);
 
-                try {
+                try (DeferredFileOutputStream dfos = new DeferredFileOutputStream(
+                        SimpleMessageListenerAdapter.this.dataDeferredSize)) {
                     int value;
                     while ((value = data.read()) >= 0) {
                         dfos.write(value);
@@ -148,8 +147,6 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
                     for (Delivery delivery : this.deliveries) {
                         delivery.getListener().deliver(this.from, delivery.getRecipient(), dfos.getInputStream());
                     }
-                } finally {
-                    dfos.close();
                 }
             }
             return null;
@@ -159,4 +156,5 @@ public final class SimpleMessageListenerAdapter implements MessageHandlerFactory
         public void done() {
         }
     }
+
 }

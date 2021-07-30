@@ -39,7 +39,7 @@ public class SmartClient {
      * string in unparsed form. If the server does not support EHLO, then this
      * map is empty.
      */
-    private final Map<String, String> extensions = new HashMap<String, String>();
+    private final Map<String, String> extensions = new HashMap<>();
 
     /**
      * If supplied (not null), then it will be called after EHLO, to
@@ -121,10 +121,7 @@ public class SmartClient {
             this.sendHeloOrEhlo();
             if (this.authenticator.isPresent())
                 this.authenticator.get().authenticate();
-        } catch (SMTPException e) {
-            this.quit();
-            throw e;
-        } catch (AuthenticationNotSupportedException e) {
+        } catch (SMTPException | AuthenticationNotSupportedException e) {
             this.quit();
             throw e;
         } catch (IOException e) {

@@ -60,17 +60,16 @@ public final class ReceivedHeaderStream extends FilterInputStream {
         String timestamp = fmt.format(new Date());
 
         StringBuilder header = new StringBuilder();
-        header.append("Received: from " + heloHost.orElse(null) + " (" + constructTcpInfo(host)
-                + ")\r\n");
-        header.append("        by " + whoami + "\r\n");
+        header.append("Received: from ").append(heloHost.orElse(null)).append(" (").append(constructTcpInfo(host)).append(")\r\n");
+        header.append("        by ").append(whoami).append("\r\n");
         header.append("        with SMTP");
         if (softwareName.isPresent())
-            header.append(" (" + softwareName.get() + ")");
+            header.append(" (").append(softwareName.get()).append(")");
         header.append(" id ").append(id);
         if (singleRecipient.isPresent())
-            header.append("\r\n        for " + singleRecipient.get());
+            header.append("\r\n        for ").append(singleRecipient.get());
         header.append(";\r\n");
-        header.append("        " + timestamp + "\r\n");
+        header.append("        ").append(timestamp).append("\r\n");
 
         this.header = new ByteArrayInputStream(TextUtils.getAsciiBytes(header.toString()));
     }

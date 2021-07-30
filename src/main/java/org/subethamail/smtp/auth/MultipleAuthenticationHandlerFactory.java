@@ -24,12 +24,12 @@ public class MultipleAuthenticationHandlerFactory implements AuthenticationHandl
 	/**
 	 * Maps the auth type (eg "PLAIN") to a handler. The mechanism name (key) is in upper case. 
 	 */
-	final Map<String, AuthenticationHandlerFactory> plugins = new HashMap<String, AuthenticationHandlerFactory>();
+	final Map<String, AuthenticationHandlerFactory> plugins = new HashMap<>();
 
 	/** 
 	 * A more orderly list of the supported mechanisms. Mechanism names are in upper case.
 	 */
-	List<String> mechanisms = new ArrayList<String>();
+	List<String> mechanisms = new ArrayList<>();
 
 	public MultipleAuthenticationHandlerFactory()
 	{

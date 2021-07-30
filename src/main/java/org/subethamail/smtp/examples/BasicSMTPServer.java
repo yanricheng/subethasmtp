@@ -67,7 +67,7 @@ public final class BasicSMTPServer {
                 String line = null;
                 try {
                     while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
+                        sb.append(line).append("\n");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

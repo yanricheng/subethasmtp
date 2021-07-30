@@ -27,7 +27,7 @@ public final class CommandHandler {
      * The map of known SMTP commands. Keys are upper case names of the
      * commands.
      */
-    private final Map<String, Command> commandMap = new HashMap<String, Command>();
+    private final Map<String, Command> commandMap = new HashMap<>();
 
     public CommandHandler() {
         // This solution should be more robust than the earlier "manual"
