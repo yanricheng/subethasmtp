@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.concurrent.GuardedBy;
 import javax.net.ssl.SSLContext;
@@ -28,6 +29,7 @@ import org.subethamail.smtp.helper.BasicMessageHandlerFactory;
 import org.subethamail.smtp.helper.BasicMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListener;
 import org.subethamail.smtp.helper.SimpleMessageListenerAdapter;
+import org.subethamail.smtp.internal.command.MailCommand;
 import org.subethamail.smtp.internal.server.AcceptAllSessionHandler;
 import org.subethamail.smtp.internal.server.CommandHandler;
 import org.subethamail.smtp.internal.server.ServerThread;
@@ -237,6 +239,8 @@ public final class SMTPServer implements SSLSocketCreator {
 
         private SessionHandler sessionHandler = AcceptAllSessionHandler.INSTANCE;
 
+        private CommandHandler commandHandler = new CommandHandler();
+
         /* No proxy handling attempt by default */
         private ProxyHandler proxyHandler = ProxyHandler.NOP;
 
@@ -348,6 +352,16 @@ public final class SMTPServer implements SSLSocketCreator {
 
         public Builder enableTLS(boolean value) {
             this.enableTLS = value;
+            return this;
+        }
+
+        /**
+         *  <p>Add filter that will be applied to address when server receive {@code MAIL FROM:} command</p>
+         * @param filter the filter will be applied to the address in MAIL FROM command
+         * @return
+         */
+        public Builder mailFromAddressFilter(Predicate<String> filter) {
+            this.commandHandler.addCommand(new MailCommand(filter));
             return this;
         }
 
@@ -530,7 +544,7 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         public Builder serverSocketFactory(SSLServerSocketFactory factory) {
-            return serverSocketFactory(() -> factory.createServerSocket());
+            return serverSocketFactory(factory::createServerSocket);
         }
 
         public Builder serverSocketFactory(SSLContext context) {
@@ -591,11 +605,12 @@ public final class SMTPServer implements SSLSocketCreator {
             if (listener.isPresent()) {
                 messageHandlerFactory(new BasicMessageHandlerFactory(listener.get(), maxMessageSize));
             }
+
             return new SMTPServer(hostName, bindAddress, port, backlog, softwareName, messageHandlerFactory,
                     authenticationHandlerFactory, executorService, enableTLS, hideTLS, requireTLS, requireAuth,
                     showAuthCapabilitiesBeforeSTARTTLS, disableReceivedHeaders, maxConnections, connectionTimeoutMs,
                     maxRecipients, maxMessageSize, sessionIdFactory, sessionHandler, proxyHandler, startTlsSocketCreator,
-                    serverSocketCreator, serverThreadNameProvider);
+                    serverSocketCreator, serverThreadNameProvider, commandHandler);
         }
 
     }
@@ -608,7 +623,7 @@ public final class SMTPServer implements SSLSocketCreator {
             int maxConnections, int connectionTimeoutMs, int maxRecipients, int maxMessageSize,
             SessionIdFactory sessionIdFactory, SessionHandler sessionHandler, ProxyHandler proxyHandler,
             SSLSocketCreator startTlsSocketFactory, ServerSocketCreator serverSocketCreator,
-            Function<SMTPServer, String> serverThreadNameProvider) {
+            Function<SMTPServer, String> serverThreadNameProvider, CommandHandler commandHandler) {
         Preconditions.checkNotNull(messageHandlerFactory);
         Preconditions.checkNotNull(bindAddress);
         Preconditions.checkNotNull(executorService);
@@ -639,7 +654,7 @@ public final class SMTPServer implements SSLSocketCreator {
         this.sessionIdFactory = sessionIdFactory;
         this.sessionHandler = sessionHandler;
         this.proxyHandler = proxyHandler;
-        this.commandHandler = new CommandHandler();
+        this.commandHandler = commandHandler;
         this.serverSocketCreator = serverSocketCreator;
         this.startTlsSocketCreator = startTlsSocketFactory;
 
@@ -677,7 +692,7 @@ public final class SMTPServer implements SSLSocketCreator {
         return s;
     };
 
-    private static final ServerSocketCreator SERVER_SOCKET_CREATOR_DEFAULT = () -> new ServerSocket();
+    private static final ServerSocketCreator SERVER_SOCKET_CREATOR_DEFAULT = ServerSocket::new;
 
     private static final MessageHandlerFactory MESSAGE_HANDLER_FACTORY_DEFAULT = new BasicMessageHandlerFactory(
             (context, from, to, data) -> log.info("From: " + from + ", To: " + to + "\n"
@@ -811,7 +826,7 @@ public final class SMTPServer implements SSLSocketCreator {
      *             when creating the socket failed
      */
     @Override
-    public final SSLSocket createSSLSocket(Socket socket) throws IOException {
+    public SSLSocket createSSLSocket(Socket socket) throws IOException {
         return startTlsSocketCreator.createSSLSocket(socket);
     }
 

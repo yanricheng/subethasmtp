@@ -17,12 +17,12 @@ public class EmailUtilsTest {
 
     @Test
     public void testSpaceAddressIsNotValid() {
-        Assert.assertFalse(EmailUtils.isValidEmailAddress(" "));
+        Assert.assertFalse(EmailUtils.isValidEmailAddress(" ", true));
     }
 
     @Test
     public void testBlankAddressIsValid() {
-        Assert.assertTrue(EmailUtils.isValidEmailAddress(""));
+        Assert.assertTrue(EmailUtils.isValidEmailAddress("", true));
     }
 
     @Test
@@ -175,7 +175,7 @@ public class EmailUtilsTest {
 
     private static String extractAndValidate(String args, int offset) {
         String address = EmailUtils.extractEmailAddress(args, offset);
-        assertTrue(address + " isn't a valid address", EmailUtils.isValidEmailAddress(address));
+        assertTrue(address + " isn't a valid address", EmailUtils.isValidEmailAddress(address, true));
         return address;
     }
 }

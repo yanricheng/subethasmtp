@@ -187,10 +187,7 @@ public final class Session implements Runnable, MessageContext {
             }
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
-            else if (e instanceof Error)
-                throw (Error) e;
-            else
-                throw new RuntimeException("Unexpected exception", e);
+            else throw (Error) e;
         } finally {
             this.closeConnection();
             this.endMessageHandler();

@@ -101,15 +101,11 @@ public final class CommandHandler {
             throws UnknownCommandException, InvalidCommandNameException {
         Command command = null;
         String key = toKey(commandString);
-        if (key != null) {
-            command = this.commandMap.get(key);
-        }
+        command = this.commandMap.get(key);
         if (command == null) {
             // some commands have a verb longer than 4 letters
             String verb = toVerb(commandString);
-            if (verb != null) {
-                command = this.commandMap.get(verb);
-            }
+            command = this.commandMap.get(verb);
         }
         if (command == null) {
             throw new UnknownCommandException("Error: command not implemented");

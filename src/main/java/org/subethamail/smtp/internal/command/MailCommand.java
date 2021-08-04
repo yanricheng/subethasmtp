@@ -2,6 +2,7 @@ package org.subethamail.smtp.internal.command;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.RejectException;
@@ -18,11 +19,22 @@ import org.subethamail.smtp.server.Session;
 public final class MailCommand extends BaseCommand
 {
 
+	private Predicate<String> isValidEmailAddress = emailAddress -> EmailUtils.isValidEmailAddress(emailAddress, true);
+
 	public MailCommand()
 	{
 		super("MAIL",
 				"Specifies the sender.",
 				"FROM: <sender> [ <parameters> ]");
+	}
+
+	/**
+	 * @param isValidEmailAddress check is MAIL FROM: address is valid
+	 */
+	public MailCommand(Predicate<String> isValidEmailAddress)
+	{
+		this();
+		this.isValidEmailAddress = isValidEmailAddress;
 	}
 
 	/* (non-Javadoc)
@@ -54,7 +66,7 @@ public final class MailCommand extends BaseCommand
 		}
 
 		String emailAddress = EmailUtils.extractEmailAddress(args, 5);
-		if (!EmailUtils.isValidEmailAddress(emailAddress))
+		if (!isValidEmailAddress.test(emailAddress))
 		{
 			sess.sendResponse("553 <" + emailAddress + "> Invalid email address.");
 			return;
@@ -106,4 +118,5 @@ public final class MailCommand extends BaseCommand
 		
 		sess.sendResponse("250 Ok");
 	}
+
 }

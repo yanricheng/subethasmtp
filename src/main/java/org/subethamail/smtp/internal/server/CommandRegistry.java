@@ -44,7 +44,7 @@ public enum CommandRegistry
 
 	private final Command command;
 
-	private CommandRegistry(Command cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired)
+	CommandRegistry(Command cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired)
 	{
 		final Command c;
         if (checkForStartedTLSWhenRequired)

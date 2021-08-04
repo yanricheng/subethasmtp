@@ -14,24 +14,18 @@ public final class EmailUtils {
     }
 
     /**
-     * @return true if the string is a valid email address
+     * @return true if the string is a valid email address, or address is empty string
      */
-    public static boolean isValidEmailAddress(String address) {
+    public static boolean isValidEmailAddress(String address, boolean strict) {
         // MAIL FROM: <>
         if (address.length() == 0)
             return true;
 
-        boolean result = false;
         try {
-            InternetAddress[] ia = InternetAddress.parse(address, true);
-            if (ia.length == 0)
-                result = false;
-            else
-                result = true;
+            return InternetAddress.parse(address, strict).length != 0;
         } catch (AddressException ae) {
-            result = false;
+            return false;
         }
-        return result;
     }
 
     /** Looking for an address start, skipping leading spaces */

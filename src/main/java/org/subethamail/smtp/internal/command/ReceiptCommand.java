@@ -46,8 +46,7 @@ public final class ReceiptCommand extends BaseCommand
 			sess.sendResponse(
 					"501 Syntax: RCPT TO: <address>  Error in parameters: \""
 					+ args + "\"");
-			return;
-		}
+        }
 		else
 		{
 			String recipientAddress = EmailUtils.extractEmailAddress(args, 3);

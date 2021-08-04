@@ -35,7 +35,7 @@ public final class HexUtils {
      * @param data byte array
      * @return hexadecimal string
      */
-    public static final String toHex(byte[] data) {
+    public static String toHex(byte[] data) {
         return toHex(data, 0, data.length, null);
     }
 
@@ -46,7 +46,7 @@ public final class HexUtils {
      * @param sep byte separator
      * @return hexadecimal string
      */
-    public static final String toHex(byte[] data, char sep) {
+    public static String toHex(byte[] data, char sep) {
         return toHex(data, 0, data.length, sep);
     }
 
@@ -58,7 +58,7 @@ public final class HexUtils {
      * @param len bytes to convert
      * @return hexadecimal string
      */
-    public static final String toHex(byte[] data, int off, int len) {
+    public static String toHex(byte[] data, int off, int len) {
         return toHex(data, off, len, null);
     }
 
@@ -71,7 +71,7 @@ public final class HexUtils {
      * @param sep (optional) byte separator
      * @return hexadecimal string
      */
-    public static final String toHex(byte[] data, int off, int len, Character sep) {
+    public static String toHex(byte[] data, int off, int len, Character sep) {
         if (len < 0) {
             throw new IllegalArgumentException("Invalid negative len " + len);
         }
