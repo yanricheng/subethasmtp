@@ -356,12 +356,17 @@ public final class SMTPServer implements SSLSocketCreator {
         }
 
         /**
-         *  <p>Add filter that will be applied to address when server receive {@code MAIL FROM:} command</p>
-         * @param filter the filter will be applied to the address in MAIL FROM command
-         * @return
+         * Adds a validator that will be applied to the MAIL FROM email address. If returns
+         * false then email address is invalid and a 553 response will be returned to
+         * the client.
+         * 
+         * @param fromAddressValidator the validator that will be applied to the address in MAIL
+         *                             FROM command
+         * @return this
          */
-        public Builder mailFromAddressFilter(Predicate<String> filter) {
-            this.commandHandler.addCommand(new MailCommand(filter));
+        public Builder fromAddressValidator(Predicate<String> fromAddressValidator) {
+            Preconditions.checkNotNull(fromAddressValidator);
+            this.commandHandler.addCommand(new MailCommand(fromAddressValidator));
             return this;
         }
 

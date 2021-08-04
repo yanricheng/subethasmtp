@@ -12,7 +12,9 @@ import java.net.SocketTimeoutException;
 import java.security.cert.Certificate;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.net.ssl.SSLSocket;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -185,15 +187,23 @@ public final class Session implements Runnable, MessageContext {
             } catch (IOException e1) {
                 // just swallow this, the outer exception is the real problem.
             }
-            if (e instanceof RuntimeException)
-                throw (RuntimeException) e;
-            else throw (Error) e;
+            rethrow(e);
         } finally {
             this.closeConnection();
             this.endMessageHandler();
             serverThread.sessionEnded(this);
             Thread.currentThread().setName(originalName);
             MDC.clear();
+        }
+    }
+
+    private static void rethrow(Throwable e) {
+        if (e instanceof RuntimeException) {
+            throw (RuntimeException) e;
+        } else if (e instanceof Error) {
+            throw (Error) e;
+        } else {
+            throw new RuntimeException(e);
         }
     }
 

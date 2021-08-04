@@ -10,6 +10,8 @@ import org.subethamail.smtp.internal.server.BaseCommand;
 import org.subethamail.smtp.internal.util.EmailUtils;
 import org.subethamail.smtp.server.Session;
 
+import com.github.davidmoten.guavamini.Preconditions;
+
 /**
  * @author Ian McFarland &lt;ian@neo.com&gt;
  * @author Jon Stevens
@@ -19,22 +21,26 @@ import org.subethamail.smtp.server.Session;
 public final class MailCommand extends BaseCommand
 {
 
-	private Predicate<String> isValidEmailAddress = emailAddress -> EmailUtils.isValidEmailAddress(emailAddress, true);
+    private static final Predicate<String> DEFAULT_EMAIL_ADDRESS_VALIDATOR =  //
+            emailAddress -> EmailUtils.isValidEmailAddress(emailAddress, true);
+    
+	private final Predicate<String> fromAddressValidator;
 
 	public MailCommand()
 	{
-		super("MAIL",
-				"Specifies the sender.",
-				"FROM: <sender> [ <parameters> ]");
+		this(DEFAULT_EMAIL_ADDRESS_VALIDATOR);
 	}
 
 	/**
 	 * @param isValidEmailAddress check is MAIL FROM: address is valid
 	 */
-	public MailCommand(Predicate<String> isValidEmailAddress)
+	public MailCommand(Predicate<String> fromAddressValidator)
 	{
-		this();
-		this.isValidEmailAddress = isValidEmailAddress;
+	    super("MAIL",
+                "Specifies the sender.",
+                "FROM: <sender> [ <parameters> ]");
+	    Preconditions.checkNotNull(fromAddressValidator);
+		this.fromAddressValidator = fromAddressValidator;
 	}
 
 	/* (non-Javadoc)
@@ -66,7 +72,7 @@ public final class MailCommand extends BaseCommand
 		}
 
 		String emailAddress = EmailUtils.extractEmailAddress(args, 5);
-		if (!isValidEmailAddress.test(emailAddress))
+		if (!fromAddressValidator.test(emailAddress))
 		{
 			sess.sendResponse("553 <" + emailAddress + "> Invalid email address.");
 			return;
