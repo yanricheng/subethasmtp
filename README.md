@@ -68,7 +68,8 @@ SMTPServer server = SMTPServer
   .maxRecipients(20) 
   .messageHandlerFactory(mhf) 
   .executorService(executor)
-  .startTlsSocketFactory(sslContext) //
+  .startTlsSocketFactory(sslContext)
+  .fromAddressValidator(emailValidator)
   .build();
 ```
 
