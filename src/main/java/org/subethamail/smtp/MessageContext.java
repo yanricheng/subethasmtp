@@ -4,12 +4,13 @@
  */
 package org.subethamail.smtp;
 
+import org.subethamail.smtp.server.SMTPServer;
+
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.cert.Certificate;
 import java.util.Optional;
-
-import org.subethamail.smtp.server.SMTPServer;
 
 /**
  * Interface which provides context to the message handlers.
@@ -66,5 +67,7 @@ public interface MessageContext
 	 * @see javax.net.ssl.SSLSession#getPeerCertificates()
 	 */
 	Certificate[] getTlsPeerCertificates();
+
+	void sendResponse(String response) throws IOException;
 
 }

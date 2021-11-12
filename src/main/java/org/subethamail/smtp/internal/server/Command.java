@@ -1,9 +1,9 @@
 package org.subethamail.smtp.internal.server;
 
-import java.io.IOException;
-
 import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.server.Session;
+
+import java.io.IOException;
 
 /**
  * Describes a SMTP command
@@ -14,7 +14,7 @@ import org.subethamail.smtp.server.Session;
 public interface Command
 {
 
-	void execute(String commandString, Session sess) throws IOException, 
+	void execute(String commandString, Session sess) throws IOException,
 			DropConnectionException;
 
 	HelpMessage getHelp() throws CommandException;
@@ -23,4 +23,13 @@ public interface Command
 	 * Returns the name of the command in upper case. For example "QUIT".
 	 */
 	String getName();
+
+	default Session getContext() {
+		return null;
+	}
+
+	default void setContext(Session session) {
+
+	}
+
 }

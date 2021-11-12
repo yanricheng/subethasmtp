@@ -1,20 +1,5 @@
 package org.subethamail.smtp.server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.security.cert.Certificate;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.net.ssl.SSLSocket;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -27,6 +12,20 @@ import org.subethamail.smtp.internal.proxy.ProxyHandler;
 import org.subethamail.smtp.internal.proxy.ProxyHandler.ProxyResult;
 import org.subethamail.smtp.internal.server.ServerThread;
 import org.subethamail.smtp.server.SessionHandler.SessionAcceptance;
+
+import javax.net.ssl.SSLSocket;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.security.cert.Certificate;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * The thread that handles a connection. This class passes most of it's
@@ -351,6 +350,7 @@ public final class Session implements Runnable, MessageContext {
     }
 
     /** Sends the response to the client */
+    @Override
     public void sendResponse(String response) throws IOException {
         log.debug("Server: {}", response);
 

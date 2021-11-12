@@ -1,5 +1,10 @@
 package org.subethamail.smtp.internal.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.DropConnectionException;
+import org.subethamail.smtp.server.Session;
+
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
@@ -8,11 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.subethamail.smtp.DropConnectionException;
-import org.subethamail.smtp.server.Session;
 
 /**
  * This class manages execution of a SMTP command.
@@ -27,7 +27,7 @@ public final class CommandHandler {
      * The map of known SMTP commands. Keys are upper case names of the
      * commands.
      */
-    private final Map<String, Command> commandMap = new HashMap<>();
+    private static final Map<String, Command> commandMap = new HashMap<>();
 
     public CommandHandler() {
         // This solution should be more robust than the earlier "manual"
@@ -97,15 +97,15 @@ public final class CommandHandler {
         return getCommandFromString(command).getHelp();
     }
 
-    private Command getCommandFromString(String commandString)
+    public static Command getCommandFromString(String commandString)
             throws UnknownCommandException, InvalidCommandNameException {
         Command command = null;
         String key = toKey(commandString);
-        command = this.commandMap.get(key);
+        command = commandMap.get(key);
         if (command == null) {
             // some commands have a verb longer than 4 letters
             String verb = toVerb(commandString);
-            command = this.commandMap.get(verb);
+            command = commandMap.get(verb);
         }
         if (command == null) {
             throw new UnknownCommandException("Error: command not implemented");
