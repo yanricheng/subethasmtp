@@ -23,13 +23,4 @@ public interface Command
 	 * Returns the name of the command in upper case. For example "QUIT".
 	 */
 	String getName();
-
-	default Session getContext() {
-		return null;
-	}
-
-	default void setContext(Session session) {
-
-	}
-
 }

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class NettySMTPServer {
     private final int port;
     private final Logger logger = LoggerFactory.getLogger(NettySMTPServer.class);
+    private SMTPConfig smtpConfig;
 
     public NettySMTPServer(int port) {
         this.port = port;
@@ -52,7 +53,7 @@ public class NettySMTPServer {
                             ch.pipeline().addLast("lineEncoder", new LineEncoder(LineSeparator.UNIX, CharsetUtil.UTF_8));
                             ch.pipeline().addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                             ch.pipeline().addLast("smtpCommandDecoder", new SMTPCommandDecoder(CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(new SMTPServerHandler());
+                            ch.pipeline().addLast(new SMTPServerHandler(new SMTPConfig()));
                         }
                     })
                     // (5)

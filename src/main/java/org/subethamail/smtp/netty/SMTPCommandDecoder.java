@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.internal.server.Command;
 import org.subethamail.smtp.internal.server.CommandException;
 import org.subethamail.smtp.internal.server.CommandHandler;
+import org.subethamail.smtp.netty.cmd.Cmd;
+import org.subethamail.smtp.netty.cmd.CmdHandler;
 
 import java.nio.charset.Charset;
 import java.util.List;
 
 public class SMTPCommandDecoder extends StringDecoder {
-    private final CommandHandler commandHandler = new CommandHandler();
+    private final CmdHandler commandHandler = new CmdHandler();
     // TODO Use CharsetDecoder instead.
     private final Charset charset;
     private final Logger logger = LoggerFactory.getLogger(SMTPCommandDecoder.class);
@@ -38,7 +40,7 @@ public class SMTPCommandDecoder extends StringDecoder {
         String commandString = msg.toString(charset);
         logger.info(">> receive:{}", commandString);
         try {
-            Command command = CommandHandler.getCommandFromString(commandString);
+            Cmd command = commandHandler.getCommandFromString(commandString);
             out.add(command);
         } catch (CommandException e) {
             ctx.writeAndFlush("500 " + e.getMessage());
