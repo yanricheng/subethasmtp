@@ -57,10 +57,6 @@ public final class CmdHandler {
         if (command == null) {
             throw new UnknownCommandException("Error: command not implemented");
         }
-
-        if (command != null) {
-            command.setCommandString(commandString);
-        }
         return command;
     }
 
@@ -115,13 +111,13 @@ public final class CmdHandler {
         return commandMap.containsKey(command);
     }
 
-    public void handleCommand(SmtpSession context, String commandString)
-            throws IOException, DropConnectionException {
-        try {
-            Cmd command = getCommandFromString(commandString);
-            command.execute(commandString, context);
-        } catch (CommandException e) {
-            context.sendResponse("500 " + e.getMessage());
-        }
-    }
+//    public void handleCommand(SmtpSession context, String commandString)
+//            throws IOException, DropConnectionException {
+//        try {
+//            Cmd command = getCommandFromString(commandString);
+//            command.execute(commandString, context);
+//        } catch (CommandException e) {
+//            context.sendResponse("500 " + e.getMessage());
+//        }
+//    }
 }

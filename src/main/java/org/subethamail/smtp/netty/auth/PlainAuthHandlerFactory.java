@@ -26,7 +26,7 @@ public final class PlainAuthHandlerFactory implements AuthHandlerFactory
     private static final Charset AUTHORIZATION_CHARSET = StandardCharsets.UTF_8;
 	private static final List<String> MECHANISMS = new ArrayList<>(1);
 	static {
-		MECHANISMS.add("PLAIN");
+		MECHANISMS.add(MechanismEmum.PLAIN.name());
 	}
 
 	private final UsernameAndPsdValidator helper;
@@ -65,7 +65,7 @@ public final class PlainAuthHandlerFactory implements AuthHandlerFactory
 			{
 				// Let's read the RFC2554 "initial-response" parameter
 				// The line could be in the form of "AUTH PLAIN <base64Secret>"
-				if (!stk.nextToken().trim().equalsIgnoreCase("PLAIN"))
+				if (!stk.nextToken().trim().equalsIgnoreCase(MechanismEmum.PLAIN.name()))
 				{
 					// Mechanism mismatch
 					throw new RejectException(504, "AUTH mechanism mismatch");

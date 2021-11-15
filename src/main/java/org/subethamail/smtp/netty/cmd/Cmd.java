@@ -28,10 +28,6 @@ public interface Cmd
 
 	HelpMessage getHelp() throws CommandException;
 
-	String getCommandString();
-
-	void setCommandString(String commandString);
-
 	/**
 	 * Returns the name of the command in upper case. For example "QUIT".
 	 */

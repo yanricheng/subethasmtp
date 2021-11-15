@@ -13,10 +13,20 @@ public class SmtpSession implements Serializable {
     //是否持续执行之前的命令
     private boolean durativeCmd;
     private String lastCmdName;
-
+    private String lastCmdNamePrefix;
+    private String currentCmdStr;
     private boolean TLSStarted;
     private SocketChannel channel;
     private Optional<User> user = Optional.empty();
+
+    public String getLastCmdNamePrefix() {
+        return lastCmdNamePrefix;
+    }
+
+    public void setLastCmdNamePrefix(String lastCmdNamePrefix) {
+        this.lastCmdNamePrefix = lastCmdNamePrefix;
+    }
+
     /**
      * Might exist if the client has successfully authenticated
      */
@@ -29,6 +39,14 @@ public class SmtpSession implements Serializable {
 
     public SmtpSession(SMTPServerConfig smtpServerConfig) {
         this.smtpServerConfig = smtpServerConfig;
+    }
+
+    public String getCurrentCmdStr() {
+        return currentCmdStr;
+    }
+
+    public void setCurrentCmdStr(String currentCmdStr) {
+        this.currentCmdStr = currentCmdStr;
     }
 
     public boolean isDurativeCmd() {

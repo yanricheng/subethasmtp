@@ -28,9 +28,6 @@ public final class RequireAuthCmdWrapper extends CmdWrapperBase implements Cmd {
     @Override
     public void execute(String commandString, SmtpSession sess) throws IOException, DropConnectionException {
         if (!sess.getSmtpConfig().isRequireAuth() || sess.isAuthenticated()) {
-            if (wrapped.getCommandString() == null) {
-                wrapped.setCommandString(getCommandString());
-            }
             if (wrapped.getSmtpServerConfig() == null) {
                 wrapped.setSmtpServerConfig(getSmtpServerConfig());
             }

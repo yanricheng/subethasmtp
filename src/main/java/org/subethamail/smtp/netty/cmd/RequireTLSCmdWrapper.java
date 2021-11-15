@@ -36,9 +36,6 @@ public final class RequireTLSCmdWrapper extends CmdWrapperBase implements Cmd {
     @Override
     public void execute(SmtpSession sess) throws IOException, DropConnectionException {
         if (!sess.getSmtpConfig().isRequireTLS() || sess.isTLSStarted()) {
-            if (wrapped.getCommandString() == null) {
-                wrapped.setCommandString(getCommandString());
-            }
             if(wrapped.getSmtpServerConfig()==null) {
                 wrapped.setSmtpServerConfig(getSmtpServerConfig());
             }

@@ -70,7 +70,6 @@ public final class AuthCmd extends BaseCmd {
                 if (response.isPresent()) {
                     // challenge-response iteration
                     sess.sendResponse(response.get());
-                    sess.setDurativeCmd(true);
                     return;
                 }
             } else {
@@ -85,10 +84,10 @@ public final class AuthCmd extends BaseCmd {
                     if (response.isPresent()) {
                         // challenge-response iteration
                         sess.sendResponse(response.get());
+                        return;
                     }
                 }
             }
-
             sess.sendResponse("235 Authentication successful.");
             sess.setAuthenticated(true);
             sess.setDurativeCmd(false);

@@ -40,22 +40,27 @@ public class SMTPCommandDecoder extends StringDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        String commandString = msg.toString(charset);
-        logger.info(">> receive:{}", commandString);
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
+        Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         try {
-            Cmd command = CmdHandler.getCommandFromString(commandString);
-            command.setCommandString(commandString);
-            out.add(command);
+            String commandString = msg.toString(charset);
+            if (sessionIdAttr.get() != null) {
+                SmtpSession smtpSession = LocalSessionHolder.get(sessionIdAttr.get());
+                if (smtpSession != null) {
+                    smtpSession.setCurrentCmdStr(commandString);
+                }
+            }
+            logger.info(">> receive:{}", commandString);
+
+            Cmd cmdPrototype = CmdHandler.getCommandFromString(commandString);
+            out.add(cmdPrototype);
         } catch (UnknownCommandException unknownCommandException) {
-            AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
-            Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
             if (sessionIdAttr.get() != null) {
                 SmtpSession smtpSession = LocalSessionHolder.get(sessionIdAttr.get());
                 if (smtpSession != null) {
                     if (smtpSession.isDurativeCmd() && smtpSession.getLastCmdName() != null) {
-                        Cmd command = commandHandler.getCommand(smtpSession.getLastCmdName());
-                        command.setCommandString(commandString);
-                        out.add(command);
+                        Cmd cmd = commandHandler.getCommand(smtpSession.getLastCmdName());
+                        out.add(cmd);
                     }
                 }
             }

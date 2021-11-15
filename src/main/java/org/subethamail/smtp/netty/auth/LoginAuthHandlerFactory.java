@@ -33,7 +33,7 @@ public final class LoginAuthHandlerFactory implements AuthHandlerFactory
 {
 	private static final List<String> MECHANISMS = new ArrayList<>(1);
 	static {
-		MECHANISMS.add("LOGIN");
+		MECHANISMS.add(MechanismEmum.LOGIN.name());
 	}
 
 	private final UsernameAndPsdValidator helper;
@@ -57,10 +57,7 @@ public final class LoginAuthHandlerFactory implements AuthHandlerFactory
 
 	/**
 	 */
-	final class Handler implements AuthHandler
-	{
-//		private String username;
-
+	final class Handler implements AuthHandler{
 		@Override
 		public Optional<String> auth(String clientInput, SmtpSession context) throws RejectException
 		{
@@ -68,7 +65,7 @@ public final class LoginAuthHandlerFactory implements AuthHandlerFactory
 			String token = stk.nextToken();
 			if (token.trim().equalsIgnoreCase("AUTH"))
 			{
-				if (!stk.nextToken().trim().equalsIgnoreCase("LOGIN"))
+				if (!stk.nextToken().trim().equalsIgnoreCase(MechanismEmum.LOGIN.name()))
 				{
 					// Mechanism mismatch
 					throw new RejectException(504, "AUTH mechanism mismatch");
@@ -85,13 +82,14 @@ public final class LoginAuthHandlerFactory implements AuthHandlerFactory
 						throw new RejectException(501, /*5.5.4*/
 								"Invalid command argument, not a valid Base64 string"); 
 					String username = TextUtils.getStringUtf8(decoded);
-					context.setUser(Optional.of(new User(username,null)));
-
+					context.setUser(Optional.of(new User(username,null,MechanismEmum.LOGIN)));
+					context.setDurativeCmd(true);
 					return Optional.of("334 "
 							+ Base64.getEncoder().encodeToString(
 									TextUtils.getAsciiBytes("Password:")));
 				} else {
-					context.setUser(Optional.of(new User(null,null)));
+					context.setUser(Optional.of(new User(null,null,MechanismEmum.LOGIN)));
+					context.setDurativeCmd(true);
 					return Optional.of("334 "
 							+ Base64.getEncoder().encodeToString(
 									TextUtils.getAsciiBytes("Username:")));
@@ -109,6 +107,7 @@ public final class LoginAuthHandlerFactory implements AuthHandlerFactory
 
 				String username = TextUtils.getStringUtf8(decoded);
 				context.getUser().get().setUserName(username);
+				context.setDurativeCmd(true);
 
 				return Optional.of("334 "
 						+ Base64.getEncoder().encodeToString(

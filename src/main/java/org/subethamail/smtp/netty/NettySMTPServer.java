@@ -47,7 +47,7 @@ public class NettySMTPServer {
         serverConfig.setHostName("netty smtp server");
         UsernameAndPsdValidator usernameAndPsdValidator = new MemoryBaseNameAndPsdValidator();
         usernameAndPsdValidator.add("yrc@yanrc.net","123456");
-        AuthHandlerFactory authHandlerFactory = new EasyAuthHandlerFactory(new MemoryBaseNameAndPsdValidator());
+        AuthHandlerFactory authHandlerFactory = new EasyAuthHandlerFactory(usernameAndPsdValidator);
         serverConfig.setAuthHandlerFactory(Optional.of(authHandlerFactory));
 
         // (1)

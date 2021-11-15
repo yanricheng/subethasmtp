@@ -58,10 +58,14 @@ public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
             SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
             Cmd cmd = (Cmd) msg;
             cmd.setSmtpServerConfig(smtpServerConfig);
-            session.setChannel((SocketChannel)ctx.channel());
+            session.setChannel((SocketChannel) ctx.channel());
             try {
                 cmd.execute(session);
                 session.setLastCmdName(cmd.getName());
+//                if("AUTH".equalsIgnoreCase(cmd.getName())){
+//                    String lastCmdStr = session.getCurrentCmdStr();
+//                    session.setLastCmdNamePrefix();
+//                }
             } catch (Exception e) {
                 logger.error("执行命令异常", e);
             }
