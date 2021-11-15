@@ -19,21 +19,21 @@ import java.util.UUID;
 @ChannelHandler.Sharable
 public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
 
-    private final SMTPConfig smtpConfig;
+    private final SMTPServerConfig smtpServerConfig;
     Logger logger = LoggerFactory.getLogger(SMTPServerHandler.class);
-    AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
 
-    public SMTPServerHandler(SMTPConfig smtpConfig) {
-        this.smtpConfig = smtpConfig;
+    public SMTPServerHandler(SMTPServerConfig smtpServerConfig) {
+        this.smtpServerConfig = smtpServerConfig;
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() == null) {
             String sessionId = UUID.randomUUID().toString().replaceAll("-", "");
             sessionIdAttr.setIfAbsent(sessionId);
-            SmtpSession session = new SmtpSession(smtpConfig);
+            SmtpSession session = new SmtpSession(smtpServerConfig);
             LocalSessionHolder.put(sessionId, session);
         }
     }
@@ -42,22 +42,26 @@ public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
     // (1)
     public void channelActive(final ChannelHandlerContext ctx) {
         SocketChannel channel = (SocketChannel) ctx.channel();
+        channel.writeAndFlush("220 " + smtpServerConfig.getHostName() + " ESMTP " + smtpServerConfig.getSoftwareName());
+
         System.out.println("IP:" + channel.localAddress().getHostString());
         System.out.println("Port:" + channel.localAddress().getPort());
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         String format = "sessionId:%s,time:%s,msg:%s";
         System.out.println(String.format(format, sessionIdAttr.get(), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), msg));
         if (sessionIdAttr.get() != null) {
             SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
             Cmd cmd = (Cmd) msg;
-            cmd.setSmtpConfig(smtpConfig);
+            cmd.setSmtpServerConfig(smtpServerConfig);
             session.setChannel((SocketChannel)ctx.channel());
             try {
                 cmd.execute(session);
+                session.setLastCmdName(cmd.getName());
             } catch (Exception e) {
                 logger.error("执行命令异常", e);
             }
@@ -66,18 +70,22 @@ public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
             LocalSessionHolder.remove(sessionIdAttr.get());
+            logger.info("remove session");
         }
         super.exceptionCaught(ctx, cause);
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
             LocalSessionHolder.remove(sessionIdAttr.get());
+            logger.info("remove session");
         }
         super.channelUnregistered(ctx);
     }

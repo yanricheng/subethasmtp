@@ -1,41 +1,24 @@
 package org.subethamail.smtp.netty;
 
-import org.subethamail.smtp.AuthenticationHandlerFactory;
+
+import org.subethamail.smtp.netty.auth.AuthHandlerFactory;
 
 import java.util.Optional;
 
-public class SMTPConfig {
+public class SMTPServerConfig {
     private String hostName = "localhost";
+    private String softwareName = "smtp server";
     private int maxMessageSize = 1024;
     private boolean enableTLS = false;
     private boolean hideTLS = true;
 
     private boolean requireTLS;
-
-    public boolean isRequireTLS() {
-        return requireTLS;
-    }
-
-    public void setRequireTLS(boolean requireTLS) {
-        this.requireTLS = requireTLS;
-    }
-
     /**
      * If true, this server will accept no mail until auth succeeded; ignored if no
-     * AuthenticationHandlerFactory has been set
+     * AuthHandlerFactory has been set
      */
     private boolean requireAuth = false;
-
-    public boolean isRequireAuth() {
-        return requireAuth;
-    }
-
-    public void setRequireAuth(boolean requireAuth) {
-        this.requireAuth = requireAuth;
-    }
-
-    private Optional<AuthenticationHandlerFactory> authenticationHandlerFactory = Optional.empty();
-
+    private Optional<AuthHandlerFactory> authHandlerFactory = Optional.empty();
     /**
      * Normally you would not want to advertise AUTH related capabilities before a
      * STARTTLS is sent so that credentials do not go in the clear. However, the use
@@ -46,6 +29,30 @@ public class SMTPConfig {
      */
     private boolean showAuthCapabilitiesBeforeSTARTTLS;
 
+    public String getSoftwareName() {
+        return softwareName;
+    }
+
+    public void setSoftwareName(String softwareName) {
+        this.softwareName = softwareName;
+    }
+
+    public boolean isRequireTLS() {
+        return requireTLS;
+    }
+
+    public void setRequireTLS(boolean requireTLS) {
+        this.requireTLS = requireTLS;
+    }
+
+    public boolean isRequireAuth() {
+        return requireAuth;
+    }
+
+    public void setRequireAuth(boolean requireAuth) {
+        this.requireAuth = requireAuth;
+    }
+
     public boolean isShowAuthCapabilitiesBeforeSTARTTLS() {
         return showAuthCapabilitiesBeforeSTARTTLS;
     }
@@ -54,12 +61,12 @@ public class SMTPConfig {
         this.showAuthCapabilitiesBeforeSTARTTLS = showAuthCapabilitiesBeforeSTARTTLS;
     }
 
-    public Optional<AuthenticationHandlerFactory> getAuthenticationHandlerFactory() {
-        return authenticationHandlerFactory;
+    public Optional<AuthHandlerFactory> getAuthHandlerFactory() {
+        return authHandlerFactory;
     }
 
-    public void setAuthenticationHandlerFactory(Optional<AuthenticationHandlerFactory> authenticationHandlerFactory) {
-        this.authenticationHandlerFactory = authenticationHandlerFactory;
+    public void setAuthHandlerFactory(Optional<AuthHandlerFactory> authHandlerFactory) {
+        this.authHandlerFactory = authHandlerFactory;
     }
 
     public String getHostName() {

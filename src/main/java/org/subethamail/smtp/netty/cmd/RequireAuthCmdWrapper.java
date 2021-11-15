@@ -3,7 +3,6 @@ package org.subethamail.smtp.netty.cmd;
 import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.internal.server.CommandException;
 import org.subethamail.smtp.internal.server.HelpMessage;
-import org.subethamail.smtp.netty.SMTPConfig;
 import org.subethamail.smtp.netty.session.SmtpSession;
 
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.io.IOException;
  *
  * @author Evgeny Naumenko
  */
-public final class RequireAuthCmdWrapper implements Cmd {
+public final class RequireAuthCmdWrapper extends CmdWrapperBase implements Cmd {
 
     private final Cmd wrapped;
 
@@ -25,17 +24,20 @@ public final class RequireAuthCmdWrapper implements Cmd {
         this.wrapped = wrapped;
     }
 
-    @Override
-    public void setSmtpConfig(SMTPConfig smtpConfig) {
-
-    }
 
     @Override
     public void execute(String commandString, SmtpSession sess) throws IOException, DropConnectionException {
-        if (!sess.getSmtpConfig().isRequireAuth() || sess.isAuthenticated())
+        if (!sess.getSmtpConfig().isRequireAuth() || sess.isAuthenticated()) {
+            if (wrapped.getCommandString() == null) {
+                wrapped.setCommandString(getCommandString());
+            }
+            if (wrapped.getSmtpServerConfig() == null) {
+                wrapped.setSmtpServerConfig(getSmtpServerConfig());
+            }
             wrapped.execute(commandString, sess);
-        else
+        } else {
             sess.sendResponse("530 5.7.0  Authentication required");
+        }
     }
 
     @Override
@@ -52,16 +54,6 @@ public final class RequireAuthCmdWrapper implements Cmd {
     @Override
     public HelpMessage getHelp() throws CommandException {
         return wrapped.getHelp();
-    }
-
-    @Override
-    public String getCommandString() {
-        return null;
-    }
-
-    @Override
-    public void setCommandString(String commandString) {
-
     }
 
     /**

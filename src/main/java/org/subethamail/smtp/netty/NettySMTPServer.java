@@ -14,6 +14,12 @@ import io.netty.handler.codec.string.LineSeparator;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.netty.auth.AuthHandlerFactory;
+import org.subethamail.smtp.netty.auth.EasyAuthHandlerFactory;
+import org.subethamail.smtp.netty.auth.UsernameAndPsdValidator;
+import org.subethamail.smtp.netty.auth.ext.MemoryBaseNameAndPsdValidator;
+
+import java.util.Optional;
 
 /**
  * @author yrc
@@ -21,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class NettySMTPServer {
     private final int port;
     private final Logger logger = LoggerFactory.getLogger(NettySMTPServer.class);
-    private SMTPConfig smtpConfig;
+    private SMTPServerConfig smtpServerConfig;
 
     public NettySMTPServer(int port) {
         this.port = port;
@@ -37,6 +43,13 @@ public class NettySMTPServer {
     }
 
     public void run() throws Exception {
+        SMTPServerConfig serverConfig =  new SMTPServerConfig();
+        serverConfig.setHostName("netty smtp server");
+        UsernameAndPsdValidator usernameAndPsdValidator = new MemoryBaseNameAndPsdValidator();
+        usernameAndPsdValidator.add("yrc@yanrc.net","123456");
+        AuthHandlerFactory authHandlerFactory = new EasyAuthHandlerFactory(new MemoryBaseNameAndPsdValidator());
+        serverConfig.setAuthHandlerFactory(Optional.of(authHandlerFactory));
+
         // (1)
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -53,7 +66,7 @@ public class NettySMTPServer {
                             ch.pipeline().addLast("lineEncoder", new LineEncoder(LineSeparator.UNIX, CharsetUtil.UTF_8));
                             ch.pipeline().addLast("frameDecoder", new LineBasedFrameDecoder(1024));
                             ch.pipeline().addLast("smtpCommandDecoder", new SMTPCommandDecoder(CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(new SMTPServerHandler(new SMTPConfig()));
+                            ch.pipeline().addLast(new SMTPServerHandler(serverConfig));
                         }
                     })
                     // (5)

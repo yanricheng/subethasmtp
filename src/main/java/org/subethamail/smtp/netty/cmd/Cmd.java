@@ -3,7 +3,7 @@ package org.subethamail.smtp.netty.cmd;
 import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.internal.server.CommandException;
 import org.subethamail.smtp.internal.server.HelpMessage;
-import org.subethamail.smtp.netty.SMTPConfig;
+import org.subethamail.smtp.netty.SMTPServerConfig;
 import org.subethamail.smtp.netty.session.SmtpSession;
 
 import java.io.IOException;
@@ -17,7 +17,8 @@ import java.io.IOException;
 public interface Cmd
 {
 
-	void setSmtpConfig(SMTPConfig smtpConfig);
+	void setSmtpServerConfig(SMTPServerConfig smtpServerConfig);
+	SMTPServerConfig getSmtpServerConfig();
 
 	void execute(String commandString, SmtpSession sess) throws IOException,
 			DropConnectionException;

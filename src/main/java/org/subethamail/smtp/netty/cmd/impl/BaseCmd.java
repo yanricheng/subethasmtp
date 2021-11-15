@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.internal.server.HelpMessage;
-import org.subethamail.smtp.netty.SMTPConfig;
+import org.subethamail.smtp.netty.SMTPServerConfig;
 import org.subethamail.smtp.netty.cmd.Cmd;
 import org.subethamail.smtp.netty.session.SmtpSession;
 
@@ -53,15 +53,16 @@ public abstract class BaseCmd implements Cmd
 		this.helpMsg =  new HelpMessage(name, help, argumentDescription);
 	}
 
-	private SMTPConfig smtpConfig;
+	private SMTPServerConfig smtpServerConfig;
 
-	public SMTPConfig getSmtpConfig() {
-		return smtpConfig;
+	@Override
+	public SMTPServerConfig getSmtpServerConfig() {
+		return smtpServerConfig;
 	}
 
 	@Override
-	public void setSmtpConfig(SMTPConfig smtpConfig) {
-		this.smtpConfig = smtpConfig;
+	public void setSmtpServerConfig(SMTPServerConfig smtpServerConfig) {
+		this.smtpServerConfig = smtpServerConfig;
 	}
 
 	/**

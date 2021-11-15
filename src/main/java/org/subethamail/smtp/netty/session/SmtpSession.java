@@ -2,16 +2,21 @@ package org.subethamail.smtp.netty.session;
 
 import io.netty.channel.socket.SocketChannel;
 import org.subethamail.smtp.AuthenticationHandler;
-import org.subethamail.smtp.netty.SMTPConfig;
+import org.subethamail.smtp.netty.SMTPServerConfig;
+import org.subethamail.smtp.netty.auth.User;
 
+import java.io.Serializable;
 import java.util.Optional;
 
-public class SmtpSession {
+public class SmtpSession implements Serializable {
+    private final SMTPServerConfig smtpServerConfig;
+    //是否持续执行之前的命令
+    private boolean durativeCmd;
+    private String lastCmdName;
 
-    private final SMTPConfig smtpConfig;
     private boolean TLSStarted;
-
     private SocketChannel channel;
+    private Optional<User> user = Optional.empty();
     /**
      * Might exist if the client has successfully authenticated
      */
@@ -20,16 +25,42 @@ public class SmtpSession {
      * Some state information
      */
     private Optional<String> helo = Optional.empty();
-    public SmtpSession(SMTPConfig smtpConfig) {
-        this.smtpConfig = smtpConfig;
+    private boolean authenticated;
+
+    public SmtpSession(SMTPServerConfig smtpServerConfig) {
+        this.smtpServerConfig = smtpServerConfig;
+    }
+
+    public boolean isDurativeCmd() {
+        return durativeCmd;
+    }
+
+    public void setDurativeCmd(boolean durativeCmd) {
+        this.durativeCmd = durativeCmd;
+    }
+
+    public String getLastCmdName() {
+        return lastCmdName;
+    }
+
+    public void setLastCmdName(String lastCmdName) {
+        this.lastCmdName = lastCmdName;
+    }
+
+    public Optional<User> getUser() {
+        return user;
+    }
+
+    public void setUser(Optional<User> user) {
+        this.user = user;
     }
 
     public void setChannel(SocketChannel channel) {
         this.channel = channel;
     }
 
-    public SMTPConfig getSmtpConfig() {
-        return smtpConfig;
+    public SMTPServerConfig getSmtpConfig() {
+        return smtpServerConfig;
     }
 
     public boolean isTLSStarted() {
@@ -41,7 +72,12 @@ public class SmtpSession {
     }
 
     public boolean isAuthenticated() {
-        return this.authenticationHandler.isPresent();
+//        return this.authenticationHandler.isPresent();
+        return authenticated;
+    }
+
+    public void setAuthenticated(boolean authenticated) {
+        this.authenticated = authenticated;
     }
 
     public Optional<AuthenticationHandler> getAuthenticationHandler() {

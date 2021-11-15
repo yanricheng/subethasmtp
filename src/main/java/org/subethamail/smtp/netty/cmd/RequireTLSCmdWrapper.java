@@ -3,7 +3,6 @@ package org.subethamail.smtp.netty.cmd;
 import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.internal.server.CommandException;
 import org.subethamail.smtp.internal.server.HelpMessage;
-import org.subethamail.smtp.netty.SMTPConfig;
 import org.subethamail.smtp.netty.session.SmtpSession;
 
 import java.io.IOException;
@@ -14,22 +13,15 @@ import java.io.IOException;
  *
  * @author Erik van Oosten
  */
-public final class RequireTLSCmdWrapper implements Cmd {
+public final class RequireTLSCmdWrapper extends CmdWrapperBase implements Cmd {
 
     private final Cmd wrapped;
-
-    private SMTPConfig smtpConfig;
 
     /**
      * @param wrapped the wrapped command (not null)
      */
     public RequireTLSCmdWrapper(Cmd wrapped) {
         this.wrapped = wrapped;
-    }
-
-    @Override
-    public void setSmtpConfig(SMTPConfig smtpConfig) {
-        this.smtpConfig = smtpConfig;
     }
 
     @Override
@@ -43,25 +35,22 @@ public final class RequireTLSCmdWrapper implements Cmd {
 
     @Override
     public void execute(SmtpSession sess) throws IOException, DropConnectionException {
-        if (!sess.getSmtpConfig().isRequireTLS() || sess.isTLSStarted())
+        if (!sess.getSmtpConfig().isRequireTLS() || sess.isTLSStarted()) {
+            if (wrapped.getCommandString() == null) {
+                wrapped.setCommandString(getCommandString());
+            }
+            if(wrapped.getSmtpServerConfig()==null) {
+                wrapped.setSmtpServerConfig(getSmtpServerConfig());
+            }
             wrapped.execute(sess);
-        else
+        } else {
             sess.sendResponse("530 Must issue a STARTTLS command first");
+        }
     }
 
     @Override
     public HelpMessage getHelp() throws CommandException {
         return wrapped.getHelp();
-    }
-
-    @Override
-    public String getCommandString() {
-        return null;
-    }
-
-    @Override
-    public void setCommandString(String commandString) {
-
     }
 
     @Override

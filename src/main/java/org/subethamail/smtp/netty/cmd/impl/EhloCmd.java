@@ -2,10 +2,9 @@ package org.subethamail.smtp.netty.cmd.impl;
 
 import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.internal.command.AuthCommand;
-import org.subethamail.smtp.internal.server.BaseCommand;
 import org.subethamail.smtp.internal.util.TextUtils;
+import org.subethamail.smtp.netty.auth.AuthHandlerFactory;
 import org.subethamail.smtp.netty.session.SmtpSession;
-import org.subethamail.smtp.server.Session;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,10 +47,10 @@ public class EhloCmd extends BaseCmd {
         StringBuilder response = new StringBuilder();
 
         response.append("250-");
-        response.append(getSmtpConfig().getHostName());
+        response.append(getSmtpServerConfig().getHostName());
         response.append("\r\n" + "250-8BITMIME");
 
-        int maxSize = getSmtpConfig().getMaxMessageSize();
+        int maxSize = getSmtpServerConfig().getMaxMessageSize();
         if (maxSize > 0)
         {
             response.append("\r\n" + "250-SIZE ");
@@ -59,7 +58,7 @@ public class EhloCmd extends BaseCmd {
         }
 
         // Enabling / Hiding TLS is a server setting
-        if (getSmtpConfig().isEnableTLS() && !getSmtpConfig().isHideTLS())
+        if (getSmtpServerConfig().isEnableTLS() && !getSmtpServerConfig().isHideTLS())
         {
             response.append("\r\n" + "250-STARTTLS");
         }
@@ -68,12 +67,12 @@ public class EhloCmd extends BaseCmd {
         response.append("\r\n250-CHUNKING");
 
         // Check to see if we support authentication
-        Optional<AuthenticationHandlerFactory> authFact = getSmtpConfig().getAuthenticationHandlerFactory();
+        Optional<AuthHandlerFactory> authFact = getSmtpServerConfig().getAuthHandlerFactory();
         final boolean displayAuth;
-        if (getSmtpConfig().isEnableTLS()) {
+        if (getSmtpServerConfig().isEnableTLS()) {
             displayAuth = authFact.isPresent();
         } else {
-            displayAuth = authFact.isPresent() && (!getSmtpConfig().isEnableTLS() || getSmtpConfig().isShowAuthCapabilitiesBeforeSTARTTLS());
+            displayAuth = authFact.isPresent() && (!getSmtpServerConfig().isEnableTLS() || getSmtpServerConfig().isShowAuthCapabilitiesBeforeSTARTTLS());
         }
         if (displayAuth)
         {

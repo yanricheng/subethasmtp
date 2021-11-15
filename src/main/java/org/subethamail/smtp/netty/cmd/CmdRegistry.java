@@ -9,7 +9,10 @@ import org.subethamail.smtp.internal.command.*;
 import org.subethamail.smtp.internal.server.Command;
 import org.subethamail.smtp.internal.server.RequireAuthCommandWrapper;
 import org.subethamail.smtp.internal.server.RequireTLSCommandWrapper;
+import org.subethamail.smtp.netty.cmd.impl.AuthCmd;
 import org.subethamail.smtp.netty.cmd.impl.EhloCmd;
+import org.subethamail.smtp.netty.cmd.impl.HelloCmd;
+import org.subethamail.smtp.netty.cmd.impl.HelpCmd;
 
 /**
  * Enumerates all the Commands made available in this release.
@@ -18,11 +21,11 @@ import org.subethamail.smtp.netty.cmd.impl.EhloCmd;
  */
 public enum CmdRegistry
 {
-//	AUTH(new AuthCommand(), true, false),
+	AUTH(new AuthCmd(), true, false),
 //	DATA(new DataCommand(), true, true),
-	EHLO(new EhloCmd(), false, false);
-//	HELO(new HelloCommand(), true, false),
-//	HELP(new HelpCommand(), true, true),
+	EHLO(new EhloCmd(), false, false),
+	HELO(new HelloCmd(), true, false),
+	HELP(new HelpCmd(), true, true);
 //	MAIL(new MailCommand(), true, true),
 //	NOOP(new NoopCommand(), false, false),
 //	QUIT(new QuitCommand(), false, false),
