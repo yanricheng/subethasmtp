@@ -4,6 +4,7 @@ import io.netty.channel.socket.SocketChannel;
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.netty.SMTPServerConfig;
 import org.subethamail.smtp.netty.auth.User;
+import org.subethamail.smtp.netty.mail.Mail;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -18,6 +19,62 @@ public class SmtpSession implements Serializable {
     private boolean TLSStarted;
     private SocketChannel channel;
     private Optional<User> user = Optional.empty();
+    private Optional<Mail> mail = Optional.empty();
+    private boolean mailTransactionInProgress;
+    private int declaredMessageSize;
+
+    private int recipientCount;
+    /**
+     * The recipient address in the first accepted RCPT command, but only if
+     * there is exactly one such accepted recipient. If there is no accepted
+     * recipient yet, or if there are more than one, then this value is null.
+     * This information is useful in the construction of the FOR clause of the
+     * Received header.
+     */
+    private Optional<String> singleRecipient;
+
+    public void addRecipient(String recipientAddress) {
+        this.recipientCount++;
+        this.singleRecipient = this.recipientCount == 1 ? Optional.of(recipientAddress)
+                : Optional.empty();
+    }
+
+    public int getRecipientCount() {
+        return this.recipientCount;
+    }
+
+    /**
+     * Returns the first accepted recipient if there is exactly one accepted
+     * recipient, otherwise it returns null.
+     */
+    public Optional<String> getSingleRecipient() {
+        return singleRecipient;
+    }
+
+
+    public Optional<Mail> getMail() {
+        return mail;
+    }
+
+    public void setMail(Optional<Mail> mail) {
+        this.mail = mail;
+    }
+
+    public int getDeclaredMessageSize() {
+        return declaredMessageSize;
+    }
+
+    public void setDeclaredMessageSize(int declaredMessageSize) {
+        this.declaredMessageSize = declaredMessageSize;
+    }
+
+    public boolean isMailTransactionInProgress() {
+        return mailTransactionInProgress;
+    }
+
+    public void setMailTransactionInProgress(boolean mailTransactionInProgress) {
+        this.mailTransactionInProgress = mailTransactionInProgress;
+    }
 
     public String getLastCmdNamePrefix() {
         return lastCmdNamePrefix;

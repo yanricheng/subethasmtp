@@ -11,7 +11,7 @@ public class SMTPServerConfig {
     private int maxMessageSize = 1024;
     private boolean enableTLS = false;
     private boolean hideTLS = true;
-
+    private int maxRecipients = 50;
     private boolean requireTLS;
     /**
      * If true, this server will accept no mail until auth succeeded; ignored if no
@@ -28,6 +28,14 @@ public class SMTPServerConfig {
      * over if AUTH capabilities are shown before STARTTLS.
      */
     private boolean showAuthCapabilitiesBeforeSTARTTLS;
+
+    public int getMaxRecipients() {
+        return maxRecipients;
+    }
+
+    public void setMaxRecipients(int maxRecipients) {
+        this.maxRecipients = maxRecipients;
+    }
 
     public String getSoftwareName() {
         return softwareName;
