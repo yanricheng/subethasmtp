@@ -6,9 +6,14 @@ import java.util.List;
 public class Mail {
     private String fromAddress;
     private List<String> toAddress = new ArrayList<>();
+    private StringBuilder data = new StringBuilder();
 
     public Mail() {
 
+    }
+
+    public StringBuilder getData() {
+        return data;
     }
 
     public Mail(String fromAddress) {

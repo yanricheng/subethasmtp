@@ -45,54 +45,60 @@ public final class MailCmd extends BaseCmd {
     @Override
     public void execute(String commandString, SmtpSession sess) throws IOException,
             DropConnectionException {
-        if (sess.isMailTransactionInProgress()) {
-            sess.sendResponse("503 5.5.1 Sender already specified.");
-            return;
-        }
-
-        if (commandString.trim().equals("MAIL FROM:")) {
-            sess.sendResponse("501 Syntax: MAIL FROM: <address>");
-            return;
-        }
-
-        String args = this.getArgPredicate(commandString);
-        if (!args.toUpperCase(Locale.ENGLISH).startsWith("FROM:")) {
-            sess.sendResponse(
-                    "501 Syntax: MAIL FROM: <address>  Error in parameters: \"" +
-                            this.getArgPredicate(commandString) + "\"");
-            return;
-        }
-
-        String emailAddress = EmailUtils.extractEmailAddress(args, 5);
-        if (!fromAddressValidator.test(emailAddress)) {
-            sess.sendResponse("553 <" + emailAddress + "> Invalid email address.");
-            return;
-        }
-
-        // extract SIZE argument from MAIL FROM command.
-        // disregard unknown parameters. TODO: reject unknown
-        // parameters.
-        int size = 0;
-        String largs = args.toLowerCase(Locale.ENGLISH);
-        int sizec = largs.indexOf(" size=");
-        if (sizec > -1) {
-            // disregard non-numeric values.
-            String ssize = largs.substring(sizec + 6).trim();
-            if (ssize.length() > 0 && ssize.matches("[0-9]+")) {
-                size = Integer.parseInt(ssize);
+        try {
+            if (sess.isMailTransactionInProgress()) {
+                sess.sendResponse("503 5.5.1 Sender already specified.");
+                return;
             }
-        }
-        // Reject the message if the size supplied by the client
-        // is larger than what we advertised in EHLO answer.
-        if (size > sess.getSmtpConfig().getMaxMessageSize()) {
-            sess.sendResponse("552 5.3.4 Message size exceeds fixed limit");
-            return;
+
+            if (commandString.trim().equals("MAIL FROM:")) {
+                sess.sendResponse("501 Syntax: MAIL FROM: <address>");
+                return;
+            }
+
+            String args = this.getArgPredicate(commandString);
+            if (!args.toUpperCase(Locale.ENGLISH).startsWith("FROM:")) {
+                sess.sendResponse(
+                        "501 Syntax: MAIL FROM: <address>  Error in parameters: \"" +
+                                this.getArgPredicate(commandString) + "\"");
+                return;
+            }
+
+            String emailAddress = EmailUtils.extractEmailAddress(args, 5);
+            if (!fromAddressValidator.test(emailAddress)) {
+                sess.sendResponse("553 <" + emailAddress + "> Invalid email address.");
+                return;
+            }
+
+            // extract SIZE argument from MAIL FROM command.
+            // disregard unknown parameters. TODO: reject unknown
+            // parameters.
+            int size = 0;
+            String largs = args.toLowerCase(Locale.ENGLISH);
+            int sizec = largs.indexOf(" size=");
+            if (sizec > -1) {
+                // disregard non-numeric values.
+                String ssize = largs.substring(sizec + 6).trim();
+                if (ssize.length() > 0 && ssize.matches("[0-9]+")) {
+                    size = Integer.parseInt(ssize);
+                }
+            }
+            // Reject the message if the size supplied by the client
+            // is larger than what we advertised in EHLO answer.
+            if (size > sess.getSmtpConfig().getMaxMessageSize()) {
+                sess.sendResponse("552 5.3.4 Message size exceeds fixed limit");
+                return;
+            }
+
+            sess.setMail(Optional.of(new Mail(emailAddress)));
+            sess.setDeclaredMessageSize(size);
+            sess.setMailTransactionInProgress(true);
+            sess.sendResponse("250 Ok");
+        } catch (RuntimeException e) {
+            sess.sendResponse("503 Error: " + e.getMessage());
+            sess.resetMailTransaction();
         }
 
-        sess.setMail(Optional.of(new Mail(emailAddress)));
-        sess.setMailTransactionInProgress(true);
-
-        sess.setDeclaredMessageSize(size);
 //		sess.startMailTransaction();
 //
 //		try
@@ -113,7 +119,7 @@ public final class MailCmd extends BaseCmd {
 //			return;
 //		}
 
-        sess.sendResponse("250 Ok");
+
     }
 
 }

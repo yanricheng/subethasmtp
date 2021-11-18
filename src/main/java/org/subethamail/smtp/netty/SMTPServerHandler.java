@@ -12,15 +12,12 @@ import org.subethamail.smtp.netty.cmd.Cmd;
 import org.subethamail.smtp.netty.session.SmtpSession;
 import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.UUID;
 
 @ChannelHandler.Sharable
 public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
-
+    private static final Logger logger = LoggerFactory.getLogger(SMTPServerHandler.class);
     private final SMTPServerConfig smtpServerConfig;
-    Logger logger = LoggerFactory.getLogger(SMTPServerHandler.class);
 
     public SMTPServerHandler(SMTPServerConfig smtpServerConfig) {
         this.smtpServerConfig = smtpServerConfig;
@@ -28,12 +25,12 @@ public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() == null) {
             String sessionId = UUID.randomUUID().toString().replaceAll("-", "");
             sessionIdAttr.setIfAbsent(sessionId);
-            SmtpSession session = new SmtpSession(smtpServerConfig);
+            SmtpSession session = new SmtpSession(sessionId, smtpServerConfig);
             LocalSessionHolder.put(sessionId, session);
         }
     }
@@ -50,10 +47,8 @@ public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
-        String format = "sessionId:%s,time:%s,msg:%s";
-        System.out.println(String.format(format, sessionIdAttr.get(), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), msg));
         if (sessionIdAttr.get() != null) {
             SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
             Cmd cmd = (Cmd) msg;
@@ -78,7 +73,7 @@ public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
             LocalSessionHolder.remove(sessionIdAttr.get());
-            logger.info("remove session");
+            logger.info("exception remove session");
         }
         super.exceptionCaught(ctx, cause);
     }
@@ -89,7 +84,7 @@ public class SMTPServerHandler extends ChannelInboundHandlerAdapter {
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
             LocalSessionHolder.remove(sessionIdAttr.get());
-            logger.info("remove session");
+            logger.info("unregistered remove session");
         }
         super.channelUnregistered(ctx);
     }

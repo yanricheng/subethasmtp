@@ -1,8 +1,7 @@
-package org.subethamail.smtp.netty.cmd;
+package org.subethamail.smtp.netty.cmd.impl;
 
 import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.internal.util.EmailUtils;
-import org.subethamail.smtp.netty.cmd.impl.BaseCmd;
 import org.subethamail.smtp.netty.session.SmtpSession;
 
 import java.io.IOException;
@@ -41,12 +40,13 @@ public final class ReceiptCmd extends BaseCmd {
 		} else {
 			String recipientAddress = EmailUtils.extractEmailAddress(args, 3);
 			sess.getMail().get().getToAddress().add(recipientAddress);
+			//TODO 校验收件地址
 			sess.addRecipient(recipientAddress);
 			sess.sendResponse("250 Ok");
 
 //			try
 //			{
-//				sess.getMail().get().getToAddress().add(recipientAddress);
+//				sess.getMessageHandler().recipient(recipientAddress);
 //				sess.addRecipient(recipientAddress);
 //				sess.sendResponse("250 Ok");
 //			}

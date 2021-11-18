@@ -74,7 +74,7 @@ public abstract class BaseCmd implements Cmd {
 
     @Override
     public void execute(SmtpSession sess) throws IOException, DropConnectionException {
-        execute(sess.getCurrentCmdStr(), sess);
+        execute(sess.getDataFrame(), sess);
     }
 
     @Override

@@ -13,6 +13,10 @@ public class SMTPServerConfig {
     private boolean hideTLS = true;
     private int maxRecipients = 50;
     private boolean requireTLS;
+    private boolean disableReceivedHeaders;
+    private boolean disableVerify = true;
+    private String domain;
+
     /**
      * If true, this server will accept no mail until auth succeeded; ignored if no
      * AuthHandlerFactory has been set
@@ -28,6 +32,30 @@ public class SMTPServerConfig {
      * over if AUTH capabilities are shown before STARTTLS.
      */
     private boolean showAuthCapabilitiesBeforeSTARTTLS;
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public boolean isDisableVerify() {
+        return disableVerify;
+    }
+
+    public void setDisableVerify(boolean disableVerify) {
+        this.disableVerify = disableVerify;
+    }
+
+    public boolean isDisableReceivedHeaders() {
+        return disableReceivedHeaders;
+    }
+
+    public void setDisableReceivedHeaders(boolean disableReceivedHeaders) {
+        this.disableReceivedHeaders = disableReceivedHeaders;
+    }
 
     public int getMaxRecipients() {
         return maxRecipients;

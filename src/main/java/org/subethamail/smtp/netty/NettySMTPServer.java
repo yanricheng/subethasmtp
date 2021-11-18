@@ -45,8 +45,10 @@ public class NettySMTPServer {
     public void run() throws Exception {
         SMTPServerConfig serverConfig =  new SMTPServerConfig();
         serverConfig.setHostName("netty smtp server");
+        serverConfig.setDomain("yanrc.net");
         UsernameAndPsdValidator usernameAndPsdValidator = new MemoryBaseNameAndPsdValidator();
-        usernameAndPsdValidator.add("yrc@yanrc.net","123456");
+        usernameAndPsdValidator.add("yrc@yanrc.net", "123456");
+        usernameAndPsdValidator.add("huizi@yanrc.net", "123456");
         AuthHandlerFactory authHandlerFactory = new EasyAuthHandlerFactory(usernameAndPsdValidator);
         serverConfig.setAuthHandlerFactory(Optional.of(authHandlerFactory));
 

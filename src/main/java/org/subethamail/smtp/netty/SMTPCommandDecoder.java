@@ -9,6 +9,7 @@ import io.netty.util.internal.ObjectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.internal.server.CommandException;
+import org.subethamail.smtp.internal.server.InvalidCommandNameException;
 import org.subethamail.smtp.internal.server.UnknownCommandException;
 import org.subethamail.smtp.netty.cmd.Cmd;
 import org.subethamail.smtp.netty.cmd.CmdHandler;
@@ -20,9 +21,8 @@ import java.util.List;
 
 public class SMTPCommandDecoder extends StringDecoder {
     private final CmdHandler commandHandler = new CmdHandler();
-    // TODO Use CharsetDecoder instead.
-    private final Charset charset;
     private final Logger logger = LoggerFactory.getLogger(SMTPCommandDecoder.class);
+    private final Charset charset;
 
     /**
      * Creates a new instance with the current system character set.
@@ -40,27 +40,29 @@ public class SMTPCommandDecoder extends StringDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
+        String format = "sessionId:{},in ->: {}";
         try {
             String commandString = msg.toString(charset);
+            logger.info(format, sessionIdAttr.get(), commandString);
             if (sessionIdAttr.get() != null) {
                 SmtpSession smtpSession = LocalSessionHolder.get(sessionIdAttr.get());
                 if (smtpSession != null) {
-                    smtpSession.setCurrentCmdStr(commandString);
+                    smtpSession.setDataFrame(commandString);
                 }
             }
-            logger.info(">> receive:{}", commandString);
-
             Cmd cmdPrototype = CmdHandler.getCommandFromString(commandString);
             out.add(cmdPrototype);
-        } catch (UnknownCommandException unknownCommandException) {
+        } catch (UnknownCommandException | InvalidCommandNameException ex) {
             if (sessionIdAttr.get() != null) {
                 SmtpSession smtpSession = LocalSessionHolder.get(sessionIdAttr.get());
                 if (smtpSession != null) {
                     if (smtpSession.isDurativeCmd() && smtpSession.getLastCmdName() != null) {
                         Cmd cmd = commandHandler.getCommand(smtpSession.getLastCmdName());
                         out.add(cmd);
+                    } else {
+                        ctx.writeAndFlush("500 " + ex.getMessage());
                     }
                 }
             }
