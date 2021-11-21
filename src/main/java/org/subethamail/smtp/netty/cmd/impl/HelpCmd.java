@@ -1,7 +1,7 @@
 package org.subethamail.smtp.netty.cmd.impl;
 
 import org.subethamail.smtp.internal.server.CommandException;
-import org.subethamail.smtp.netty.SMTPServerConfig;
+import org.subethamail.smtp.netty.ServerConfig;
 import org.subethamail.smtp.netty.cmd.CmdHandler;
 import org.subethamail.smtp.netty.session.SmtpSession;
 
@@ -27,7 +27,7 @@ public final class HelpCmd extends BaseCmd {
     public void execute(String commandString, SmtpSession context) throws IOException {
         String args = this.getArgPredicate(commandString);
         if ("".equals(args)) {
-            context.sendResponse(this.getCommandMessage(getSmtpServerConfig()));
+            context.sendResponse(this.getCommandMessage(getServerConfig()));
             return;
         }
         try {
@@ -37,7 +37,7 @@ public final class HelpCmd extends BaseCmd {
         }
     }
 
-    private String getCommandMessage(SMTPServerConfig config) {
+    private String getCommandMessage(ServerConfig config) {
         return "214-"
                 + config.getSoftwareName()
                 + " on "

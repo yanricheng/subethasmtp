@@ -36,6 +36,28 @@ public class BdatTest {
     }
 
     @Test
+    public void testOneBdatCmd1() throws UnknownHostException, SMTPException, IOException {
+        MyListener listener = new MyListener();
+//        SMTPServer server = SMTPServer.port(10000).messageHandler(listener).build();
+        try {
+//            server.start();
+            SmartClient client = SmartClient.createAndConnect("localhost", 10000, "clientHeloHost");
+            assertTrue(client.getExtensions().containsKey("CHUNKING"));
+            client.from("huizi@yanrc.net");
+            client.to("yrc@yanrc.net");
+            client.bdat("hello,world1");
+            client.bdat("hello,world2");
+            client.bdat("hello,world3");
+            client.bdatLast("ok");
+            assertEquals("hello", listener.dataAsText());
+            assertEquals("me@oz.com", listener.from);
+            assertEquals("dave@oz.com", listener.to);
+        } finally {
+//            server.stop();
+        }
+    }
+
+    @Test
     public void testBadBdatCommand() throws UnknownHostException, SMTPException, IOException {
         MyListener listener = new MyListener();
         SMTPServer server = SMTPServer.port(25000).messageHandler(listener).build();

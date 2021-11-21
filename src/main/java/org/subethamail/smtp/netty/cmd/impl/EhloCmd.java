@@ -1,6 +1,5 @@
 package org.subethamail.smtp.netty.cmd.impl;
 
-import org.subethamail.smtp.AuthenticationHandlerFactory;
 import org.subethamail.smtp.internal.command.AuthCommand;
 import org.subethamail.smtp.internal.util.TextUtils;
 import org.subethamail.smtp.netty.auth.AuthHandlerFactory;
@@ -47,10 +46,10 @@ public class EhloCmd extends BaseCmd {
         StringBuilder response = new StringBuilder();
 
         response.append("250-");
-        response.append(getSmtpServerConfig().getHostName());
+        response.append(getServerConfig().getHostName());
         response.append("\r\n" + "250-8BITMIME");
 
-        int maxSize = getSmtpServerConfig().getMaxMessageSize();
+        int maxSize = getServerConfig().getMaxMessageSize();
         if (maxSize > 0)
         {
             response.append("\r\n" + "250-SIZE ");
@@ -58,7 +57,7 @@ public class EhloCmd extends BaseCmd {
         }
 
         // Enabling / Hiding TLS is a server setting
-        if (getSmtpServerConfig().isEnableTLS() && !getSmtpServerConfig().isHideTLS())
+        if (getServerConfig().isEnableTLS() && !getServerConfig().isHideTLS())
         {
             response.append("\r\n" + "250-STARTTLS");
         }
@@ -67,12 +66,12 @@ public class EhloCmd extends BaseCmd {
         response.append("\r\n250-CHUNKING");
 
         // Check to see if we support authentication
-        Optional<AuthHandlerFactory> authFact = getSmtpServerConfig().getAuthHandlerFactory();
+        Optional<AuthHandlerFactory> authFact = getServerConfig().getAuthHandlerFactory();
         final boolean displayAuth;
-        if (getSmtpServerConfig().isEnableTLS()) {
+        if (getServerConfig().isEnableTLS()) {
             displayAuth = authFact.isPresent();
         } else {
-            displayAuth = authFact.isPresent() && (!getSmtpServerConfig().isEnableTLS() || getSmtpServerConfig().isShowAuthCapabilitiesBeforeSTARTTLS());
+            displayAuth = authFact.isPresent() && (!getServerConfig().isEnableTLS() || getServerConfig().isShowAuthCapabilitiesBeforeSTARTTLS());
         }
         if (displayAuth)
         {

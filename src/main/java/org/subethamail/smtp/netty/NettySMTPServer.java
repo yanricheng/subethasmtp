@@ -27,7 +27,7 @@ import java.util.Optional;
 public class NettySMTPServer {
     private final int port;
     private final Logger logger = LoggerFactory.getLogger(NettySMTPServer.class);
-    private SMTPServerConfig smtpServerConfig;
+    private ServerConfig serverConfig;
 
     public NettySMTPServer(int port) {
         this.port = port;
@@ -43,7 +43,7 @@ public class NettySMTPServer {
     }
 
     public void run() throws Exception {
-        SMTPServerConfig serverConfig =  new SMTPServerConfig();
+        ServerConfig serverConfig =  new ServerConfig();
         serverConfig.setHostName("netty smtp server");
         serverConfig.setDomain("yanrc.net");
         UsernameAndPsdValidator usernameAndPsdValidator = new MemoryBaseNameAndPsdValidator();
@@ -65,10 +65,10 @@ public class NettySMTPServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("lineEncoder", new LineEncoder(LineSeparator.UNIX, CharsetUtil.UTF_8));
-                            ch.pipeline().addLast("frameDecoder", new LineBasedFrameDecoder(1024));
-                            ch.pipeline().addLast("smtpCommandDecoder", new SMTPCommandDecoder(CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(new SMTPServerHandler(serverConfig));
+                            ch.pipeline().addLast(SMTPConstants.SMTP_LINE_ENCODER, new LineEncoder(LineSeparator.UNIX, CharsetUtil.UTF_8));
+                            ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new LineBasedFrameDecoder(1024));
+                            ch.pipeline().addLast(SMTPConstants.SMTP_CMD_DECODER, new SMTPCmdDecoder(CharsetUtil.UTF_8));
+                            ch.pipeline().addLast(new SMTPCmdHandler(serverConfig));
                         }
                     })
                     // (5)

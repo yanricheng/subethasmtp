@@ -19,22 +19,22 @@ import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
 import java.nio.charset.Charset;
 import java.util.List;
 
-public class SMTPCommandDecoder extends StringDecoder {
+public class SMTPCmdDecoder extends StringDecoder {
     private final CmdHandler commandHandler = new CmdHandler();
-    private final Logger logger = LoggerFactory.getLogger(SMTPCommandDecoder.class);
+    private final Logger logger = LoggerFactory.getLogger(SMTPCmdDecoder.class);
     private final Charset charset;
 
     /**
      * Creates a new instance with the current system character set.
      */
-    public SMTPCommandDecoder() {
+    public SMTPCmdDecoder() {
         this(Charset.defaultCharset());
     }
 
     /**
      * Creates a new instance with the specified character set.
      */
-    public SMTPCommandDecoder(Charset charset) {
+    public SMTPCmdDecoder(Charset charset) {
         this.charset = ObjectUtil.checkNotNull(charset, "charset");
     }
 

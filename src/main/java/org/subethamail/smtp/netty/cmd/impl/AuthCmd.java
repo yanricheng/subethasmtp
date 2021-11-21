@@ -40,7 +40,7 @@ public final class AuthCmd extends BaseCmd {
             return;
         }
 
-        Optional<AuthHandlerFactory> authFactory = getSmtpServerConfig().getAuthHandlerFactory();
+        Optional<AuthHandlerFactory> authFactory = getServerConfig().getAuthHandlerFactory();
 
         if (!authFactory.isPresent()) {
             sess.sendResponse("502 Authentication not supported");

@@ -5,7 +5,7 @@ import org.subethamail.smtp.netty.auth.AuthHandlerFactory;
 
 import java.util.Optional;
 
-public class SMTPServerConfig {
+public class ServerConfig {
     private String hostName = "localhost";
     private String softwareName = "smtp server";
     private int maxMessageSize = 1024;

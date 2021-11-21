@@ -20,16 +20,17 @@ public final class RequireAuthCmdWrapper extends CmdWrapperBase implements Cmd {
     /**
      * @param wrapped the wrapped command (not null)
      */
-    public RequireAuthCmdWrapper(Cmd wrapped) {
+    public RequireAuthCmdWrapper(Cmd wrapped,Cmd originCmd) {
         this.wrapped = wrapped;
+        setOriginCmd(originCmd);
     }
 
 
     @Override
     public void execute(String commandString, SmtpSession sess) throws IOException, DropConnectionException {
         if (!sess.getSmtpConfig().isRequireAuth() || sess.isAuthenticated()) {
-            if (wrapped.getSmtpServerConfig() == null) {
-                wrapped.setSmtpServerConfig(getSmtpServerConfig());
+            if (wrapped.getServerConfig() == null) {
+                wrapped.setServerConfig(getServerConfig());
             }
             wrapped.execute(commandString, sess);
         } else {

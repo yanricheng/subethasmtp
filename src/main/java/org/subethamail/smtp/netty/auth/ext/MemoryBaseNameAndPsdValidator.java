@@ -25,12 +25,12 @@ public class MemoryBaseNameAndPsdValidator implements UsernameAndPsdValidator {
 
     @Override
     public void login(String username, String password, SmtpSession context) throws LoginFailedException {
-        if (password.equals(nameAndPsdMap.get(username))) {
-            logger.info("login:{},login succeed!", username);
-        } else {
-            logger.info("login:{},login fail!", username);
-            throw new LoginFailedException();
-        }
+//        if (password.equals(nameAndPsdMap.get(username))) {
+//            logger.info("login:{},login succeed!", username);
+//        } else {
+//            logger.info("login:{},login fail!", username);
+//            throw new LoginFailedException();
+//        }
     }
 
     @Override

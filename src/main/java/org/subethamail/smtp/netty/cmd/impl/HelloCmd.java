@@ -31,6 +31,6 @@ public final class HelloCmd extends BaseCmd
 //		sess.resetMailTransaction();
 		sess.setHelo(args[1]);
 
-		sess.sendResponse("250 " + getSmtpServerConfig().getHostName());
+		sess.sendResponse("250 " + getServerConfig().getHostName());
 	}
 }

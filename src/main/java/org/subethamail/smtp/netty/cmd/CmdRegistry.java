@@ -5,18 +5,7 @@
 
 package org.subethamail.smtp.netty.cmd;
 
-import org.subethamail.smtp.netty.cmd.impl.AuthCmd;
-import org.subethamail.smtp.netty.cmd.impl.DataCmd;
-import org.subethamail.smtp.netty.cmd.impl.EhloCmd;
-import org.subethamail.smtp.netty.cmd.impl.ExpandCmd;
-import org.subethamail.smtp.netty.cmd.impl.HelloCmd;
-import org.subethamail.smtp.netty.cmd.impl.HelpCmd;
-import org.subethamail.smtp.netty.cmd.impl.MailCmd;
-import org.subethamail.smtp.netty.cmd.impl.NoopCmd;
-import org.subethamail.smtp.netty.cmd.impl.QuitCmd;
-import org.subethamail.smtp.netty.cmd.impl.ReceiptCmd;
-import org.subethamail.smtp.netty.cmd.impl.ResetCmd;
-import org.subethamail.smtp.netty.cmd.impl.VerifyCmd;
+import org.subethamail.smtp.netty.cmd.impl.*;
 
 /**
  * Enumerates all the Commands made available in this release.
@@ -37,21 +26,25 @@ public enum CmdRegistry {
     //	STARTTLS(new StartTLSCommand(), false, false),
     VRFY(new VerifyCmd(), true, true),
     EXPN(new ExpandCmd(), true, true),
-//	BDAT(new BdatCommand(), true, true)
-    ;
+    BDAT(new BdatCmd(), true, true);
+
 
     private final Cmd command;
 
     CmdRegistry(Cmd cmd, boolean checkForStartedTLSWhenRequired, boolean checkForAuthIfRequired) {
         final Cmd c;
-        if (checkForStartedTLSWhenRequired)
-            c = new RequireTLSCmdWrapper(cmd);
-        else
+
+        if (checkForStartedTLSWhenRequired) {
+            c = new RequireTLSCmdWrapper(cmd, cmd);
+        } else {
             c = cmd;
-        if (checkForAuthIfRequired)
-            this.command = new RequireAuthCmdWrapper(c);
-        else
+        }
+
+        if (checkForAuthIfRequired) {
+            this.command = new RequireAuthCmdWrapper(c, cmd);
+        } else {
             this.command = c;
+        }
     }
 
     public Cmd getCommand() {

@@ -20,8 +20,9 @@ public final class RequireTLSCmdWrapper extends CmdWrapperBase implements Cmd {
     /**
      * @param wrapped the wrapped command (not null)
      */
-    public RequireTLSCmdWrapper(Cmd wrapped) {
+    public RequireTLSCmdWrapper(Cmd wrapped,Cmd originCmd) {
         this.wrapped = wrapped;
+        setOriginCmd(originCmd);
     }
 
     @Override
@@ -36,8 +37,8 @@ public final class RequireTLSCmdWrapper extends CmdWrapperBase implements Cmd {
     @Override
     public void execute(SmtpSession sess) throws IOException, DropConnectionException {
         if (!sess.getSmtpConfig().isRequireTLS() || sess.isTLSStarted()) {
-            if(wrapped.getSmtpServerConfig()==null) {
-                wrapped.setSmtpServerConfig(getSmtpServerConfig());
+            if(wrapped.getServerConfig()==null) {
+                wrapped.setServerConfig(getServerConfig());
             }
             wrapped.execute(sess);
         } else {

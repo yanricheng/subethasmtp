@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.netty.SMTPConstants;
-import org.subethamail.smtp.netty.SMTPServerConfig;
+import org.subethamail.smtp.netty.ServerConfig;
 import org.subethamail.smtp.netty.auth.User;
 import org.subethamail.smtp.netty.cmd.impl.DataCmd;
 import org.subethamail.smtp.netty.mail.Mail;
@@ -18,8 +18,8 @@ import java.net.InetAddress;
 import java.util.Optional;
 
 public class SmtpSession implements Serializable {
-    static Logger logger = LoggerFactory.getLogger(DataCmd.class);
-    private final SMTPServerConfig smtpServerConfig;
+    static Logger logger = LoggerFactory.getLogger(SmtpSession.class);
+    private final ServerConfig serverConfig;
     private final String id;
     //是否持续执行之前的命令
     private boolean durativeCmd;
@@ -55,9 +55,9 @@ public class SmtpSession implements Serializable {
      */
     private volatile boolean quitting = false;
 
-    public SmtpSession(String id, SMTPServerConfig smtpServerConfig) {
+    public SmtpSession(String id, ServerConfig serverConfig) {
         this.id = id;
-        this.smtpServerConfig = smtpServerConfig;
+        this.serverConfig = serverConfig;
     }
 
     public InetAddress getRemoteAddress() {
@@ -182,8 +182,8 @@ public class SmtpSession implements Serializable {
         this.channel = channel;
     }
 
-    public SMTPServerConfig getSmtpConfig() {
-        return smtpServerConfig;
+    public ServerConfig getSmtpConfig() {
+        return serverConfig;
     }
 
     public boolean isTLSStarted() {

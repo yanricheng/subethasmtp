@@ -1,23 +1,29 @@
 package org.subethamail.smtp.netty.mail;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Mail {
     private String fromAddress;
     private List<String> toAddress = new ArrayList<>();
-    private StringBuilder data = new StringBuilder();
+    private final StringBuilder data = new StringBuilder();
+    private final ByteArrayOutputStream dataByteOutStream = new ByteArrayOutputStream();
 
     public Mail() {
 
     }
 
-    public StringBuilder getData() {
-        return data;
-    }
-
     public Mail(String fromAddress) {
         this.fromAddress = fromAddress;
+    }
+
+    public ByteArrayOutputStream getDataByteOutStream() {
+        return dataByteOutStream;
+    }
+
+    public StringBuilder getData() {
+        return data;
     }
 
     public List<String> getToAddress() {
