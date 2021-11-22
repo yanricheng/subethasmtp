@@ -10,7 +10,6 @@ import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.netty.SMTPConstants;
 import org.subethamail.smtp.netty.ServerConfig;
 import org.subethamail.smtp.netty.auth.User;
-import org.subethamail.smtp.netty.cmd.impl.DataCmd;
 import org.subethamail.smtp.netty.mail.Mail;
 
 import java.io.Serializable;
@@ -236,4 +235,14 @@ public class SmtpSession implements Serializable {
         this.channel.close();
     }
 
+
+    private int headerTrimSize;
+
+    public int getHeaderTrimSize() {
+        return headerTrimSize;
+    }
+
+    public void setHeaderTrimSize(int headerTrimSize) {
+        this.headerTrimSize = headerTrimSize;
+    }
 }

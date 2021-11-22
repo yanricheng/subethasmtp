@@ -8,7 +8,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.LineEncoder;
 import io.netty.handler.codec.string.LineSeparator;
 import io.netty.util.CharsetUtil;
@@ -66,7 +65,7 @@ public class NettySMTPServer {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(SMTPConstants.SMTP_LINE_ENCODER, new LineEncoder(LineSeparator.UNIX, CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new LineBasedFrameDecoder(1024));
+                            ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new SMTPLineDecoder(1024));
                             ch.pipeline().addLast(SMTPConstants.SMTP_CMD_DECODER, new SMTPCmdDecoder(CharsetUtil.UTF_8));
                             ch.pipeline().addLast(new SMTPCmdHandler(serverConfig));
                         }

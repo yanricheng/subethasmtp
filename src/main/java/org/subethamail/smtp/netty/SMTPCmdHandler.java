@@ -34,18 +34,22 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
             String sessionId = UUID.randomUUID().toString().replaceAll("-", "");
             sessionIdAttr.setIfAbsent(sessionId);
             SmtpSession session = new SmtpSession(sessionId, serverConfig);
+            session.setChannel((SocketChannel) ctx.channel());
             LocalSessionHolder.put(sessionId, session);
         }
+        logger.info("create connect,register session");
     }
 
     @Override
     // (1)
     public void channelActive(final ChannelHandlerContext ctx) {
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        channel.writeAndFlush("220 " + serverConfig.getHostName() + " ESMTP " + serverConfig.getSoftwareName());
-
-        System.out.println("IP:" + channel.localAddress().getHostString());
-        System.out.println("Port:" + channel.localAddress().getPort());
+        logger.info("begin communicate...");
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
+        Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
+        if (sessionIdAttr.get() != null) {
+            SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
+            session.sendResponse("220 " + serverConfig.getHostName() + " ESMTP " + serverConfig.getSoftwareName());
+        }
     }
 
     @Override
@@ -54,10 +58,16 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
             SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
+            if (msg == null) {
+                logger.info("sessionId:{},execute cmd:{}", session.getId(), null);
+                return;
+            }
+
+
             Cmd cmd = (Cmd) msg;
             cmd.setServerConfig(serverConfig);
-            session.setChannel((SocketChannel) ctx.channel());
             try {
+                logger.info("sessionId:{},execute cmd:{}", session.getId(), cmd.getName());
                 cmd.execute(session);
                 session.setLastCmdName(cmd.getName());
                 if (cmd.getName().equals("BDAT")) {
@@ -69,10 +79,11 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
                     } else if (cmd instanceof RequireAuthCmdWrapper) {
                         bdatCmd = (BdatCmd) ((RequireAuthCmdWrapper) cmd).getOriginCmd();
                     }
-
-                    ctx.channel().pipeline().replace(SMTPConstants.SMTP_FRAME_DECODER,
-                            SMTPConstants.SMTP_FRAME_DECODER,
-                            new BdatFixedLengthFrameDecoder((int) bdatCmd.getBdat().getSize(), bdatCmd.getBdat().isLast()));
+                    if (bdatCmd.getBdat().isLast) {
+                        ctx.channel().pipeline().replace(SMTPConstants.SMTP_FRAME_DECODER,
+                                SMTPConstants.SMTP_FRAME_DECODER,
+                                new BdatFixedLengthFrameDecoder((int) bdatCmd.getBdat().getSize(), bdatCmd.getBdat().isLast()));
+                    }
                 }
             } catch (Exception e) {
                 logger.error("执行命令异常", e);
@@ -82,23 +93,24 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+//        super.exceptionCaught(ctx, cause);
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
             LocalSessionHolder.get(sessionIdAttr.get()).resetMailTransaction();
             logger.info("exception reset session");
         }
-        super.exceptionCaught(ctx, cause);
+
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+//        super.channelUnregistered(ctx);
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
             LocalSessionHolder.remove(sessionIdAttr.get());
             logger.info("unregistered remove session");
         }
-        super.channelUnregistered(ctx);
     }
 }

@@ -1,30 +1,55 @@
 package org.subethamail.smtp.netty.cmd.impl;
 
 import org.subethamail.smtp.DropConnectionException;
-import org.subethamail.smtp.RejectException;
-import org.subethamail.smtp.internal.io.BdatInputStream;
-import org.subethamail.smtp.internal.server.BaseCommand;
 import org.subethamail.smtp.internal.util.SMTPResponseHelper;
 import org.subethamail.smtp.netty.session.SmtpSession;
-import org.subethamail.smtp.server.Session;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * @author David Moten
  */
 public final class BdatCmd extends BaseCmd {
 
+    private Bdat bdat;
+
     public BdatCmd() {
         super("BDAT", "A sequence of BDAT packets is collected as the data of the message.");
+    }
+
+    public static BdatCmd newInstance(String commandString) {
+        BdatCmd batCmd = new BdatCmd();
+        batCmd.bdat = parse(commandString);
+        return batCmd;
+    }
+
+    public static Bdat parse(String commandString) {
+        String[] args = getArgs(commandString);
+        if (args.length == 1) {
+            return new Bdat("503 Error: wrong syntax for BDAT command");
+        }
+        long size;
+        try {
+            size = Long.parseLong(args[1]);
+        } catch (NumberFormatException e) {
+            return new Bdat("503 Error: integer size expected after BDAT token");
+        }
+        if (size < 0) {
+            return new Bdat("503 Error: size token after BDAT must be non-negative integer");
+        }
+        if (args.length == 3 && !"LAST".equals(args[2])) {
+            return new Bdat("503 Error: expected LAST but found " + args[2]);
+        }
+        if (args.length > 3) {
+            return new Bdat("503 Error: too many arguments found for BDAT command");
+        }
+        boolean isLast = args.length == 3 && "LAST".equals(args[2]);
+        return new Bdat(size, isLast);
     }
 
     public Bdat getBdat() {
         return bdat;
     }
-
-    private Bdat bdat;
 
     @Override
     public void execute(String commandString, SmtpSession sess)
@@ -41,6 +66,11 @@ public final class BdatCmd extends BaseCmd {
         if (bdat.errorMessage != null) {
             sess.sendResponse(bdat.errorMessage);
             return;
+        }
+
+        if (bdat != null) {
+            sess.setHeaderTrimSize((int) bdat.getSize());
+            sess.setDurativeCmd(!bdat.isLast);
         }
 
         String dataMessage = null;
@@ -68,42 +98,10 @@ public final class BdatCmd extends BaseCmd {
 //        sess.resetMailTransaction();
     }
 
-    public static Bdat parse(String commandString) {
-        String[] args = getArgs(commandString);
-        if (args.length == 1) {
-            return new Bdat("503 Error: wrong syntax for BDAT command");
-        }
-        long size;
-        try {
-            size = Long.parseLong(args[1]);
-        } catch (NumberFormatException e) {
-            return new Bdat("503 Error: integer size expected after BDAT token");
-        }
-        if (size < 0) {
-            return new Bdat("503 Error: size token after BDAT must be non-negative integer");
-        }
-        if (args.length == 3 && !"LAST".equals(args[2])) {
-            return new Bdat("503 Error: expected LAST but found " + args[2]);
-        }
-        if (args.length > 3) {
-            return new Bdat("503 Error: too many arguments found for BDAT command");
-        }
-        boolean isLast = args.length == 3 && "LAST".equals(args[2]);
-        return new Bdat(size, isLast);
-    }
-
     public static final class Bdat {
         public final long size;
         public final boolean isLast;
         public final String errorMessage;
-
-        public long getSize() {
-            return size;
-        }
-
-        public boolean isLast() {
-            return isLast;
-        }
 
         private Bdat(long size, boolean isLast, String errorMessage) {
             this.size = size;
@@ -117,6 +115,14 @@ public final class BdatCmd extends BaseCmd {
 
         Bdat(String errorMessage) {
             this(0, true, errorMessage);
+        }
+
+        public long getSize() {
+            return size;
+        }
+
+        public boolean isLast() {
+            return isLast;
         }
     }
 }

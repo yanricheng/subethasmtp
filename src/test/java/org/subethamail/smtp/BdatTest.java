@@ -1,18 +1,18 @@
 package org.subethamail.smtp;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.subethamail.smtp.client.SMTPException;
 import org.subethamail.smtp.client.SmartClient;
 import org.subethamail.smtp.helper.BasicMessageListener;
 import org.subethamail.smtp.server.SMTPServer;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BdatTest {
 
@@ -45,9 +45,10 @@ public class BdatTest {
             assertTrue(client.getExtensions().containsKey("CHUNKING"));
             client.from("huizi@yanrc.net");
             client.to("yrc@yanrc.net");
-            client.bdat("hello,world1");
-            client.bdat("hello,world2");
-            client.bdat("hello,world3");
+            client.bdat("hello,world 1111");
+            client.bdat("hello,world 2222222222");
+            client.bdat("hello,world_1 3333333333");
+            client.bdat("hello,world_1_2 44444444");
             client.bdatLast("ok");
             assertEquals("hello", listener.dataAsText());
             assertEquals("me@oz.com", listener.from);
