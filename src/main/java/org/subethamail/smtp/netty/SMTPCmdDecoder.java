@@ -14,8 +14,6 @@ import org.subethamail.smtp.internal.server.InvalidCommandNameException;
 import org.subethamail.smtp.internal.server.UnknownCommandException;
 import org.subethamail.smtp.netty.cmd.Cmd;
 import org.subethamail.smtp.netty.cmd.CmdHandler;
-import org.subethamail.smtp.netty.cmd.RequireAuthCmdWrapper;
-import org.subethamail.smtp.netty.cmd.RequireTLSCmdWrapper;
 import org.subethamail.smtp.netty.cmd.impl.BdatCmd;
 import org.subethamail.smtp.netty.session.SmtpSession;
 import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
@@ -48,10 +46,11 @@ public class SMTPCmdDecoder extends StringDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
-        String format = "sessionId:{},cmd name: -> {}";
+        SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
 
+        String lineFormat = "sessionId:{},text line : -> {}";
         if (msg == null) {
-            logger.info(format, sessionIdAttr.get(), null);
+            logger.info(lineFormat, sessionIdAttr.get(), null);
             return;
         }
 
@@ -61,72 +60,49 @@ public class SMTPCmdDecoder extends StringDecoder {
             bytes = new byte[msg.readableBytes()];
             readerIndex = msg.readerIndex();
             msg.getBytes(readerIndex, bytes);
+            logger.info(lineFormat, sessionIdAttr.get(), new String(bytes), charset);
         }
 
+        String cmdFormat = "sessionId:{},get CMD name: -> {}";
         try {
-            String commandString = new String(bytes, charset);
-            if (sessionIdAttr.get() != null) {
-                SmtpSession smtpSession = LocalSessionHolder.get(sessionIdAttr.get());
-                if (smtpSession != null) {
-                    smtpSession.setDataFrame(commandString);
-                }
-            }
-
-            Cmd cmdPrototype = CmdHandler.getCommandFromString(commandString);
-            logger.info(format, sessionIdAttr.get(), cmdPrototype.getName());
-            out.add(cmdPrototype);
+            String cmdStr = new String(bytes, charset);
+            session.setDataFrame(cmdStr);
+            Cmd cmd = CmdHandler.getCommandFromString(cmdStr);
+            logger.info(cmdFormat, sessionIdAttr.get(), cmd.getName());
+            out.add(cmd);
         } catch (UnknownCommandException | InvalidCommandNameException ex) {
-            if (sessionIdAttr.get() != null) {
-                SmtpSession smtpSession = LocalSessionHolder.get(sessionIdAttr.get());
-                if (smtpSession != null) {
-                    if (smtpSession.isDurativeCmd() && smtpSession.getLastCmdName() != null) {
-                        Cmd cmdPrototype = commandHandler.getCommand(smtpSession.getLastCmdName());
-
-                        //取字节数
-                        if (smtpSession.getLastCmdName().equals("BDAT")) {
-                            byte[] dataBytes = Arrays.copyOfRange(bytes, 0, smtpSession.getHeaderTrimSize());
-                            String commandString = new String(Arrays.copyOfRange(bytes, smtpSession.getHeaderTrimSize(), bytes.length), charset);
-//                            cmdPrototype = CmdHandler.getCommandFromString(commandString);
-                            cmdPrototype = BdatCmd.newInstance(commandString);
-                            smtpSession.setDataFrame(commandString);
-                            if (bytes.length == smtpSession.getHeaderTrimSize()) {
-
-                            } else {
-
-                            }
-
-                            BdatCmd bdatCmd = null;
-                            if (cmdPrototype instanceof BdatCmd) {
-                                bdatCmd = (BdatCmd) cmdPrototype;
-                            } else if (cmdPrototype instanceof RequireTLSCmdWrapper) {
-                                bdatCmd = (BdatCmd) ((RequireTLSCmdWrapper) cmdPrototype).getOriginCmd();
-                            } else if (cmdPrototype instanceof RequireAuthCmdWrapper) {
-                                bdatCmd = (BdatCmd) ((RequireAuthCmdWrapper) cmdPrototype).getOriginCmd();
-                            }
-                            if (!smtpSession.isDurativeCmd()) {
-                                ByteBuf lastBuf = readFixLength(ctx, msg, smtpSession.getHeaderTrimSize());
-                                if (lastBuf != null) {
-                                    byte[] lastBytes = new byte[msg.readableBytes()];
-                                    int lastReaderIndex = msg.readerIndex();
-                                    lastBuf.getBytes(lastReaderIndex, lastBytes);
-                                    smtpSession.getMail().get().getDataByteOutStream().write(dataBytes);
-                                    smtpSession.sendResponse("250 Message OK, " + smtpSession.getHeaderTrimSize() + " bytes received (last chunk)");
-                                    smtpSession.resetMailTransaction();
-                                }
-                            } else {
-                                smtpSession.getMail().get().getDataByteOutStream().write(dataBytes);
-                                smtpSession.sendResponse("250 Message OK, " + smtpSession.getHeaderTrimSize() + " bytes received");
-                            }
-
-
+            if (session.isDurativeCmd() && session.getLastCmdName() != null) {
+                Cmd cmd = commandHandler.getCommand(session.getLastCmdName());
+                //取字节数
+                if (session.getLastCmdName().equals("BDAT")) {
+                    byte[] dataBytes = Arrays.copyOfRange(bytes, 0, session.getHeaderTrimSize());
+                    String cmdStr = new String(Arrays.copyOfRange(bytes, session.getHeaderTrimSize(), bytes.length), charset);
+                    if(!cmdStr.startsWith("BDAT ")){
+                        String message = "503 Error: expected BDAT command line but encountered: '" + cmdStr + "'";
+                        session.sendResponse(message);
+                    }
+                    cmd = BdatCmd.newInstance(cmdStr);
+                    session.setDataFrame(cmdStr);
+                    if (!session.isDurativeCmd()) {
+                        ByteBuf lastBuf = readFixLength(ctx, msg, session.getHeaderTrimSize());
+                        if (lastBuf != null) {
+                            byte[] lastBytes = new byte[msg.readableBytes()];
+                            int lastReaderIndex = msg.readerIndex();
+                            lastBuf.getBytes(lastReaderIndex, lastBytes);
+                            session.getMail().get().getDataByteOutStream().write(dataBytes);
+                            session.sendResponse("250 Message OK, " + session.getHeaderTrimSize() + " bytes received (last chunk)");
+                            session.resetMailTransaction();
                         }
-
-                        logger.info(format, sessionIdAttr.get(), cmdPrototype.getName());
-                        out.add(cmdPrototype);
                     } else {
-                        ctx.writeAndFlush("500 " + ex.getMessage());
+                        session.getMail().get().getDataByteOutStream().write(dataBytes);
+                        session.sendResponse("250 Message OK, " + session.getHeaderTrimSize() + " bytes received");
                     }
                 }
+
+                logger.info(cmdFormat, sessionIdAttr.get(), cmd.getName());
+                out.add(cmd);
+            } else {
+                ctx.writeAndFlush("500 " + ex.getMessage());
             }
         } catch (CommandException e) {
             ctx.writeAndFlush("500 " + e.getMessage());

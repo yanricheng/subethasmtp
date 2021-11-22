@@ -1,6 +1,8 @@
 package org.subethamail.smtp.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -8,6 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.string.LineEncoder;
 import io.netty.handler.codec.string.LineSeparator;
 import io.netty.util.CharsetUtil;
@@ -18,6 +21,7 @@ import org.subethamail.smtp.netty.auth.EasyAuthHandlerFactory;
 import org.subethamail.smtp.netty.auth.UsernameAndPsdValidator;
 import org.subethamail.smtp.netty.auth.ext.MemoryBaseNameAndPsdValidator;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -65,7 +69,8 @@ public class NettySMTPServer {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(SMTPConstants.SMTP_LINE_ENCODER, new LineEncoder(LineSeparator.UNIX, CharsetUtil.UTF_8));
-                            ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new SMTPLineDecoder(1024));
+//                            ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new SMTPLineDecoder(1024));
+                            ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new DelimiterBasedFrameDecoder(1024, Unpooled.copiedBuffer("\r\n".getBytes(StandardCharsets.UTF_8))));
                             ch.pipeline().addLast(SMTPConstants.SMTP_CMD_DECODER, new SMTPCmdDecoder(CharsetUtil.UTF_8));
                             ch.pipeline().addLast(new SMTPCmdHandler(serverConfig));
                         }

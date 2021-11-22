@@ -30,22 +30,22 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
+        SmtpSession session = null;
         if (sessionIdAttr.get() == null) {
             String sessionId = UUID.randomUUID().toString().replaceAll("-", "");
             sessionIdAttr.setIfAbsent(sessionId);
-            SmtpSession session = new SmtpSession(sessionId, serverConfig);
+            session = new SmtpSession(sessionId, serverConfig);
             session.setChannel((SocketChannel) ctx.channel());
             LocalSessionHolder.put(sessionId, session);
         }
-        logger.info("create connect,register session");
+        logger.info("create connect,register session,id:{}", session.getId());
     }
 
     @Override
-    // (1)
     public void channelActive(final ChannelHandlerContext ctx) {
-        logger.info("begin communicate...");
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
+        logger.info("sessionId:{},begin communicate...", sessionIdAttr.get());
         if (sessionIdAttr.get() != null) {
             SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
             session.sendResponse("220 " + serverConfig.getHostName() + " ESMTP " + serverConfig.getSoftwareName());
@@ -62,12 +62,10 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
                 logger.info("sessionId:{},execute cmd:{}", session.getId(), null);
                 return;
             }
-
-
             Cmd cmd = (Cmd) msg;
             cmd.setServerConfig(serverConfig);
             try {
-                logger.info("sessionId:{},execute cmd:{}", session.getId(), cmd.getName());
+                logger.info("sessionId:{},executing cmd:{}", session.getId(), cmd.getName());
                 cmd.execute(session);
                 session.setLastCmdName(cmd.getName());
                 if (cmd.getName().equals("BDAT")) {
@@ -82,7 +80,7 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
                     if (bdatCmd.getBdat().isLast) {
                         ctx.channel().pipeline().replace(SMTPConstants.SMTP_FRAME_DECODER,
                                 SMTPConstants.SMTP_FRAME_DECODER,
-                                new BdatFixedLengthFrameDecoder((int) bdatCmd.getBdat().getSize(), bdatCmd.getBdat().isLast()));
+                                new BdatFixedLenDecoder((int) bdatCmd.getBdat().getSize(), bdatCmd.getBdat().isLast()));
                     }
                 }
             } catch (Exception e) {

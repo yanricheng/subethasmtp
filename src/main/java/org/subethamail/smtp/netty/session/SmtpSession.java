@@ -53,6 +53,7 @@ public class SmtpSession implements Serializable {
      * Set this true when doing an ordered shutdown
      */
     private volatile boolean quitting = false;
+    private int headerTrimSize;
 
     public SmtpSession(String id, ServerConfig serverConfig) {
         this.id = id;
@@ -221,7 +222,7 @@ public class SmtpSession implements Serializable {
 
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = channel.attr(sessionIdKey);
-        String format = "sessionId:{},out <-: {}";
+        String format = "sessionId:{},write out <-: {}";
         logger.info(format, sessionIdAttr.get(), outMsg);
 
         channel.writeAndFlush(outMsg);
@@ -234,9 +235,6 @@ public class SmtpSession implements Serializable {
         this.quitting = true;
         this.channel.close();
     }
-
-
-    private int headerTrimSize;
 
     public int getHeaderTrimSize() {
         return headerTrimSize;

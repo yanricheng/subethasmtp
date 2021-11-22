@@ -1,41 +1,49 @@
 package org.subethamail.smtp.netty;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.ByteProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.netty.session.SmtpSession;
+import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * A decoder that splits the received {@link ByteBuf}s on line endings.
- * <p>
- * Both {@code "\n"} and {@code "\r\n"} are handled.
- * <p>
- * The byte stream is expected to be in UTF-8 character encoding or ASCII. The current implementation
- * uses direct {@code byte} to {@code char} cast and then compares that {@code char} to a few low range
- * ASCII characters like {@code '\n'} or {@code '\r'}. UTF-8 is not using low range [0..0x7F]
- * byte values for multibyte codepoint representations therefore fully supported by this implementation.
- * <p>
- * For a more general delimiter-based decoder, see {@link DelimiterBasedFrameDecoder}.
- */
-public class SMTPLineDecoder extends ByteToMessageDecoder {
+import static io.netty.util.internal.ObjectUtil.checkPositive;
 
-    /**
-     * Maximum length of a frame we're willing to decode.
-     */
-    private final int maxLength;
-    /**
-     * Whether or not to throw an exception as soon as we exceed maxLength.
-     */
-    private final boolean failFast;
-    private final boolean stripDelimiter;
-    private final Logger logger = LoggerFactory.getLogger(SMTPLineDecoder.class);
+/**
+ * A decoder that splits the received {@link ByteBuf}s by the fixed number
+ * of bytes. For example, if you received the following four fragmented packets:
+ * <pre>
+ * +---+----+------+----+
+ * | A | BC | DEFG | HI |
+ * +---+----+------+----+
+ * </pre>
+ * A {@link io.netty.handler.codec.FixedLengthFrameDecoder}{@code (3)} will decode them into the
+ * following three packets with the fixed length:
+ * <pre>
+ * +-----+-----+-----+
+ * | ABC | DEF | GHI |
+ * +-----+-----+-----+
+ * </pre>
+ */
+public class BdatFixedLenDecoder extends ByteToMessageDecoder {
+    private static final Logger logger = LoggerFactory.getLogger(BdatFixedLenDecoder.class);
+
+    private final int frameLength;
+    private final boolean last;
+    private final boolean failFast = false;
+    private final boolean stripDelimiter = true;
+    private final int maxLength = 1024;
+    private final boolean takeEffectImmediately;
     /**
      * True if we're discarding input because we're already over maxLength.
      */
@@ -47,47 +55,22 @@ public class SMTPLineDecoder extends ByteToMessageDecoder {
     private int offset;
 
     /**
-     * Creates a new decoder.
+     * Creates a new instance.
      *
-     * @param maxLength the maximum length of the decoded frame.
-     *                  A {@link TooLongFrameException} is thrown if
-     *                  the length of the frame exceeds this value.
+     * @param frameLength the length of the frame
      */
-    public SMTPLineDecoder(final int maxLength) {
-        this(maxLength, true, false);
-    }
-
-
-    /**
-     * Creates a new decoder.
-     *
-     * @param maxLength      the maximum length of the decoded frame.
-     *                       A {@link TooLongFrameException} is thrown if
-     *                       the length of the frame exceeds this value.
-     * @param stripDelimiter whether the decoded frame should strip out the
-     *                       delimiter or not
-     * @param failFast       If <tt>true</tt>, a {@link TooLongFrameException} is
-     *                       thrown as soon as the decoder notices the length of the
-     *                       frame will exceed <tt>maxFrameLength</tt> regardless of
-     *                       whether the entire frame has been read.
-     *                       If <tt>false</tt>, a {@link TooLongFrameException} is
-     *                       thrown after the entire frame that exceeds
-     *                       <tt>maxFrameLength</tt> has been read.
-     */
-    public SMTPLineDecoder(final int maxLength, final boolean stripDelimiter, final boolean failFast) {
-        this.maxLength = maxLength;
-        this.failFast = failFast;
-        this.stripDelimiter = stripDelimiter;
+    public BdatFixedLenDecoder(int frameLength, boolean last) {
+        checkPositive(frameLength, "frameLength");
+        this.frameLength = frameLength;
+        this.last = last;
+        this.takeEffectImmediately = false;
     }
 
     @Override
     protected final void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-
+        ByteBuf decoded = readFixLength(ctx, in);
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
-
-        ByteBuf decoded = decode(ctx, in);
-
         byte[] bytes = null;
         if (decoded != null) {
             bytes = new byte[decoded.readableBytes()];
@@ -95,12 +78,65 @@ public class SMTPLineDecoder extends ByteToMessageDecoder {
             decoded.getBytes(readerIndex, bytes);
         }
 
-        String s = (bytes == null ? null : new String(bytes));
-
-        logger.info("sessionId:{},line -> {}", sessionIdAttr.get(), s);
+        logger.info("decode by me in -> {}", new String(bytes));
 
         if (decoded != null) {
-            out.add(decoded);
+            try {
+                if (sessionIdAttr.get() != null) {
+                    String format = "sessionId:{},in ->: {}";
+                    SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
+                    if (session != null) {
+                        out.add(decoded);
+
+                        bytes = new byte[decoded.readableBytes()];
+                        int readerIndex = decoded.readerIndex();
+                        decoded.getBytes(readerIndex, bytes);
+                        session.getMail().get().getDataByteOutStream().write(bytes);
+                        logger.info(format, session.getId(), new String(bytes));
+                        if (last) {
+                            session.sendResponse("250 Message OK, " + frameLength + " bytes received (last chunk)");
+                            logger.info("mail data:{}", session.getMail().get().getDataByteOutStream().toString());
+                            session.resetMailTransaction();
+                        } else {
+                            session.sendResponse("250 Message OK, " + frameLength + " bytes received");
+                        }
+                    }
+                }
+            } finally {
+                ctx.channel().pipeline().replace(
+                        SMTPConstants.SMTP_FRAME_DECODER,
+                        SMTPConstants.SMTP_FRAME_DECODER,
+                        new DelimiterBasedFrameDecoder(1024, Unpooled.copiedBuffer("\r\n".getBytes(StandardCharsets.UTF_8))));
+//                }
+            }
+        }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
+        Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
+        if (sessionIdAttr.get() != null) {
+            LocalSessionHolder.get(sessionIdAttr.get()).resetMailTransaction();
+            logger.info("exception reset session");
+        }
+        super.exceptionCaught(ctx, cause);
+    }
+
+    /**
+     * Create a frame out of the {@link ByteBuf} and return it.
+     *
+     * @param ctx the {@link ChannelHandlerContext} which this {@link ByteToMessageDecoder} belongs to
+     * @param in  the {@link ByteBuf} from which to read data
+     * @return frame           the {@link ByteBuf} which represent the frame or {@code null} if no frame could
+     * be created.
+     */
+    protected ByteBuf readFixLength(
+            @SuppressWarnings("UnusedParameters") ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        if (in.readableBytes() < frameLength) {
+            return null;
+        } else {
+            return in.readRetainedSlice(frameLength);
         }
     }
 
@@ -112,7 +148,7 @@ public class SMTPLineDecoder extends ByteToMessageDecoder {
      * @return frame           the {@link ByteBuf} which represent the frame or {@code null} if no frame could
      * be created.
      */
-    protected ByteBuf decode(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception {
+    protected ByteBuf readUntiNextLine(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception {
         final int eol = findEndOfLine(buffer);
         if (!discarding) {
             if (eol >= 0) {
