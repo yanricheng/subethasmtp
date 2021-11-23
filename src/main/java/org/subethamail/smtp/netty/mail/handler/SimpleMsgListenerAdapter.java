@@ -8,6 +8,7 @@ import org.subethamail.smtp.*;
 import org.subethamail.smtp.helper.SimpleMessageListener;
 import org.subethamail.smtp.internal.io.DeferredFileOutputStream;
 import org.subethamail.smtp.netty.mail.listener.SimpleMsgListener;
+import org.subethamail.smtp.netty.session.SmtpSession;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +71,7 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
      * MessageContext)
      */
     @Override
-    public MsgHandler create(MessageContext ctx) {
+    public MsgHandler create(SmtpSession ctx) {
         return new SimpleHandler(ctx);
     }
 
@@ -100,11 +101,11 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
      * Class which implements the actual handler interface.
      */
     class SimpleHandler implements MsgHandler {
-        final MessageContext ctx;
+        final SmtpSession ctx;
         String from;
         List<Delivery> deliveries = new ArrayList<>();
 
-        public SimpleHandler(MessageContext ctx) {
+        public SimpleHandler(SmtpSession ctx) {
             this.ctx = ctx;
         }
 

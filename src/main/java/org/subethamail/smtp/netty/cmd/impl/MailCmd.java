@@ -2,6 +2,7 @@ package org.subethamail.smtp.netty.cmd.impl;
 
 import com.github.davidmoten.guavamini.Preconditions;
 import org.subethamail.smtp.DropConnectionException;
+import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.internal.util.EmailUtils;
 import org.subethamail.smtp.netty.mail.Mail;
 import org.subethamail.smtp.netty.session.SmtpSession;
@@ -92,7 +93,22 @@ public final class MailCmd extends BaseCmd {
 
             sess.setMail(Optional.of(new Mail(emailAddress)));
             sess.setDeclaredMessageSize(size);
-            sess.setMailTransactionInProgress(true);
+
+            sess.startMailTransaction();
+            try {
+                sess.getMessageHandler().from(emailAddress);
+                sess.setMailTransactionInProgress(true);
+            } catch (DropConnectionException ex) {
+                // roll back the start of the transaction
+                sess.resetMailTransaction();
+                throw ex; // Propagate this
+            } catch (RejectException ex) {
+                // roll back the start of the transaction
+                sess.resetMailTransaction();
+                sess.sendResponse(ex.getErrorResponse());
+                return;
+            }
+
             sess.sendResponse("250 Ok");
         } catch (RuntimeException e) {
             sess.sendResponse("503 Error: " + e.getMessage());

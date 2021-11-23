@@ -20,6 +20,7 @@ import org.subethamail.smtp.netty.auth.AuthHandlerFactory;
 import org.subethamail.smtp.netty.auth.EasyAuthHandlerFactory;
 import org.subethamail.smtp.netty.auth.UsernameAndPsdValidator;
 import org.subethamail.smtp.netty.auth.ext.MemoryBaseNameAndPsdValidator;
+import org.subethamail.smtp.netty.mail.ext.ConsoleMsgListener;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -54,6 +55,7 @@ public class NettySMTPServer {
         usernameAndPsdValidator.add("huizi@yanrc.net", "123456");
         AuthHandlerFactory authHandlerFactory = new EasyAuthHandlerFactory(usernameAndPsdValidator);
         serverConfig.setAuthHandlerFactory(Optional.of(authHandlerFactory));
+        serverConfig.simpleMessageListener(new ConsoleMsgListener());
 
         // (1)
         EventLoopGroup bossGroup = new NioEventLoopGroup();

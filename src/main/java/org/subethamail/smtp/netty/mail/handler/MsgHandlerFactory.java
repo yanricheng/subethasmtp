@@ -6,6 +6,7 @@ package org.subethamail.smtp.netty.mail.handler;
 
 
 import org.subethamail.smtp.MessageContext;
+import org.subethamail.smtp.netty.session.SmtpSession;
 
 /**
  * The primary interface to be implemented by clients of the SMTP library.
@@ -22,5 +23,5 @@ public interface MsgHandlerFactory
 	 *
 	 * @param ctx provides information about the client.
 	 */
-	MsgHandler create(MessageContext ctx);
+	MsgHandler create(SmtpSession ctx);
 }

@@ -1,11 +1,27 @@
 package org.subethamail.smtp.netty;
 
 
+import com.github.davidmoten.guavamini.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.netty.auth.AuthHandlerFactory;
+import org.subethamail.smtp.netty.mail.handler.BasicMsgHandlerFactory;
+import org.subethamail.smtp.netty.mail.handler.MsgHandlerFactory;
+import org.subethamail.smtp.netty.mail.handler.SimpleMsgListenerAdapter;
+import org.subethamail.smtp.netty.mail.listener.SimpleMsgListener;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 public class ServerConfig {
+
+    private final static Logger logger = LoggerFactory.getLogger(ServerConfig.class);
+    private final static int MAX_MESSAGE_SIZE_UNLIMITED = 0;
+    private static final MsgHandlerFactory MESSAGE_HANDLER_FACTORY_DEFAULT = new BasicMsgHandlerFactory(
+            (context, from, to, data) -> logger.info("From: " + from + ", To: " + to + "\n"
+                    + new String(data, StandardCharsets.UTF_8) + "\n--------END OF MESSAGE ------------"),
+            MAX_MESSAGE_SIZE_UNLIMITED);
     private String hostName = "localhost";
     private String softwareName = "smtp server";
     private int maxMessageSize = 1024;
@@ -16,7 +32,6 @@ public class ServerConfig {
     private boolean disableReceivedHeaders;
     private boolean disableVerify = true;
     private String domain;
-
     /**
      * If true, this server will accept no mail until auth succeeded; ignored if no
      * AuthHandlerFactory has been set
@@ -32,6 +47,25 @@ public class ServerConfig {
      * over if AUTH capabilities are shown before STARTTLS.
      */
     private boolean showAuthCapabilitiesBeforeSTARTTLS;
+    private MsgHandlerFactory messageHandlerFactory = MESSAGE_HANDLER_FACTORY_DEFAULT;
+
+    public void messageHandlerFactory(MsgHandlerFactory factory) {
+        Preconditions.checkNotNull(factory);
+        Preconditions.checkArgument(this.messageHandlerFactory == MESSAGE_HANDLER_FACTORY_DEFAULT,
+                "can only set message handler factory once");
+        this.messageHandlerFactory = factory;
+    }
+
+    public void simpleMessageListener(SimpleMsgListener listener) {
+        this.messageHandlerFactory = new SimpleMsgListenerAdapter(listener);
+    }
+    public void simpleMessageListeners(List<SimpleMsgListener> listeners) {
+        this.messageHandlerFactory = new SimpleMsgListenerAdapter(listeners);
+    }
+
+    public MsgHandlerFactory getMessageHandlerFactory() {
+        return messageHandlerFactory;
+    }
 
     public String getDomain() {
         return domain;

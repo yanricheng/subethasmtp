@@ -11,6 +11,7 @@ import org.subethamail.smtp.netty.SMTPConstants;
 import org.subethamail.smtp.netty.ServerConfig;
 import org.subethamail.smtp.netty.auth.User;
 import org.subethamail.smtp.netty.mail.Mail;
+import org.subethamail.smtp.netty.mail.handler.MsgHandler;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -31,6 +32,33 @@ public class SmtpSession implements Serializable {
     private boolean mailTransactionInProgress;
     private int declaredMessageSize;
     private int recipientCount;
+
+    /**
+     * It exists if a mail transaction is in progress (from the MAIL command up
+     * to the end of the DATA command).
+     */
+    private MsgHandler messageHandler;
+
+    /**
+     * @return the current message handler
+     */
+    public MsgHandler getMessageHandler() {
+        return this.messageHandler;
+    }
+
+    /**
+     * Starts a mail transaction by creating a new message handler.
+     *
+     * @throws IllegalStateException
+     *             if a mail transaction is already in progress
+     */
+    public void startMailTransaction() throws IllegalStateException {
+        if (this.messageHandler != null) {
+            throw new IllegalStateException("Mail transaction is already in progress");
+        }
+        this.messageHandler = serverConfig.getMessageHandlerFactory().create(this);
+    }
+
     /**
      * The recipient address in the first accepted RCPT command, but only if
      * there is exactly one such accepted recipient. If there is no accepted
@@ -48,7 +76,6 @@ public class SmtpSession implements Serializable {
      */
     private Optional<String> helo = Optional.empty();
     private boolean authenticated;
-    private MessageHandler messageHandler;
     /**
      * Set this true when doing an ordered shutdown
      */
@@ -114,7 +141,7 @@ public class SmtpSession implements Serializable {
     }
 
     public boolean isMailTransactionInProgress() {
-        return mailTransactionInProgress;
+        return this.messageHandler != null && mailTransactionInProgress;
     }
 
     public void setMailTransactionInProgress(boolean mailTransactionInProgress) {
