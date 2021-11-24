@@ -4,8 +4,8 @@
  */
 package org.subethamail.smtp.netty.mail.handler;
 
-import org.subethamail.smtp.*;
-import org.subethamail.smtp.helper.SimpleMessageListener;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.TooMuchDataException;
 import org.subethamail.smtp.internal.io.DeferredFileOutputStream;
 import org.subethamail.smtp.netty.mail.listener.SimpleMsgListener;
 import org.subethamail.smtp.netty.session.SmtpSession;
@@ -64,7 +64,6 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
     }
 
     /*
-     * (non-Javadoc)
      *
      * @see
      * org.subethamail.smtp.MessageHandlerFactory#create(org.subethamail.smtp.
@@ -78,7 +77,7 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
     /**
      * Needed by this class to track which listeners need delivery.
      */
-    static class Delivery {
+    static class SimpleDelivery {
         private final SimpleMsgListener listener;
 
         SimpleMsgListener getListener() {
@@ -91,7 +90,7 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
             return this.recipient;
         }
 
-        Delivery(SimpleMsgListener listener, String recipient) {
+        SimpleDelivery(SimpleMsgListener listener, String recipient) {
             this.listener = listener;
             this.recipient = recipient;
         }
@@ -103,7 +102,7 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
     class SimpleHandler implements MsgHandler {
         final SmtpSession ctx;
         String from;
-        List<Delivery> deliveries = new ArrayList<>();
+        List<SimpleDelivery> deliveries = new ArrayList<>();
 
         public SimpleHandler(SmtpSession ctx) {
             this.ctx = ctx;
@@ -120,7 +119,7 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
 
             for (SimpleMsgListener listener : SimpleMsgListenerAdapter.this.listeners) {
                 if (listener.accept(this.from, recipient)) {
-                    this.deliveries.add(new Delivery(listener, recipient));
+                    this.deliveries.add(new SimpleDelivery(listener, recipient));
                     addedListener = true;
                 }
             }
@@ -132,7 +131,7 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
         @Override
         public String data(InputStream data) throws TooMuchDataException, IOException {
             if (this.deliveries.size() == 1) {
-                Delivery delivery = this.deliveries.get(0);
+                SimpleDelivery delivery = this.deliveries.get(0);
                 delivery.getListener().deliver(this.from, delivery.getRecipient(), data);
             } else {
 
@@ -143,7 +142,7 @@ public final class SimpleMsgListenerAdapter implements MsgHandlerFactory {
                         dfos.write(value);
                     }
 
-                    for (Delivery delivery : this.deliveries) {
+                    for (SimpleDelivery delivery : this.deliveries) {
                         delivery.getListener().deliver(this.from, delivery.getRecipient(), dfos.getInputStream());
                     }
                 }

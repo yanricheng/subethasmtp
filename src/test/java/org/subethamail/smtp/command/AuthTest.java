@@ -1,7 +1,6 @@
 package org.subethamail.smtp.command;
 
-import java.util.Base64;
-
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.auth.EasyAuthenticationHandlerFactory;
 import org.subethamail.smtp.auth.LoginFailedException;
@@ -13,7 +12,7 @@ import org.subethamail.smtp.util.ServerTestCase;
 import org.subethamail.smtp.util.Testing;
 import org.subethamail.wiser.Wiser;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.Base64;
 
 /**
  * @author Marco Trevisan <mrctrevisan@yahoo.it>
@@ -141,6 +140,11 @@ public class AuthTest extends ServerTestCase {
 
         send("AUTH");
         expect("503");
+    }
+
+    public void testAuthLogin1() throws Exception {
+        System.out.println(Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes("yrc@servyou.com.cn")));
+        System.out.println(Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes("08730008_Yrc")));
     }
 
     public void testMailBeforeAuth() throws Exception {

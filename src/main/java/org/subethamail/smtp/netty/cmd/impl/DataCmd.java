@@ -4,11 +4,16 @@ import com.github.davidmoten.guavamini.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.DropConnectionException;
+import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.internal.util.SMTPResponseHelper;
 import org.subethamail.smtp.netty.session.SmtpSession;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,7 +27,8 @@ import java.util.Optional;
  */
 public final class DataCmd extends BaseCmd {
     private final static int BUFFER_SIZE = 1024 * 32; // 32k seems reasonable
-    private static Logger logger = LoggerFactory.getLogger(DataCmd.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataCmd.class);
+    private final byte[] spilitorBytes = "\n\r".getBytes();
 
     public DataCmd() {
         super("DATA", "Following text is collected as the message.\n"
@@ -46,10 +52,10 @@ public final class DataCmd extends BaseCmd {
             //判断是否要加头
             if (!sess.isDurativeCmd()) {
                 if (!sess.getSmtpConfig().isDisableReceivedHeaders()) {
-                    sess.getMail().get().getData().append(generateHead(sess.getHelo(),
+                    sess.getMail().get().getDataByteOutStream().write(generateHead(sess.getHelo(),
                             sess.getRemoteAddress(), sess.getSmtpConfig().getHostName(),
                             Optional.of(sess.getSmtpConfig().getSoftwareName()), sess.getId(),
-                            sess.getSingleRecipient()));
+                            sess.getSingleRecipient()).getBytes());
                 }
             }
             sess.setDurativeCmd(true);
@@ -59,34 +65,60 @@ public final class DataCmd extends BaseCmd {
         String dataFrame = sess.getDataFrame();
         //一直都数据，直接遇到<CR><LF>.<CR><LF>
         if (!".".equals(dataFrame)) {
-            sess.getMail().get().getData().append(dataFrame).append("\n\r");
+            sess.getMail().get().getDataByteOutStream().write(dataFrame.getBytes(StandardCharsets.UTF_8));
+            sess.getMail().get().getDataByteOutStream().write(spilitorBytes);
             sess.setDurativeCmd(true);
             return;
         } else {
+            String dataMessage = null;
+            byte[] dataBytes = sess.getMail().get().getDataByteOutStream().toByteArray();
             try {
-                sess.getMail().get().getData().append("\n\r");
-                String mailDate = sess.getMail().get().getData().toString();
-                logger.info(">>> receive email data:\n\r{}", mailDate);
-
-                String handleResult = handleDate(mailDate);
-                if (null != handleResult) {
-                    sess.sendResponse(SMTPResponseHelper.buildResponse("250", handleResult));
-                } else {
-                    sess.sendResponse("250 Ok");
+                InputStream stream = new BufferedInputStream(new ByteArrayInputStream(dataBytes), BUFFER_SIZE);
+                dataMessage = sess.getMessageHandler().data(stream);
+                // Just in case the handler didn't consume all the data, we might as
+                // well suck it up so it doesn't pollute further exchanges. This
+                // code used to throw an exception, but this seems an arbitrary part
+                // of the contract that we might as well relax.
+                while (stream.read() != -1) {
                 }
-            } finally {
-                sess.setDurativeCmd(false);
-                sess.setMailTransactionInProgress(false);
-                sess.resetMailTransaction();
+
+            } catch (DropConnectionException ex) {
+                throw ex; // Propagate this
+            } catch (RejectException ex) {
+                sess.sendResponse(ex.getErrorResponse());
+                return;
             }
+
+            if (dataMessage != null) {
+                sess.sendResponse(SMTPResponseHelper.buildResponse("250", dataMessage));
+            } else {
+                sess.sendResponse("250 Ok");
+            }
+            logger.info("receive whole mail data:{}", new String(dataBytes));
+
+            sess.setDurativeCmd(false);
+            sess.setMailTransactionInProgress(false);
+            sess.resetMailTransaction();
+//            try {
+//                sess.getMail().get().getDataByteOutStream().write(spilitorBytes);
+//                String mailDate = sess.getMail().get().getData().toString();
+//                logger.info(">>> receive email data:\n\r{}", mailDate);
+//
+//                String handleResult = handleDate(mailDate);
+//                if (null != handleResult) {
+//                    sess.sendResponse(SMTPResponseHelper.buildResponse("250", handleResult));
+//                } else {
+//                    sess.sendResponse("250 Ok");
+//                }
+//            } finally {
+//                sess.setDurativeCmd(false);
+//                sess.setMailTransactionInProgress(false);
+//                sess.resetMailTransaction();
+//            }
 
         }
 
 
-    }
-
-    private String handleDate(String mailDate) {
-        return null;
     }
 
     public String generateHead(Optional<String> heloHost, InetAddress host, String whoami,

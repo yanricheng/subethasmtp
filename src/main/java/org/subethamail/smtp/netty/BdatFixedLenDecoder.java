@@ -11,9 +11,15 @@ import io.netty.util.AttributeKey;
 import io.netty.util.ByteProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.subethamail.smtp.DropConnectionException;
+import org.subethamail.smtp.RejectException;
+import org.subethamail.smtp.internal.util.SMTPResponseHelper;
 import org.subethamail.smtp.netty.session.SmtpSession;
 import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -37,7 +43,7 @@ import static io.netty.util.internal.ObjectUtil.checkPositive;
  */
 public class BdatFixedLenDecoder extends ByteToMessageDecoder {
     private static final Logger logger = LoggerFactory.getLogger(BdatFixedLenDecoder.class);
-
+    private final static int BUFFER_SIZE = 1024 * 32; // 32k seems reasonable
     private final int frameLength;
     private final boolean last;
     private final boolean failFast = false;
@@ -94,8 +100,32 @@ public class BdatFixedLenDecoder extends ByteToMessageDecoder {
                         session.getMail().get().getDataByteOutStream().write(bytes);
                         logger.info(format, session.getId(), new String(bytes));
                         if (last) {
-                            session.sendResponse("250 Message OK, " + frameLength + " bytes received (last chunk)");
-                            logger.info("mail data:{}", session.getMail().get().getDataByteOutStream().toString());
+                            byte[] dataBytes = session.getMail().get().getDataByteOutStream().toByteArray();
+                            InputStream stream = new BufferedInputStream(new ByteArrayInputStream(dataBytes), BUFFER_SIZE);
+                            String dataMessage = null;
+                            try {
+                                dataMessage = session.getMessageHandler().data(stream);
+                                // Just in case the handler didn't consume all the data, we might as
+                                // well suck it up so it doesn't pollute further exchanges. This
+                                // code used to throw an exception, but this seems an arbitrary part
+                                // of the contract that we might as well relax.
+                                while (stream.read() != -1) {
+                                }
+
+                            } catch (DropConnectionException ex) {
+                                throw ex; // Propagate this
+                            } catch (RejectException ex) {
+                                session.sendResponse(ex.getErrorResponse());
+                                return;
+                            }
+                            if (dataMessage != null) {
+                                session.sendResponse(SMTPResponseHelper.buildResponse("250", dataMessage));
+                            } else {
+                                session.sendResponse("250 Message OK, " + frameLength + " bytes received (last chunk)");
+                            }
+
+                            logger.info("receive whole mail data:{}", new String(dataBytes));
+
                             session.resetMailTransaction();
                         } else {
                             session.sendResponse("250 Message OK, " + frameLength + " bytes received");

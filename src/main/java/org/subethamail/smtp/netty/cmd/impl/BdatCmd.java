@@ -69,6 +69,10 @@ public final class BdatCmd extends BaseCmd {
         }
 
         if (bdat != null) {
+            if (bdat.errorMessage != null) {
+                sess.sendResponse(bdat.errorMessage);
+                return;
+            }
             sess.setHeaderTrimSize((int) bdat.getSize());
             sess.setDurativeCmd(!bdat.isLast);
         }

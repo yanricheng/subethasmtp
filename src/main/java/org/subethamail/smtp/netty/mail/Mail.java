@@ -7,7 +7,6 @@ import java.util.List;
 public class Mail {
     private String fromAddress;
     private List<String> toAddress = new ArrayList<>();
-    private final StringBuilder data = new StringBuilder();
     private final ByteArrayOutputStream dataByteOutStream = new ByteArrayOutputStream();
 
     public Mail() {
@@ -20,10 +19,6 @@ public class Mail {
 
     public ByteArrayOutputStream getDataByteOutStream() {
         return dataByteOutStream;
-    }
-
-    public StringBuilder getData() {
-        return data;
     }
 
     public List<String> getToAddress() {

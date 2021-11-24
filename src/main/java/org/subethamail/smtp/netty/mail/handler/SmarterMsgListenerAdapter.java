@@ -97,12 +97,14 @@ public class SmarterMsgListenerAdapter implements MsgHandlerFactory {
             for (SmarterMsgListener listener : SmarterMsgListenerAdapter.this.listeners) {
                 SmarterMsgListener.Receiver rec = listener.accept(this.from, recipient);
 
-                if (rec != null)
+                if (rec != null) {
                     this.deliveries.add(rec);
+                }
             }
 
-            if (this.deliveries.isEmpty())
+            if (this.deliveries.isEmpty()) {
                 throw new RejectException(553, "<" + recipient + "> address unknown.");
+            }
         }
 
         @Override
@@ -110,7 +112,6 @@ public class SmarterMsgListenerAdapter implements MsgHandlerFactory {
             if (this.deliveries.size() == 1) {
                 this.deliveries.get(0).deliver(data);
             } else {
-
                 try (DeferredFileOutputStream dfos = new DeferredFileOutputStream(
                         SmarterMsgListenerAdapter.this.dataDeferredSize)) {
                     int value;
