@@ -16,7 +16,7 @@ import org.subethamail.smtp.netty.cmd.Cmd;
 import org.subethamail.smtp.netty.cmd.CmdHandler;
 import org.subethamail.smtp.netty.cmd.impl.BdatCmd;
 import org.subethamail.smtp.netty.session.SmtpSession;
-import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
+import org.subethamail.smtp.netty.session.impl.SessionHolder;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public class SMTPCmdDecoder extends StringDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
-        SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
+        SmtpSession session = SessionHolder.get(sessionIdAttr.get());
 
         String lineFormat = "sessionId:{},text line : -> {}";
         if (msg == null) {

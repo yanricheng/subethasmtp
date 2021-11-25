@@ -13,7 +13,7 @@ import org.subethamail.smtp.netty.cmd.RequireAuthCmdWrapper;
 import org.subethamail.smtp.netty.cmd.RequireTLSCmdWrapper;
 import org.subethamail.smtp.netty.cmd.impl.BdatCmd;
 import org.subethamail.smtp.netty.session.SmtpSession;
-import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
+import org.subethamail.smtp.netty.session.impl.SessionHolder;
 
 import java.util.UUID;
 
@@ -36,7 +36,7 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
             sessionIdAttr.setIfAbsent(sessionId);
             session = new SmtpSession(sessionId, serverConfig);
             session.setChannel((SocketChannel) ctx.channel());
-            LocalSessionHolder.put(sessionId, session);
+            SessionHolder.put(sessionId, session);
         }
         logger.info("create connect,register session,id:{}", session.getId());
     }
@@ -47,7 +47,7 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         logger.info("sessionId:{},begin communicate...", sessionIdAttr.get());
         if (sessionIdAttr.get() != null) {
-            SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
+            SmtpSession session = SessionHolder.get(sessionIdAttr.get());
             session.sendResponse("220 " + serverConfig.getHostName() + " ESMTP " + serverConfig.getSoftwareName());
         }
     }
@@ -57,7 +57,7 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
-            SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
+            SmtpSession session = SessionHolder.get(sessionIdAttr.get());
             if (msg == null) {
                 logger.info("sessionId:{},execute cmd:{}", session.getId(), null);
                 return;
@@ -95,7 +95,7 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
-            LocalSessionHolder.get(sessionIdAttr.get()).resetMailTransaction();
+            SessionHolder.get(sessionIdAttr.get()).resetMailTransaction();
             logger.info("exception reset session");
         }
 
@@ -107,7 +107,7 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
-            LocalSessionHolder.remove(sessionIdAttr.get());
+            SessionHolder.remove(sessionIdAttr.get());
             logger.info("unregistered remove session");
         }
     }

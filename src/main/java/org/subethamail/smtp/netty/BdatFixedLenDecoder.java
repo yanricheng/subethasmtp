@@ -15,7 +15,7 @@ import org.subethamail.smtp.DropConnectionException;
 import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.internal.util.SMTPResponseHelper;
 import org.subethamail.smtp.netty.session.SmtpSession;
-import org.subethamail.smtp.netty.session.impl.LocalSessionHolder;
+import org.subethamail.smtp.netty.session.impl.SessionHolder;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -90,7 +90,7 @@ public class BdatFixedLenDecoder extends ByteToMessageDecoder {
             try {
                 if (sessionIdAttr.get() != null) {
                     String format = "sessionId:{},in ->: {}";
-                    SmtpSession session = LocalSessionHolder.get(sessionIdAttr.get());
+                    SmtpSession session = SessionHolder.get(sessionIdAttr.get());
                     if (session != null) {
                         out.add(decoded);
 
@@ -147,7 +147,7 @@ public class BdatFixedLenDecoder extends ByteToMessageDecoder {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf("sessionId");
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
         if (sessionIdAttr.get() != null) {
-            LocalSessionHolder.get(sessionIdAttr.get()).resetMailTransaction();
+            SessionHolder.get(sessionIdAttr.get()).resetMailTransaction();
             logger.info("exception reset session");
         }
         super.exceptionCaught(ctx, cause);

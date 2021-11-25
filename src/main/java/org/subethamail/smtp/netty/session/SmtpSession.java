@@ -6,13 +6,14 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.subethamail.smtp.AuthenticationHandler;
-import org.subethamail.smtp.MessageHandler;
 import org.subethamail.smtp.netty.SMTPConstants;
 import org.subethamail.smtp.netty.ServerConfig;
 import org.subethamail.smtp.netty.auth.User;
 import org.subethamail.smtp.netty.mail.Mail;
 import org.subethamail.smtp.netty.mail.handler.MsgHandler;
+import org.subethamail.smtp.netty.session.impl.SessionHolder;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Optional;
@@ -38,27 +39,6 @@ public class SmtpSession implements Serializable {
      * to the end of the DATA command).
      */
     private MsgHandler messageHandler;
-
-    /**
-     * @return the current message handler
-     */
-    public MsgHandler getMessageHandler() {
-        return this.messageHandler;
-    }
-
-    /**
-     * Starts a mail transaction by creating a new message handler.
-     *
-     * @throws IllegalStateException
-     *             if a mail transaction is already in progress
-     */
-    public void startMailTransaction() throws IllegalStateException {
-        if (this.messageHandler != null) {
-            throw new IllegalStateException("Mail transaction is already in progress");
-        }
-        this.messageHandler = serverConfig.getMessageHandlerFactory().create(this);
-    }
-
     /**
      * The recipient address in the first accepted RCPT command, but only if
      * there is exactly one such accepted recipient. If there is no accepted
@@ -85,6 +65,25 @@ public class SmtpSession implements Serializable {
     public SmtpSession(String id, ServerConfig serverConfig) {
         this.id = id;
         this.serverConfig = serverConfig;
+    }
+
+    /**
+     * @return the current message handler
+     */
+    public MsgHandler getMessageHandler() {
+        return this.messageHandler;
+    }
+
+    /**
+     * Starts a mail transaction by creating a new message handler.
+     *
+     * @throws IllegalStateException if a mail transaction is already in progress
+     */
+    public void startMailTransaction() throws IllegalStateException {
+        if (this.messageHandler != null) {
+            throw new IllegalStateException("Mail transaction is already in progress");
+        }
+        this.messageHandler = serverConfig.getMessageHandlerFactory().create(this);
     }
 
     public InetAddress getRemoteAddress() {
@@ -170,7 +169,14 @@ public class SmtpSession implements Serializable {
         this.recipientCount = 0;
         this.singleRecipient = Optional.empty();
         this.declaredMessageSize = 0;
-        this.setMail(Optional.empty());
+        if (getMail().get() != null && getMail().get().getDataByteOutStream() != null) {
+            try {
+                getMail().get().getDataByteOutStream().close();
+            } catch (IOException e) {
+                //noop ignore
+            }
+            setMail(Optional.empty());
+        }
         setMailTransactionInProgress(false);
         setDataFrame(null);
         setLastCmdName(null);
@@ -259,9 +265,23 @@ public class SmtpSession implements Serializable {
      * Triggers the shutdown of the thread and the closing of the connection.
      */
     public void quit() {
+        if (getMail().get() != null && getMail().get().getDataByteOutStream() != null) {
+            try {
+                getMail().get().getDataByteOutStream().close();
+            } catch (IOException e) {
+                //noop ignore
+            }
+            setMail(Optional.empty());
+        }
+
+        if (getUser() != null) {
+            setUser(Optional.empty());
+        }
+        SessionHolder.remove(getId());
         this.quitting = true;
         this.channel.close();
     }
+
 
     public int getHeaderTrimSize() {
         return headerTrimSize;

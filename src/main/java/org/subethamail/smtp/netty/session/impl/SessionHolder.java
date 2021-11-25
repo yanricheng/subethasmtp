@@ -4,7 +4,7 @@ import org.subethamail.smtp.netty.session.SmtpSession;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LocalSessionHolder {
+public class SessionHolder {
     private static final ConcurrentHashMap<String, SmtpSession> sessionMap = new ConcurrentHashMap<>();
 
     public static SmtpSession get(String sessionId) {
