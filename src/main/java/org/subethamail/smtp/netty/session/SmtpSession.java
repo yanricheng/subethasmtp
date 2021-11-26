@@ -16,6 +16,7 @@ import org.subethamail.smtp.netty.session.impl.SessionHolder;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.security.cert.Certificate;
 import java.util.Optional;
 
 public class SmtpSession implements Serializable {
@@ -61,6 +62,45 @@ public class SmtpSession implements Serializable {
      */
     private volatile boolean quitting = false;
     private int headerTrimSize;
+
+    /**
+     * Some more state information
+     */
+    private boolean tlsStarted;
+    private Certificate[] tlsPeerCertificates;
+
+
+    /**
+     * @return true when the TLS handshake was completed, false otherwise
+     */
+    public boolean isTLSStarted() {
+        return tlsStarted;
+    }
+
+    /**
+     * @param tlsStarted true when the TLS handshake was completed, false otherwise
+     */
+    public void setTlsStarted(boolean tlsStarted) {
+        this.tlsStarted = tlsStarted;
+    }
+
+    public void setTlsPeerCertificates(Certificate[] tlsPeerCertificates) {
+        this.tlsPeerCertificates = tlsPeerCertificates;
+    }
+
+    public Certificate[] getTlsPeerCertificates() {
+        return tlsPeerCertificates;
+    }
+
+
+    /**
+     * Reset the SMTP protocol to the initial state, which is the state after a
+     * server issues a 220 service ready greeting.
+     */
+    public void resetSmtpProtocol() {
+        resetMailTransaction();
+        this.helo = Optional.empty();
+    }
 
     public SmtpSession(String id, ServerConfig serverConfig) {
         this.id = id;
@@ -217,14 +257,6 @@ public class SmtpSession implements Serializable {
 
     public ServerConfig getSmtpConfig() {
         return serverConfig;
-    }
-
-    public boolean isTLSStarted() {
-        return TLSStarted;
-    }
-
-    public void setTLSStarted(boolean TLSStarted) {
-        this.TLSStarted = TLSStarted;
     }
 
     public boolean isAuthenticated() {
