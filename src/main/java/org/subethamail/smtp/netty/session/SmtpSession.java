@@ -70,6 +70,11 @@ public class SmtpSession implements Serializable {
     private Certificate[] tlsPeerCertificates;
 
 
+    public SmtpSession(String id, ServerConfig serverConfig) {
+        this.id = id;
+        this.serverConfig = serverConfig;
+    }
+
     /**
      * @return true when the TLS handshake was completed, false otherwise
      */
@@ -84,14 +89,13 @@ public class SmtpSession implements Serializable {
         this.tlsStarted = tlsStarted;
     }
 
-    public void setTlsPeerCertificates(Certificate[] tlsPeerCertificates) {
-        this.tlsPeerCertificates = tlsPeerCertificates;
-    }
-
     public Certificate[] getTlsPeerCertificates() {
         return tlsPeerCertificates;
     }
 
+    public void setTlsPeerCertificates(Certificate[] tlsPeerCertificates) {
+        this.tlsPeerCertificates = tlsPeerCertificates;
+    }
 
     /**
      * Reset the SMTP protocol to the initial state, which is the state after a
@@ -100,11 +104,6 @@ public class SmtpSession implements Serializable {
     public void resetSmtpProtocol() {
         resetMailTransaction();
         this.helo = Optional.empty();
-    }
-
-    public SmtpSession(String id, ServerConfig serverConfig) {
-        this.id = id;
-        this.serverConfig = serverConfig;
     }
 
     /**
@@ -297,7 +296,10 @@ public class SmtpSession implements Serializable {
      * Triggers the shutdown of the thread and the closing of the connection.
      */
     public void quit() {
-        if (getMail().get() != null && getMail().get().getDataByteOutStream() != null) {
+        if (getMail() != null
+                && getMail().isPresent()
+                && getMail().get() != null
+                && getMail().get().getDataByteOutStream() != null) {
             try {
                 getMail().get().getDataByteOutStream().close();
             } catch (IOException e) {

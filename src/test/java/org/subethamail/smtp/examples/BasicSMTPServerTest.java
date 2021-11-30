@@ -25,6 +25,21 @@ public class BasicSMTPServerTest {
         Thread.sleep(500);
         server.stop();
     }
+
+    @Test
+    public void test1() throws InterruptedException, UnknownHostException, SMTPException, IOException {
+//        SMTPServer server = new BasicSMTPServer().start(25000);
+        SmartClient client = SmartClient.createAndConnect("mail.servyou.com.cn", 25, "clientHost");
+        client.from("me@me.com");
+        client.to("yrc@servyou.com.cn");
+        client.dataStart();
+        byte[] bytes = "stuff".getBytes();
+        client.dataWrite(bytes, bytes.length);
+        client.dataEnd();
+        client.quit();
+        Thread.sleep(500);
+//        server.stop();
+    }
     
     public static void main(String[] args) {
         BasicSMTPServer.main(args);

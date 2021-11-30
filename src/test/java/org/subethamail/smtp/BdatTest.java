@@ -41,10 +41,10 @@ public class BdatTest {
 //        SMTPServer server = SMTPServer.port(10000).messageHandler(listener).build();
         try {
 //            server.start();
-            SmartClient client = SmartClient.createAndConnect("localhost", 10000, "clientHeloHost");
+            SmartClient client = SmartClient.createAndConnect("mail.servyou.com.cn", 25, "clientHeloHost");
             assertTrue(client.getExtensions().containsKey("CHUNKING"));
             client.from("huizi@yanrc.net");
-            client.to("yrc@yanrc.net");
+            client.to("yrc@servyou.com.cn");
             client.bdat("hello,world 1111");
             client.bdat("hello,world 2222222222");
             client.bdat("hello,world_1 3333333333");

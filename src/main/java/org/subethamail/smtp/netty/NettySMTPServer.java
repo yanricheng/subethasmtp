@@ -38,7 +38,7 @@ public class NettySMTPServer {
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 10000;
+        int port = 25;
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         }
@@ -70,7 +70,7 @@ public class NettySMTPServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(SMTPConstants.SMTP_LINE_ENCODER, new LineEncoder(LineSeparator.UNIX, CharsetUtil.UTF_8));
+                            ch.pipeline().addLast(SMTPConstants.SMTP_LINE_ENCODER, new LineEncoder(LineSeparator.WINDOWS, CharsetUtil.UTF_8));
 //                            ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new SMTPLineDecoder(1024));
                             ch.pipeline().addLast(SMTPConstants.SMTP_FRAME_DECODER, new DelimiterBasedFrameDecoder(1024, Unpooled.copiedBuffer("\r\n".getBytes(StandardCharsets.UTF_8))));
                             ch.pipeline().addLast(SMTPConstants.SMTP_CMD_DECODER, new SMTPCmdDecoder(CharsetUtil.UTF_8));

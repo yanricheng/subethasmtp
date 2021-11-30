@@ -45,7 +45,7 @@ public class SMTPCmdHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(final ChannelHandlerContext ctx) {
         AttributeKey<String> sessionIdKey = AttributeKey.valueOf(SMTPConstants.SESSION_ID);
         Attribute<String> sessionIdAttr = ctx.channel().attr(sessionIdKey);
-        logger.info("sessionId:{},begin communicate...", sessionIdAttr.get());
+        logger.info("sessionId:{},active begin communicate <-...", sessionIdAttr.get());
         if (sessionIdAttr.get() != null) {
             SmtpSession session = SessionHolder.get(sessionIdAttr.get());
             session.sendResponse("220 " + serverConfig.getHostName() + " ESMTP " + serverConfig.getSoftwareName());
