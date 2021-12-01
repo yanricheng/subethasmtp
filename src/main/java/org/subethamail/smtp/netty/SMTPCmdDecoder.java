@@ -55,17 +55,22 @@ public class SMTPCmdDecoder extends StringDecoder {
         }
 
         byte[] bytes = null;
+        String cmdStr = null;
         int readerIndex;
         if (msg != null) {
             bytes = new byte[msg.readableBytes()];
             readerIndex = msg.readerIndex();
             msg.getBytes(readerIndex, bytes);
-            logger.info(lineFormat, sessionIdAttr.get(), new String(bytes), charset);
+            cmdStr = new String(bytes, charset);
+            logger.info(lineFormat, sessionIdAttr.get(), cmdStr, charset);
+            if (cmdStr == null || cmdStr.trim().length() == 0) {
+                session.sendResponse("250 Message OK, 0 bytes received");
+                return;
+            }
         }
 
         String cmdFormat = "sessionId:{},get CMD name: -> {}";
         try {
-            String cmdStr = new String(bytes, charset);
             session.setDataFrame(cmdStr);
             Cmd cmd = CmdHandler.getCommandFromString(cmdStr);
             logger.info(cmdFormat, sessionIdAttr.get(), cmd.getName());
@@ -76,8 +81,8 @@ public class SMTPCmdDecoder extends StringDecoder {
                 //取字节数
                 if (session.getLastCmdName().equals("BDAT")) {
                     byte[] dataBytes = Arrays.copyOfRange(bytes, 0, session.getHeaderTrimSize());
-                    String cmdStr = new String(Arrays.copyOfRange(bytes, session.getHeaderTrimSize(), bytes.length), charset);
-                    if(!cmdStr.startsWith("BDAT ")){
+                    cmdStr = new String(Arrays.copyOfRange(bytes, session.getHeaderTrimSize(), bytes.length), charset);
+                    if (!cmdStr.startsWith("BDAT ")) {
                         String message = "503 Error: expected BDAT command line but encountered: '" + cmdStr + "'";
                         session.sendResponse(message);
                     }
