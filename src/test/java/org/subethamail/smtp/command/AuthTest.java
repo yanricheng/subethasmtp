@@ -143,8 +143,9 @@ public class AuthTest extends ServerTestCase {
     }
 
     public void testAuthLogin1() throws Exception {
-        System.out.println(Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes("yrc@servyou.com.cn")));
-        System.out.println(Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes("08730008_Yrc")));
+        System.out.println(Base64.getEncoder().encodeToString("yrc@yanrc.net".getBytes("US-ASCII")));
+        System.out.println(Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes("yrc@yanrc.net")));
+        System.out.println(Base64.getEncoder().encodeToString(TextUtils.getAsciiBytes("123456")));
     }
 
     public void testMailBeforeAuth() throws Exception {
